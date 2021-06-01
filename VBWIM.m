@@ -19,8 +19,8 @@ u = StartProgBar(height(BaseData), 1, 1, 1); tic; st = now;
 % Investigations.
 
 % Each row of BaseData represents one analysis
-%parfor g = 1:height(BaseData)
-for g = 1:height(BaseData)
+parfor g = 1:height(BaseData)
+%for g = 1:height(BaseData)
     
     % Update analysis data for current row of BaseData
     [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
@@ -78,7 +78,7 @@ for g = 1:height(BaseData)
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
                 T = VBApercu(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
                 if BaseData.Parallel(g) == 1
-                    exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
+                    exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + "xx.jpg",'Resolution',600)
                 end
             end
             

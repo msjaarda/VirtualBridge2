@@ -238,11 +238,11 @@ for j = 1:NumLanePlots
             set(gca,'xticklabel',[],'xcolor','none','xtick',[])
             % Add line between lanes (solid if change of dir)
             if Lane.Details.NSEW(Lane.Details.ALANE(j)) == Lane.Details.NSEW(Lane.Details.ALANE(j)+1)
-                yl = yline(0,'--w','LineWidth',3);
-                uistack(yl,'top')
+                yline(0.1,'--w','LineWidth',4);
+                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
             else
-                yl = yline(0,'-w','LineWidth',3);
-                uistack(yl,'top')
+                yline(0.1,'-w','LineWidth',4);
+                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
             end
         end
         
@@ -254,19 +254,20 @@ for j = 1:NumLanePlots
             set(gca,'xticklabel',[],'xcolor','none','xtick',[])
             % Add line between lanes (solid if change of dir)
             if Lane.Details.NSEW(Lane.Details.ALANE(j)) == Lane.Details.NSEW(Lane.Details.ALANE(j)+1)
-                yl = yline(0,'--w','LineWidth',3);
-                uistack(yl,'top')
+                yline(0.1,'--w','LineWidth',4);
+                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
             else
-                yl = yline(0,'-w','LineWidth',3);
-                uistack(yl,'top')
+                yline(0.1,'-w','LineWidth',4);
+                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
             end
         end
-        
     end
     set(gca,'Color',[.6 .6 .6])
+    
 end
 
 set(gcf,'Position',[100 100 900 750])
+
 
 % Left Bottom Width Height
 Left = sp(1).Position(1);
