@@ -6,11 +6,8 @@
 % Initializing commands
 clear, clc, close all, format long g, rng('shuffle');
 
-% Input File
-InputFile = 'VBSimInputPDx.xlsx';
-
-% Read in simulation data
-BaseData = VBReadInputFile(['Input/' InputFile]);
+% Read Input File
+BaseData = VBReadInputFile('VBSimInputPDx.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -81,7 +78,7 @@ for g = 1:height(BaseData)
                 for t = 1:Num.InfCases
                     
                     % Subject Influence Line to Axle Stream                    
-                    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData.v{t},BaseData.RunDyn(g));
+                    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,BaseData.RunDyn(g));
                     
                     % Fatigue, Calculate Fatigue Damage using Rainflow
                     if BaseData.RunFat(g) == 1
@@ -94,7 +91,7 @@ for g = 1:height(BaseData)
                         % Save results for Apercu
                         if BaseData.Apercu(g) == 1
                             % We do +- 20 to make sure we get them all
-                            ApercuMax{t} = VehLineUp(VehLineUp(:,1)>(BrStInd*BaseData.ILRes(g) - 20) & VehLineUp(:,1)<((BrStInd + length(ILData.v{t}))*BaseData.ILRes(g) + 20),:);
+                            ApercuMax{t} = VehLineUp(VehLineUp(:,1)>(BrStInd*BaseData.ILRes(g) - 20) & VehLineUp(:,1)<((BrStInd + length(ILData(t).v))*BaseData.ILRes(g) + 20),:);
                         end
                     end
                 end

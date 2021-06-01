@@ -1,18 +1,36 @@
 function [Num,Lane,ILData,TrData,FolDist,ESIA] = VBUpdateData(BaseData)
 %Updates the data for the main variables, based on a signle row in BaseData
 
-% --- Required in BaseData ---
+% --- Required in BaseData --- Depends on AnalysisType
 % LaneTrDistr
 % Flow
 % Traffic
+
+if strcmp(BaseData.AnalysisType,"WIM")
+    
+    % We need Lane.Dir and Num.Lanes for other things to work!
+    load('Sites.mat'); load('SiteLanes.mat');
+    
+    % Get LaneDir automatically using Sites and SiteLanes
+    Lane.Sites = Sites(Sites.SITE == BaseData.SITE,:);
+    Lane.Details = SiteLanes(SiteLanes.SITE == BaseData.SITE,:);
+    Num.Lanes = Lane.Sites.NumLanes;
+    [A, B, Lane.Dir] = unique(Lane.Details.NSEW);
+    for i = 1:length(Lane.Dir)
+    if Lane.Details.NSEW(i) == 2 | Lane.Details.NSEW(i) == 4
+        Lane.Dir(i) = 1;
+    else
+        Lane.Dir(i) = 2;
+    end
+end
 
 % Get Lane Truck Distribution, Lane.TrDistr, and Lane Directions, Lane.Dir
 % If optional, do try
 try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch end
 % Splitting by ',' is no problem, even where there is no ','
-Lane.Dir =  cellfun(@str2num,split(BaseData.LaneDir{:},','));
+try Lane.Dir =  cellfun(@str2num,split(BaseData.LaneDir{:},',')); catch end
 % Get Num.Lanes from the length of Lane.Dir
-Num.Lanes = length(Lane.Dir);
+try Num.Lanes = length(Lane.Dir); catch end
 
 
 % FolDist can use qualitative measures:
@@ -146,14 +164,14 @@ for i = 1:length(ILs)
                                         ILx = eval([TName '(:,1)']);
                                         ILv = eval([TName '(:,2:end)']);
                                         RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                                        ILData.v{Num.InfCases} = interp1(ILx,ILv,RoundedILx);
-                                        ILData.Name{Num.InfCases} = TName;
-                                        if size(ILData.v{Num.InfCases},2) < Num.Lanes
-                                            if size(ILData.v{Num.InfCases},2) == 1
-                                                ILData.v{Num.InfCases} = repmat(ILData.v{Num.InfCases},1,Num.Lanes);
+                                        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
+                                        ILData(Num.InfCases).Name = TName;
+                                        if size(ILData(Num.InfCases).v,2) < Num.Lanes
+                                            if size(ILData(Num.InfCases).v,2) == 1
+                                                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
                                             else
-                                                for t = size(ILData.v{Num.InfCases},2) + 1:Num.Lanes
-                                                    ILData.v{Num.InfCases}(:,t) = 0;
+                                                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                                                    ILData(Num.InfCases).v(:,t) = 0;
                                                     fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
                                                 end
                                             end
@@ -165,14 +183,14 @@ for i = 1:length(ILs)
                                 ILx = eval([TName '(:,1)']);
                                 ILv = eval([TName '(:,2:end)']);
                                 RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                                ILData.v{Num.InfCases} = interp1(ILx,ILv,RoundedILx);
-                                ILData.Name{Num.InfCases} = TName;
-                                if size(ILData.v{Num.InfCases},2) < Num.Lanes
-                                    if size(ILData.v{Num.InfCases},2) == 1
-                                        ILData.v{Num.InfCases} = repmat(ILData.v{Num.InfCases},1,Num.Lanes);
+                                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
+                                ILData(Num.InfCases).Name = TName;
+                                if size(ILData(Num.InfCases).v,2) < Num.Lanes
+                                    if size(ILData(Num.InfCases).v,2) == 1
+                                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
                                     else
-                                        for t = size(ILData.v{Num.InfCases},2) + 1:Num.Lanes
-                                            ILData.v{Num.InfCases}(:,t) = 0;
+                                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                                            ILData(Num.InfCases).v(:,t) = 0;
                                             fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
                                         end
                                     end
@@ -184,14 +202,14 @@ for i = 1:length(ILs)
                         ILx = eval([TName '(:,1)']);
                         ILv = eval([TName '(:,2:end)']);
                         RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                        ILData.v{Num.InfCases} = interp1(ILx,ILv,RoundedILx);
-                        ILData.Name{Num.InfCases} = TName;
-                        if size(ILData.v{Num.InfCases},2) < Num.Lanes
-                            if size(ILData.v{Num.InfCases},2) == 1
-                                ILData.v{Num.InfCases} = repmat(ILData.v{Num.InfCases},1,Num.Lanes);
+                        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
+                        ILData(Num.InfCases).Name = TName;
+                        if size(ILData(Num.InfCases).v,2) < Num.Lanes
+                            if size(ILData(Num.InfCases).v,2) == 1
+                                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
                             else
-                                for t = size(ILData.v{Num.InfCases},2) + 1:Num.Lanes
-                                    ILData.v{Num.InfCases}(:,t) = 0;
+                                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                                    ILData(Num.InfCases).v(:,t) = 0;
                                     fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
                                 end
                             end
@@ -203,14 +221,14 @@ for i = 1:length(ILs)
                 ILx = eval([TName '(:,1)']);
                 ILv = eval([TName '(:,2:end)']);
                 RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                ILData.v{Num.InfCases} = interp1(ILx,ILv,RoundedILx);
-                ILData.Name{Num.InfCases} = TName;
-                if size(ILData.v{Num.InfCases},2) < Num.Lanes
-                    if size(ILData.v{Num.InfCases},2) == 1
-                        ILData.v{Num.InfCases} = repmat(ILData.v{Num.InfCases},1,Num.Lanes);
+                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
+                ILData(Num.InfCases).Name = TName;
+                if size(ILData(Num.InfCases).v,2) < Num.Lanes
+                    if size(ILData(Num.InfCases).v,2) == 1
+                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
                     else
-                        for t = size(ILData.v{Num.InfCases},2) + 1:Num.Lanes
-                            ILData.v{Num.InfCases}(:,t) = 0;
+                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                            ILData(Num.InfCases).v(:,t) = 0;
                             fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
                         end
                     end
@@ -225,18 +243,18 @@ for i = 1:length(ILs)
         % Round to refinement level (ILRes)
         RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
         % Now we interpolate the influence lines and populate IL.v | We will have no need for x after this!
-        ILData.v{Num.InfCases} = interp1(ILx,ILv,RoundedILx);
+        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
         % Add to IL.Name
-        ILData.Name{Num.InfCases} = TName;
-        if size(ILData.v{Num.InfCases},2) < Num.Lanes
+        ILData(Num.InfCases).Name = TName;
+        if size(ILData(Num.InfCases).v,2) < Num.Lanes
             % Can choose to duplicate, or add zeros. The rule will be that
             % if size(ILData.v{Num.InfCases},2) == 1, we duplicate, but if
             % it is greater, we add zeros with a notification
-            if size(ILData.v{Num.InfCases},2) == 1
-                ILData.v{Num.InfCases} = repmat(ILData.v{Num.InfCases},1,Num.Lanes);
+            if size(ILData(Num.InfCases).v,2) == 1
+                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
             else
-                for t = size(ILData.v{Num.InfCases},2) + 1:Num.Lanes
-                    ILData.v{Num.InfCases}(:,t) = 0;
+                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                    ILData(Num.InfCases).v(:,t) = 0;
                     fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
                 end
             end
@@ -244,8 +262,8 @@ for i = 1:length(ILs)
     end
 end
 % We have to do successive loops until we've explored all parts of the structure and obtained all lines.
-ILData.v = ILData.v';
-ILData.Name = ILData.Name';
+%ILData.v = ILData.v';
+%ILData.Name = ILData.Name';
 
 % NOTE - sometimes the "track average" (average of two wheel positions) is
 % not equal to the "area average", and so ESIA calculations which involve
@@ -261,27 +279,27 @@ for i = 1:Num.InfCases
     % Keep in mind... may not always be true
     
     % Switch signs of all ILs associated with InfCase together if warranted
-    if abs(max(ILData.v{i}(:,1))) < abs(min(ILData.v{i}(:,1)))
-        ILData.v{i} = -ILData.v{i};
+    if abs(max(ILData(i).v(:,1))) < abs(min(ILData(i).v(:,1)))
+        ILData(i).v = -ILData(i).v;
     end
     
     % Find max Influence line value index, k
-    [~, k] = max(ILData.v{i});
+    [~, k] = max(ILData(i).v);
     
     clear b, clear c
 
     % Interpolate around influence lines to figure out next biggest max
-    for j = 1:size(ILData.v{i},2)
-        x = 0:BaseData.ILRes:(length(ILData.v{i})-1)*BaseData.ILRes;
+    for j = 1:size(ILData(i).v,2)
+        x = 0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes;
         % In case we are already at the start or end (can't interpolate
         % less or more)
-        if k == 1 | k == length(ILData.v{i})
-            b(j) = ILData.v{i}(k(j),j);
-            c(j) = ILData.v{i}(k(j),j);
+        if k == 1 | k == length(ILData(i).v)
+            b(j) = ILData(i).v(k(j),j);
+            c(j) = ILData(i).v(k(j),j);
         % Normal procedure
         else
-            b(j) = interp1(0:BaseData.ILRes:(length(ILData.v{i})-1)*BaseData.ILRes,ILData.v{i}(:,j),x(k(j))+0.6);
-            c(j) = interp1(0:BaseData.ILRes:(length(ILData.v{i})-1)*BaseData.ILRes,ILData.v{i}(:,j),x(k(j))-0.6);
+            b(j) = interp1(0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes,ILData(i).v(:,j),x(k(j))+0.6);
+            c(j) = interp1(0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes,ILData(i).v(:,j),x(k(j))-0.6);
         end
     end
     
@@ -293,7 +311,7 @@ end
 
 % Assign integral values into IntInfv (each InfCase)
 for i = 1:Num.InfCases
-    IntInfv(:,i) = trapz(ILData.v{i});
+    IntInfv(:,i) = trapz(ILData(i).v);
 end
 
 % Define ESIA details

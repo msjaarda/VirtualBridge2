@@ -67,7 +67,8 @@ for r = 1:length(SName)
         PD = load(['Pruned WIM/',SName{r},'.mat']);
         
         % Add Datetime
-        PDC = Classify(PD.PD);  %PD = Daytype(PD,Year(i));
+        % SWITCH BELOW TO NEW
+        %PDC = Classify(PD.PD);  %PD = Daytype(PD,Year(i));
         %PDC = AddDatetime(PDC,1);
         
         % Fix Oberburen pre 2006 station naming issue (SITE = 410 both dirs)

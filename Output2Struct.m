@@ -27,7 +27,7 @@ Struct_Name = 'MAT';
 %Struct_Name = 'PLAT';
 % Add to existing Structure (PLATResults)
 %load('Results Variables\PLATResults.mat')
-load('Results Variables\Ceneri2017Results.mat')
+%load('Results Variables\Ceneri2017Results.mat')
 RegSpans = true; % Used to tell if the normal sequence of Spans (10-80)
 
 % Number of Vehicles for Bidirectional

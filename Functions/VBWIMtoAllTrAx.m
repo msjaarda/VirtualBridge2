@@ -1,4 +1,4 @@
-function [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,SpaceSaver,LaneDir,ILRes)
+function [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,SpaceSaver,Lane,ILRes)
 % WIMTOALLTRAX Translates WIM or VWIM data into AllTrAx and TrLineUp
 % Also returns PDC (in the form of PDCx) with some mods
 
@@ -6,21 +6,21 @@ function [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,SpaceSaver,LaneDir,ILRe
 isWIM =  ismember('DTS', PDCx.Properties.VariableNames);
 % Else, assume it is VWIM, Apercu, or Det
 
+% Change lane directions so that N and E go to the left (2), and SW right (1)
+
 % Get Lanes
 Lanes = unique(PDCx.LANE);
 
 % If WIM, Convert time to distance
 if isWIM
     
-    % Convert numbers to doubles
-%     tic
-%     PDCx{:,1:size(PDCx,2)~=find(string(PDCx.Properties.VariableNames) == "DTS")} = double(PDCx{:,1:size(PDCx,2)~=find(string(PDCx.Properties.VariableNames) == "DTS")});
-%     toc
+    % Sort? This adds time... let's presort.
+    PDCx = sortrows(PDCx,2);
     
     % Convert time to distance
-    PDCx.Dist = [0; seconds(diff(PDCx.DTS))].*((double(PDCx.SPD/100))*0.2777777777778); PDCx.Dist(1) = 1;
+    PDCx.Dist = [1; seconds(diff(PDCx.DTS))].*((PDCx.SPEED)*0.2777777777778); %PDCx.Dist(1) = 1;
     
-    % Delete excess space according to IL... add veh length (in PruneWIM is 26m)
+    % Delete excess space according to IL... add max veh length
     if SpaceSaver > 0
         PDCx.Dist(PDCx.Dist > SpaceSaver + 26) = SpaceSaver + 26;
     end
@@ -35,8 +35,7 @@ PDCx.LnTrSpacing = zeros(height(PDCx),1);
 % Btw, or between, is rear of veh to front of next
 PDCx.LnTrBtw = zeros(height(PDCx),1);
 
-% Some kind of filter for making sure trucks don't encroach on one
-% another.. skip for VWIM
+% Some kind of filter for making sure trucks don't encroach on one another
 if isWIM
     for i = 1:length(Lanes)
         
@@ -44,15 +43,16 @@ if isWIM
         LaneInds = PDCx.LANE == Lanes(i);
         
         % Find all locations where truck i and i - 1 arrived at the same time
-        AA = [0; diff(PDCx.SpCu(LaneInds))];
+        % 30 chosen as greater than max tr length (26) to avoid deleting r1
+        AA = [30; diff(PDCx.SpCu(LaneInds))];
         
         PDCx.LnTrSpacing(LaneInds) = AA;
         % The following only makes sense in direction 1. We don't circshift
         % for the 2 direction... why not?
-        if LaneDir(i) == 1
-            PDCx.LnTrBtw(LaneInds) = AA - double(PDCx.LENTH(circshift(find(LaneInds == 1),1)))/100;
+        if Lane.Dir(i) == 1
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
-            PDCx.LnTrBtw(LaneInds) = AA - double(PDCx.LENTH(LaneInds))/100;
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
         end
 
     end
@@ -66,7 +66,7 @@ WBL = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
 AX = PDCx{:,strncmp(PDCx.Properties.VariableNames,'AW',2)}/102;
 
 % Make wheelbase length cummulative
-WBL = double(cumsum(WBL,2));
+WBL = cumsum(WBL,2);
 
 % Switch WBL for direction 2
 for i = 1:length(Lanes)
@@ -75,7 +75,7 @@ for i = 1:length(Lanes)
     LaneInds = PDCx.LANE == Lanes(i);
     
     % Change the sign of the WBL for those in direction 2
-    if LaneDir(i) == 2
+    if Lane.Dir(i) == 2
         WBL(LaneInds,:) = -WBL(LaneInds,:);
     end 
 end
@@ -115,7 +115,7 @@ TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
 
 % Make a separate axle stream vector for each lane, and last one for all
 % Put max() function in incase one lane has no representation in TrLineUp
-AllTrAx = zeros(max(TrLineUp(:,1)),max(length(LaneDir),length(Lanes))+1);
+AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes))+1);
 
 for i = 1:length(Lanes)
     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));

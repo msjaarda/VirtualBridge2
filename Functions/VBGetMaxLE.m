@@ -81,6 +81,7 @@ BrStInd = MaxLoc-length(IL)+1;
 %     BrStIndP = BrStInd + PadLen;
 %     AxOnBr = sum(AllTrAx(BrStIndP:BrStIndP+length(IL)-1,:),2);
 % end
+% Should also get Indices of AllTrAx in order to reset to 0
 
 % For troubleshooting
 % % Find indexes for AxonBr
@@ -88,11 +89,6 @@ BrStInd = MaxLoc-length(IL)+1;
 % % Find (but not reported)
 % FirstAxInd = BrStInd+AxonBrInds(1)-1;
 % FirstAx = AxOnBr(AxonBrInds(1));
-
-% NB: In fact... this whole MaxLE thing doesn't care about direction at all
-% Axles are just single points, at single locations, with no directions...
-% Response: Yes but it matters for Apercu! And for looking up afterwards
-% what was responsible
     
 end
 

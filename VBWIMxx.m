@@ -8,6 +8,9 @@
 % AxleStatsBasic >> Q1 Investigation
 % MATSimAxles    >> Q1Q2 Investigation
 
+
+% Similar to VBAxles... CONVERT TO VB Format!!
+
  % Initial commands
 clear, clc, format long g, rng('shuffle'), close all;
 
@@ -22,7 +25,8 @@ InputFile = 'Input/MATSimWIMInput.xlsx';
 warning('off','MATLAB:mir_warning_maybe_uninitialized_temporary')
 
 % Read Input File
-[BaseData,LaneData,~,~] = ReadInputFile(InputFile);
+% SWITCH BELOW TO NEW
+%[BaseData,LaneData,~,~] = VBReadInputFile(InputFile);
 
 % Initialize variables and start row counter
 MaxEvents = nan(500000,14,height(BaseData));
@@ -39,8 +43,10 @@ parfor g = 1:height(BaseData)
      j = 1;
      
     % Obtain Influence Line Info
-    [NLanes,Lane,LaneData,~,~] = UpdateData(BaseData(g,:),[],1,1);
-    [Infl,NInfCases,Infl.x,Infl.v,ESIA] = GetInfLines(LaneData,BaseData(g,:),NLanes);
+    % SWITCH BELOW TO NEW
+    %[NLanes,Lane,LaneData,~,~] = VBUpdateData(BaseData(g,:),[],1,1);
+    % SWITCH BELOW TO NEW
+    %[Infl,NInfCases,Infl.x,Infl.v,ESIA] = GetInfLines(LaneData,BaseData(g,:),NLanes);
     
     % Modify IL according to area to be analyzed
     % DON"T MODIFY... USE INFCAsES
@@ -51,12 +57,13 @@ parfor g = 1:height(BaseData)
     PD = load(['PrunedS1 WIM/',BaseData.SName{g},'/',BaseData.SName{g},'_',num2str(BaseData.Year(g)),'.mat']);
     
     % Classify and add Datetime
-    PDC = Classify(PD.PD); PDC = AddDatetime(PDC,1);
+    % SWITCH BELOW TO NEW
+    %PDC = Classify(PD.PD); PDC = AddDatetime(PDC,1);
     
     % Further trimming if necessary
-    if BaseData.S2Prune(g) == 1
-        PDC = PruneWIM2(PDC,0);
-    end
+%     if BaseData.S2Prune(g) == 1
+%         PDC = PruneWIM2(PDC,0);
+%     end
             
     % We treat each station separately
     Stations = unique(PDC.ZST);
@@ -77,7 +84,8 @@ parfor g = 1:height(BaseData)
         PDCx.FS(PDCx.FS == WeakL) = 2;
         
         % Convert PDC to AllTrAx - Spacesave at 4 (plus min 26 = 30)
-        [PDCr, AllTrAx, TrLineUp] = WIMtoAllTrAx(PDCx,4,Lane.Dir,BaseData.ILRes(g));
+        % SWITCH BELOW TO NEW
+        %[PDCr, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,4,Lane.Dir,BaseData.ILRes(g));
         
         % Make groups out of each unique day
         PDCr.Group = findgroups(dateshift(PDCr.Time,'start','day'));
@@ -124,7 +132,8 @@ parfor g = 1:height(BaseData)
                 end
                 
                 % Subject Influence Line to Truck Axle Stream
-                [MaxLE,SMaxLE,BrStInd,~,~] = GetMaxLE(AllTrAxSub,Infl,BaseData.RunDyn(g),t);
+                % SWITCH BELOW TO NEW
+                %[MaxLE,SMaxLE,BrStInd,~,~] = VBGetMaxLE(AllTrAxSub,Infl,BaseData.RunDyn(g),t);
                 
                 % Allow for possible BrStInd < 0
                 if BrStInd < 0
@@ -188,7 +197,8 @@ parfor g = 1:height(BaseData)
                 % Optional Apercu
                 if BaseData.Apercu(g) == 1
                     ApercuTitle = [BaseData.SName{g} ' ' num2str(Stations(w)) ' ' num2str(BaseData.Year(g)) ' Max'];
-                    T = Apercu(PDCr,ApercuTitle,Infl.x,Infl.v(:,1),BrStIndx,TrLineUp,MaxLE/ESIA.Total(1),MaxLE/SMaxLE,Lane.Dir,BaseData.ILRes(g));
+                    % SWITCH BELOW TO NEW
+                    %T = Apercu(PDCr,ApercuTitle,Infl.x,Infl.v(:,1),BrStIndx,TrLineUp,MaxLE/ESIA.Total(1),MaxLE/SMaxLE,Lane.Dir,BaseData.ILRes(g));
                 end
                 
                 % Troubleshooting
