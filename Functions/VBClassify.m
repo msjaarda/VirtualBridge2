@@ -9,11 +9,11 @@ function [PD] = VBClassify(PD)
 
 IndW = find(string(PD.Properties.VariableNames) == "W1_2");
 
-% Create the table of axel. 0: >2m ; 1: <2m, NaN: no axel 
+% Create the table of axeles. 0: >2m ; 1: <2m, NaN: no axle
 axleTable = double(PD{:,IndW:IndW+7} < 200);
 axleTable(PD{:,IndW:IndW+7} == 0) = NaN;
 
-% Initilize the empty count of axels and count of axel per group. 
+% Initilize the empty count of axles and count of axles per group. 
 count = ones(height(axleTable),1);
 countGroup = nan(size(axleTable)+[0 1]);
 
@@ -41,9 +41,7 @@ countGroup(:,j+1)=count;
 
 % Convert the count per group into the code, by using a power of 10
 % corrected for the presence of nan
-STR_c = nansum(countGroup .* 10.^(cumsum(~isnan(countGroup),2,'reverse')-1),2);
-
-PD.TYPE = STR_c;
+PD.TYPE = nansum(countGroup .* 10.^(cumsum(~isnan(countGroup),2,'reverse')-1),2);
 
 % ---------------- TYPE DONE -------------------
 

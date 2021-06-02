@@ -4,43 +4,42 @@ function T = VBApercu(PDC,Title,ILData,BrStInd,TrLineUp,PEsia,DLF,Lane,ILRes)
 % Take only the influence lines that apply to the current InfCase
 Infv = ILData.v;
 Infx = 0:ILRes:(length(ILData.v)-1)*ILRes;
+Span = max(Infx);
 
+% if isWIM we will have Lane.Sites and Lane.Station
 if any(ismember(PDC.Properties.VariableNames,'DTS'))
-    WIMa = true;
+    isWIM = true;
 else
-    WIMa = false;
+    isWIM = false;
 end
 
-% This is going to need major work since we have hard coded WIMa stuffs
-    
-% Think about tailoring the size of the subplots to the length and width of
-% the bridge, so the aspect ratio is always good. HAVEN't TAKEN NuMLANES2ac
-% Fix middle lanes being slightly larger FIXED
-% Create solid line when there is a direction change TRIED WE SEE
-
+% Initialize Figure
 figure
 
-% Just for displaying class, see Classify... SHOULD ADD TO THIS
+% Just for displaying class, see Classify...
 TrTyps = [0; 11; 119; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238; 41; 42; 43; 44; 45; 46; 47; 48; 49];
 TrNames = ["NC" "11" "11bis" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "11112r" "112a" "113a" "123a"...
     "60t Crane" "6ax 60t" "7ax 72t" "8ax 84t" "9ax 96t" "96t Crane" "Libherr 132" "Libherr 15" "84t AT7"];
 
 % Get number and name of lanes
-Lanes = unique(PDC.LANE); NumLanes = length(Lanes);
-NumTrafLanes = length(Lanes);
-if WIMa
-    %Lanes = Lane.SiteLanes.ALANE;
-    NumLanes = Lane.Sites.NumLanes;
+LaneswTr = unique(PDC.LANE); NumLaneswTr = length(LaneswTr);
+% Get TotalLanes and get Aperçu lanes (ALane)
+if isWIM
+    TotalLanes = Lane.Sites.NumLanes;
+    ALane = Lane.Details.ALANE;
+else
+    TotalLanes = NumLaneswTr;
+    ALane = LaneswTr;
 end
-NumLanePlots = NumLanes;
+% Get total number of subplots
+NumSubplots = TotalLanes + 2;
 
-% Define Plot Colors
-Col{1} = [.94 .28 .18]; Col{2} = [0 .447 .74]; Col{3} = [.184 .8 .086];       % Yellow and Blue
-Col{4} = [.99 .67 0]; Col{5} = Col{2}; Col{6} = Col{3}; % Col 4 is Red
+% Define Plot Colors RBGY
+Col{1} = [.94 .28 .18]; Col{2} = [0 .447 .74]; Col{3} = [.184 .8 .086];       
+Col{4} = [.99 .67 0]; Col{5} = Col{2}; Col{6} = Col{3};
 
-% Plot Influence Line
-% Open up subplot and choose the last subplot
-sp(NumLanePlots+2) = subplot(NumLanePlots+2,1,NumLanePlots+2);
+% Plot Influence Line - Open up subplot and choose the last subplot
+sp(NumSubplots) = subplot(NumSubplots,1,NumSubplots);
 % Note that trucks go the other way than is plotted... must flip ILs
 if size(Infv,2) == 1 | all(all(Infv == Infv(:,1),2))
     plot(Infx,flip(-Infv),'k','LineWidth',1.5)
@@ -50,38 +49,38 @@ else
         plot(Infx,flip(-Infv(:,i)),'Color',Col{i},'LineWidth',1.5)
     end
 end
-xlabel('Distance Along Bridge (m)'); ylabel('Inf Line'); xlim([-0.5 max(Infx)+0.5]); box on
+xlabel('Distance Along Bridge (m)'); ylabel('Inf Line'); xlim([-0.5 Span+0.5]); box on
 text(1,-max(max(Infv))+max(max(Infv))/5,sprintf('%.1f%% of E_{SIA}',PEsia*100),'FontSize',11,'FontWeight','bold','Color','k')
 PerI = find(ILData.Name == '.');
-text(max(Infx)-1,-max(max(Infv))+max(max(Infv))/5,sprintf('%s',strrep(ILData.Name(PerI(1)+1:PerI(end)-1),'.',' ')),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
+text(Span-1,-max(max(Infv))+max(max(Infv))/5,sprintf('%s',strrep(ILData.Name(PerI(1)+1:PerI(end)-1),'.',' ')),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
 set(gca,'ytick',[]); set(gca,'yticklabel',[])
 
 % Define overall plot title
 sgtitle(Title);
 
-% Col1 of TrLineUp is Rounded w/ ILRes, Col5 is actual distance
-
-% How does Q work?! BrStInd no errors??
-% Q is like AllTrAx and T is like AllVehAx I think
+% Q / q    [     1            2         3         4          5     ]
+%           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)
 
 % Define Q, an excerpt of TrLineUp with just those vehicles on the bridge
 Q = TrLineUp(TrLineUp(:,1) >= BrStInd & TrLineUp(:,1) <= BrStInd+length(Infx)-1,:); % added equals...
 % Define T, an excerpt of WIM/VWIM PDC with just vehicles on the bridge
 T = PDC(unique(Q(:,3)),:);
 
-% Gather variables for the plots of each lane
-for i = 1:NumLanes
-    if i > NumTrafLanes
+% Gather variables for the plots of each lane (vehicle corners and axle vals)
+for i = 1:NumLaneswTr
+    % If there is no traffic on a given lane
+    if i > NumLaneswTr
+        % Set vehicle corners and accummulated axles to zero
         ac{i} = 0; vc{i} = 0;
         NoVeh(i) = 1;
         continue
     end
     % q is a subset of Q, t is a subset of T
-    q{i} = Q(Q(:,4) == Lanes(i),:); t{i} = T(T.LANE == Lanes(i),:);
+    q{i} = Q(Q(:,4) == LaneswTr(i),:); t{i} = T(T.LANE == LaneswTr(i),:);
     % normalize q values for start of the bridge at zero
     q{i}(:,1) = round((q{i}(:,1) - BrStInd)); q{i}(:,5) = q{i}(:,5) - BrStInd*ILRes;
     [a, b] = unique(q{i}(:,3));
-    % vc stands for vehicle corners, ac for accumulated
+    % vc stands for vehicle corners, ac for accummulated
     if ~isempty(b)
         for j = 1:length(b)
             locations = q{i}(q{i}(:,3) == a(j),1);
@@ -118,20 +117,23 @@ for i = 1:NumLanes
     end
 end
 
-if size(barp,2) < NumLanePlots
-    barp(1:size(barp,1), size(barp,2)+1:NumLanePlots) = 0.001;
+% Need at least a value for all lanes
+if size(barp,2) < TotalLanes
+    barp(1:size(barp,1), size(barp,2)+1:TotalLanes) = 0.001;
 end
 
-% Plot axle loads
-sp(NumLanePlots+1) = subplot(NumLanePlots+2,1,NumLanePlots+1);
+% Plot axle loads - Open up subplot and choose the second last subplot
+sp(TotalLanes+1) = subplot(NumSubplots,1,TotalLanes+1);
+% Use handle, h, to assign colors later
 h = bar(0:ILRes:Infx(end),barp/9.81,1.2/ILRes,'grouped','EdgeColor','k');
-xlim([-0.5 max(Infx)+0.5]);
+xlim([-0.5 Span+0.5]);
 ylim([0 ceil(max(max(barp/9.81))/5)*5])
 ylabel('Axle Loads (t)')
 set(gca,'xticklabel',[])
 
 % Show text of DLA and Total Weight
 text(1,ceil(max(max(barp/9.81))/5)*5-3,sprintf('Total: %.0f (DLF = %.2f)',sum(sum(barp)),DLF),'FontSize',11,'FontWeight','bold','Color','k')
+
 
 if ILRes ~= 1
     xtemp = 0:ILRes:Infx(end);
@@ -142,132 +144,153 @@ if ILRes ~= 1
 else
     Infvtemp = Infv;
 end
-if size(Infvtemp,2) < NumLanePlots
-    Infvtemp(1:size(Infvtemp,1), size(Infvtemp,2)+1:NumLanePlots) = 0;
+if size(Infvtemp,2) < TotalLanes
+    Infvtemp(1:size(Infvtemp,1), size(Infvtemp,2)+1:TotalLanes) = 0;
 end
 
-text(max(Infx)-1,ceil(max(max(barp/9.81))/5)*5-3,sprintf('Load Effect: %.0f',DLF*sum(sum(barp(1:end,:).*flip(Infvtemp(:,1:end))))),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
+% Show text of Load Effect and % of ESIA
+text(Span-1,ceil(max(max(barp/9.81))/5)*5-3,sprintf('Load Effect: %.0f',DLF*sum(sum(barp(1:end,:).*flip(Infvtemp(:,1:end))))),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
 
-for i = 1:NumLanes
+% Set Line colors
+for i = 1:NumLaneswTr
     if NoVeh(i) ~= i
         h(i).FaceColor = Col{i};
     end
 end
 
+
+
+
+% j counts up in order (1, 2, 3)
+% ALanes is Aperçu lanes
+% sp(1:TotalLanes) are in the order top to bottom
+
+% We go in order j 1:TotalLanes, but actual we use ALane(j), so we don't
+% plot in order downwards always ALane(j) is the plot we are on
+
 % Code order, Actual Names, ALANE [[1:length(Lanes)]' Lane.Details.ALANE]
-for j = 1:NumLanePlots
-    % Use ALANES for selecting subplot number?
-    sp(Lane.Details.ALANE(j)) = subplot(NumLanePlots+2,1,Lane.Details.ALANE(j));
-    if Lane.Details.ALANE(j) == 1 && any(ismember(T.Properties.VariableNames,'DTS'))
+for j = 1:TotalLanes
+    
+    % Use ALANES for selecting subplot number
+    sp(ALane(j)) = subplot(NumSubplots,1,ALane(j));
+    
+    % Write extra data on first subplot if WIM
+    if ALane(j) == 1 && isWIM
         text(0,9,datestr(T.DTS(1),'mmm-dd-yyyy'),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
         text(0,1.25,datestr(T.DTS(1),'HH:MM:SS'),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
         % North Arrow and Canton/Hwy
         if isfield(Lane,'Details')
             if Lane.Details.NSEW == 4 | Lane.Details.NSEW == 3
-                text(max(Infx),9,['NORTH ' char(8593)],'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+                text(Span,9,['NORTH ' char(8593)],'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
             else
-                text(max(Infx),9,['NORTH ' char(8594)],'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+                text(Span,9,['NORTH ' char(8594)],'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
             end
-            text(max(Infx),1.25,Lane.Sites.CANTON + " (" + Lane.Sites.HWY + ")",'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+            text(Span,1.25,Lane.Sites.CANTON + " (" + Lane.Sites.HWY + ")",'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
         end
     end
-    if Lane.Details.ALANE(j) == 2 && isfield(Lane,'Details')
+    % Write extra data on second subplot if we have Lane Details
+    if ALane(j) == 2 && isfield(Lane,'Details')
         if Lane.Details.NSEW(j) == 2 | Lane.Details.NSEW(j) == 4
             text(0,1.25,char(8592) + " " + Lane.Details.DIR(j),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
-            text(max(Infx),1.25,Lane.Details.FROM(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+            text(Span,1.25,Lane.Details.FROM(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
         else
             text(0,1.25,char(8592) + " " + Lane.Details.FROM(j),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
-            text(max(Infx),1.25,Lane.Details.DIR(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+            text(Span,1.25,Lane.Details.DIR(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
         end
     end
-    if j <= length(Lanes)
+    
+    % If we are on a plot that has Tr, draw the trucks
+    if j <= NumLaneswTr
         % Assign y scale for trucks
         Lo = 2; Hi = 8;
         % Adjust scale for middle lanes
-        if Lane.Details.ALANE(j) > 1 & NumLanePlots > 2 & Lane.Details.ALANE(j) < NumLanePlots
+        if ALane(j) > 1 & TotalLanes > 2 & ALane(j) < TotalLanes
             Lo = Lo + 0.20; Hi = Hi - 0.20;
         end
-        Span = max(Infx)-1;
         % Adjust scale for Inf Length
-        if max(Infx)-1 > 50;
-            Lo = min(Lo + ((max(Infx)-1)-50)/35,3.5); Hi = max(Hi - ((max(Infx)-1)-50)/35,6.5);
+        if Span > 50;
+            Lo = min(Lo + (Span-50)/35,3.5); Hi = max(Hi - (Span-50)/35,6.5);
         end
+        % Difference
         DiF = Hi - Lo; % Normally 6
+        
+        % For each truck... draw it
         for i = 1:numel((vc{j}))/2
             hold on
-            Fillcolor = 'k';
+            EdgCol = 'k';
             % Truck Outline
-            fill([vc{j}(i,1) vc{j}(i,1) vc{j}(i,2) vc{j}(i,2)],[Lo Hi Hi Lo],Col{j},'EdgeColor',Fillcolor,'LineWidth',1.5);
+            fill([vc{j}(i,1) vc{j}(i,1) vc{j}(i,2) vc{j}(i,2)],[Lo Hi Hi Lo],Col{j},'EdgeColor',EdgCol,'LineWidth',1.5);
             if Lane.Dir(j) == 1
                 % Back Bumper
-                fill([vc{j}(i,2)-0.1 vc{j}(i,2)-0.1 vc{j}(i,2)+0.1 vc{j}(i,2)+0.1],[Lo+0.5 Hi-0.5 Hi-0.5 Lo+0.5],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,2)-0.1 vc{j}(i,2)-0.1 vc{j}(i,2)+0.1 vc{j}(i,2)+0.1],[Lo+0.5 Hi-0.5 Hi-0.5 Lo+0.5],'w','EdgeColor',EdgCol,'LineWidth',1.5);
                 % Front of Truck
-                fill([vc{j}(i,1)-0.7*Span/50 vc{j}(i,1)-0.7*Span/50 vc{j}(i,1) vc{j}(i,1)],[Lo+1.75*DiF/6 Hi-1.75*DiF/6 Hi-DiF/6 Lo+DiF/6],[.4 .4 .4],'EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,1)-0.7*Span/50 vc{j}(i,1)-0.7*Span/50 vc{j}(i,1) vc{j}(i,1)],[Lo+1.75*DiF/6 Hi-1.75*DiF/6 Hi-DiF/6 Lo+DiF/6],[.4 .4 .4],'EdgeColor',EdgCol,'LineWidth',1.5);
                 % Mirrors
-                fill([vc{j}(i,1)+1.1 vc{j}(i,1)+1.3 vc{j}(i,1)+1.5 vc{j}(i,1)+1.3],[Lo Lo-0.5 Lo-0.5 Lo],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
-                fill([vc{j}(i,1)+1.1 vc{j}(i,1)+1.3 vc{j}(i,1)+1.5 vc{j}(i,1)+1.3],[Hi Hi+0.5 Hi+0.5 Hi],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,1)+1.1 vc{j}(i,1)+1.3 vc{j}(i,1)+1.5 vc{j}(i,1)+1.3],[Lo Lo-0.5 Lo-0.5 Lo],'w','EdgeColor',EdgCol,'LineWidth',1.5);
+                fill([vc{j}(i,1)+1.1 vc{j}(i,1)+1.3 vc{j}(i,1)+1.5 vc{j}(i,1)+1.3],[Hi Hi+0.5 Hi+0.5 Hi],'w','EdgeColor',EdgCol,'LineWidth',1.5);
             else
                 % Back Bumper
-                fill([vc{j}(i,1)-0.1 vc{j}(i,1)-0.1 vc{j}(i,1)+0.1 vc{j}(i,1)+0.1],[Lo+0.5 Hi-0.5 Hi-0.5 Lo+0.5],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,1)-0.1 vc{j}(i,1)-0.1 vc{j}(i,1)+0.1 vc{j}(i,1)+0.1],[Lo+0.5 Hi-0.5 Hi-0.5 Lo+0.5],'w','EdgeColor',EdgCol,'LineWidth',1.5);
                 % Front of Truck
-                fill([vc{j}(i,2)+0.7*Span/50 vc{j}(i,2)+0.7*Span/50 vc{j}(i,2) vc{j}(i,2)],[Lo+1.75*DiF/6 Hi-1.75*DiF/6 Hi-DiF/6 Lo+DiF/6],[.4 .4 .4],'EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,2)+0.7*Span/50 vc{j}(i,2)+0.7*Span/50 vc{j}(i,2) vc{j}(i,2)],[Lo+1.75*DiF/6 Hi-1.75*DiF/6 Hi-DiF/6 Lo+DiF/6],[.4 .4 .4],'EdgeColor',EdgCol,'LineWidth',1.5);
                 % Mirrors
-                fill([vc{j}(i,2)-1.1 vc{j}(i,2)-1.3 vc{j}(i,2)-1.5 vc{j}(i,2)-1.3],[Lo Lo-0.5 Lo-0.5 Lo],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
-                fill([vc{j}(i,2)-1.1 vc{j}(i,2)-1.3 vc{j}(i,2)-1.5 vc{j}(i,2)-1.3],[Hi Hi+0.5 Hi+0.5 Hi],'w','EdgeColor',Fillcolor,'LineWidth',1.5);
+                fill([vc{j}(i,2)-1.1 vc{j}(i,2)-1.3 vc{j}(i,2)-1.5 vc{j}(i,2)-1.3],[Lo Lo-0.5 Lo-0.5 Lo],'w','EdgeColor',EdgCol,'LineWidth',1.5);
+                fill([vc{j}(i,2)-1.1 vc{j}(i,2)-1.3 vc{j}(i,2)-1.5 vc{j}(i,2)-1.3],[Hi Hi+0.5 Hi+0.5 Hi],'w','EdgeColor',EdgCol,'LineWidth',1.5);
             end
+            
             % Only write text if it is within the plot...
-            if (vc{j}(i,1)+vc{j}(i,2))/2 > max(Infx)/15 && (vc{j}(i,1)+vc{j}(i,2))/2 < max(Infx)-max(Infx)/15
+            if (vc{j}(i,1)+vc{j}(i,2))/2 > Span/15 && (vc{j}(i,1)+vc{j}(i,2))/2 < Span-Span/15
                 text((vc{j}(i,1)+vc{j}(i,2))/2,5,sprintf('%i ax | %.1f t',t{j}.AX(i),t{j}.GW_TOT(i)/1000),'FontSize',11,'FontWeight','bold','VerticalAlignment','middle','HorizontalAlignment','center','Color','k')
             end
-            if (vc{j}(i,1)+vc{j}(i,2))/2 > max(Infx)/15 && (vc{j}(i,1)+vc{j}(i,2))/2 < max(Infx)-max(Infx)/15 && ismember('SPEED', T.Properties.VariableNames)
+            if (vc{j}(i,1)+vc{j}(i,2))/2 > Span/8 && (vc{j}(i,1)+vc{j}(i,2))/2 < Span-Span/8 && ismember('SPEED', T.Properties.VariableNames)
                 text((vc{j}(i,1)+vc{j}(i,2))/2,Hi+1,sprintf('%.0f kph',t{j}.SPEED(i)),'FontSize',11,'FontWeight','bold','HorizontalAlignment','center','VerticalAlignment','middle','Color','w')
             end
-            if (vc{j}(i,1)+vc{j}(i,2))/2 > max(Infx)/15 && (vc{j}(i,1)+vc{j}(i,2))/2 < max(Infx)-max(Infx)/15
-                text((vc{j}(i,1)+vc{j}(i,2))/2,Lo-0.75,sprintf('CLASS %s',TrNames(TrTyps == t{j}.CLASS(i))),'FontSize',9,'FontWeight','bold','HorizontalAlignment','center','VerticalAlignment','middle','Color','w')
+            if (vc{j}(i,1)+vc{j}(i,2))/2 > Span/8 && (vc{j}(i,1)+vc{j}(i,2))/2 < Span-Span/8
+                text((vc{j}(i,1)+vc{j}(i,2))/2,Lo-0.75,sprintf('%s',TrNames(TrTyps == t{j}.CLASS(i))),'FontSize',9,'FontWeight','bold','HorizontalAlignment','center','VerticalAlignment','middle','Color','w')
             end
         end
-        % Add wheel locations (column 5 has actual wheel locations, column 1 would be approximate)
+        
+        % Add all wheel locations (column 5 has actual wheel locations, column 1 would be approximate)
         hold on
         scatter(q{j}(:,5),(Hi-DiF/6)*ones(size(q{j},1),1),DiF*6,'filled','s','MarkerFaceColor','k')
         scatter(q{j}(:,5),(Lo+DiF/6)*ones(size(q{j},1),1),DiF*6,'filled','s','MarkerFaceColor','k')
-        
-        xlim([-0.5 max(Infx)+0.5]); ylim([0 10])
-        ylabel(['Lane ' num2str(Lane.Details.LANE(j))]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
-        yaxish = gca; yaxish.YRuler.Axle.Visible = 'off';
-        if Lane.Details.ALANE(j) ~= NumLanePlots
-            set(gca,'xticklabel',[],'xcolor','none','xtick',[])
-            % Add line between lanes (solid if change of dir)
-            if Lane.Details.NSEW(Lane.Details.ALANE(j)) == Lane.Details.NSEW(Lane.Details.ALANE(j)+1)
-                yline(0.1,'--w','LineWidth',4);
-                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
-            else
-                yline(0.1,'-w','LineWidth',4);
-                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
-            end
-        end
-        
-    else
-        xlim([-0.5 max(Infx)+0.5]); ylim([0 10])
-        ylabel(['Lane ' num2str(Lane.Details.LANE(j))]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
-        yaxish = gca; yaxish.YRuler.Axle.Visible = 'off';
-        if Lane.Details.ALANE(j) ~= NumLanePlots
-            set(gca,'xticklabel',[],'xcolor','none','xtick',[])
-            % Add line between lanes (solid if change of dir)
-            if Lane.Details.NSEW(Lane.Details.ALANE(j)) == Lane.Details.NSEW(Lane.Details.ALANE(j)+1)
-                yline(0.1,'--w','LineWidth',4);
-                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
-            else
-                yline(0.1,'-w','LineWidth',4);
-                yline(0,'-','Color',[.6 .6 .6],'LineWidth',2);
-            end
-        end
+
     end
-    set(gca,'Color',[.6 .6 .6])
     
+    % If we are NOT at the bottom lane
+    if ALane(j) ~= TotalLanes
+        % Add line between lanes
+        %if Lane.Details.NSEW(Lane.Details.ALANE(j)) == Lane.Details.NSEW(Lane.Details.ALANE(j)+1)
+        if Lane.Details.NSEW(j) == Lane.Details.NSEW(ALane == ALane(j)+1)
+            % Dashed if between same direction
+            hold on
+            xlim([-0.5 Span+0.5]); ylim([0 10])
+            dashline([0 Span],[0.1 0.1],Span/10,Span/10,Span/10,Span/10,'w','LineWidth',2);
+        else
+            % Solid if change of direction
+            yline(0.1,'-w','LineWidth',2);
+        end
+        
+        % Turn off x axis completely
+        set(gca,'xticklabel',[],'xcolor','none','xtick',[])
+        
+        
+        
+    end
+
+    % Set axis limits
+    xlim([-0.5 Span+0.5]); ylim([0 10])
+    % Label y axis
+    ylabel(['Lane ' num2str(Lane.Details.LANE(j))]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
+    % Turn y axis off
+    yaxish = gca; yaxish.YRuler.Axle.Visible = 'off';
+
+    % Set the background lane color to grey, like asphalt
+    set(gca,'Color',[.6 .6 .6])
 end
 
+% Set Position
 set(gcf,'Position',[100 100 900 750])
-
 
 % Left Bottom Width Height
 Left = sp(1).Position(1);
@@ -281,14 +304,13 @@ set(sp(end), 'Position',   [Left   sp(end).Position(2)                     Width
 set(sp(end-1), 'Position', [Left   sp(end-1).Position(2) - GapSize         Width    NewHeight]);
 
 % Remove gap between lanes
-for i = 1:NumLanePlots
+for i = 1:TotalLanes
     if i == 1
         set(sp(i), 'Position',   [Left   sp(i).Position(2) - GapSize       Width    NewHeight]);
-    elseif i == NumLanePlots
+    elseif i == TotalLanes
         set(sp(i), 'Position',   [Left   sp(i).Position(2)                 Width    NewHeight]);
     else
         set(sp(i), 'Position',   [Left   sp(i).Position(2) - GapSize       Width    NewHeightIn]);
-        %set(sp(i), 'ylim', [-0.5 10.5]);
     end
 end
 

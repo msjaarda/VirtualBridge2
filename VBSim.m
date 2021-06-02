@@ -167,6 +167,6 @@ end
 
 % Run Apercu to see critical case... does all IL given for the last row of BaseData
 if BaseData.Apercu(g) == 1
-    [T, OverMx, AllTrAxx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),ESIA.Total,Lane.Dir,BaseData.ILRes(g));
+    [T, OverMx, AllTrAxx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),ESIA.Total,Lane,BaseData.ILRes(g));
 end
 

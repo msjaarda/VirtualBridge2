@@ -13,21 +13,40 @@ BaseData = VBReadInputFile('Input/VBWIMInput.xlsx');
 if BaseData.Parallel(1) > 0, gcp; clc; end
 u = StartProgBar(height(BaseData), 1, 1, 1); tic; st = now;
 
-% Add BaseData Filter for ClassOnly or ClassOW
 % After that we need to add back specific time period... daily,
-% weekly, yearly, with logging of block maxima. For Q1/Q2 and q
-% Investigations.
+% weekly, yearly, with logging of block maxima.
+%For Q1/Q2 and q Investigations (but they will have their own names).
+
+% Initialize variables and start row counter
+MaxEvents = nan(500000,13); j = 1;
 
 % Each row of BaseData represents one analysis
-parfor g = 1:height(BaseData)
-%for g = 1:height(BaseData)
+%parfor g = 1:height(BaseData)
+for g = 1:height(BaseData)
     
     % Update analysis data for current row of BaseData
     [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
     
     % Load File
-    PDx = load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
-    PDs = PDx.PDs;
+    %PDx = 
+    load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
+    %PDs = PDx.PDs;
+    
+    % Get Only the ClassType Specified
+    try
+        if strcmp(BaseData.ClassType(g),'Class')
+            PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 50 | PDs.CLASS < 40),:);
+        elseif strcmp(BaseData.ClassType(g),'ClassOW')
+            PDs = PDs(PDs.CLASS > 0),:);
+        end
+    catch end
+    
+    % Let's choose a certain amount for a demo
+    try
+        PDs = PDs(1:800000,:);
+    catch
+        PDs = PDs(1:end,:);
+    end
     
     % Convert PDC to AllTrAx - Spacesave at MaxLength
     MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)/BaseData.ILRes(g);
@@ -77,9 +96,7 @@ parfor g = 1:height(BaseData)
             if BaseData.Apercu(g) == 1
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
                 T = VBApercu(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
-                if BaseData.Parallel(g) == 1
-                    exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + "xx.jpg",'Resolution',600)
-                end
+                exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end
             
             % Delete vehicle entries from TrLineUp for re-analysis

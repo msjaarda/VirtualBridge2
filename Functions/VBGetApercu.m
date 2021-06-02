@@ -1,4 +1,4 @@
-function [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,NumInfCases,ILData,RunDyn,ESIA,LaneDir,ILRes)
+function [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,NumInfCases,ILData,RunDyn,ESIA,Lane,ILRes)
 %GETAPERCU Prepares results to be handed to WIMtoAllTrAx, then into Apercu
 
 % Dummy year
@@ -13,9 +13,9 @@ for t = 1:NumInfCases
     % Take only vehicles involved in governing simulation, from current InfCase
     PDx = PD(PD.SimNum == MaxSimNum & PD.InfCase == t,:);
     % Necessary for WIMtoAllTrAx
-    PDC = Classify(PDx); 
+    PDC = VBClassify(PDx); 
     % Convert PDC to AllTrAx (no SpaceSaver necessary)
-    [PDC, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDC,0,LaneDir,ILRes);
+    [PDC, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDC,0,Lane,ILRes);
     % Round TrLineUp first row, move unrounded to fifth row
     TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
     
@@ -24,7 +24,7 @@ for t = 1:NumInfCases
     % Record Maximums
     OverMax = [OverMax; [t, MaxLEx, BrStIndx, MaxSimNum]];
     
-    T = VBApercu(PDC,'',ILData(t),BrStIndx,TrLineUp,MaxLEx/ESIA(t),DLFx,LaneDir,ILRes);
+    T = VBApercu(PDC,'',ILData(t),BrStIndx,TrLineUp,MaxLEx/ESIA(t),DLFx,Lane,ILRes);
             
 end
 
