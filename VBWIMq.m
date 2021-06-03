@@ -19,14 +19,11 @@ BaseData = VBReadInputFile('Input/VBWIMqInput.xlsx');
 if BaseData.Parallel(1) > 0, gcp; clc; end
 
 % Initialize variables and start row counter
-MaxEvents = nan(500000,14); j = 1;
+MaxEvents = [];
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
 
-    MaxEvents1 = nan(500000,14);
-    j = 1;
-    
     % Update analysis data for current row of BaseData
     [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
     
@@ -55,6 +52,10 @@ for g = 1:height(BaseData)
     
     parfor r = 1:length(UYears)
     %for r = 1:length(UYears)
+        
+        %MaxEvents1 = nan(500000,14);
+        %j = 1;
+    
         PDsy = PDs(year(PDs.DTS) == UYears(r),:);
     
         % Convert PDC to AllTrAx - Spacesave at MaxLength
@@ -166,8 +167,9 @@ for g = 1:height(BaseData)
                     
                     % Save MaxEvents...
                     % Save Times and Datenums and then convert
-                    MaxEvents1(j,:) = [datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, L1Veh, L2Veh, L1Load, L2Load, L1Ax, L2Ax, L1Spd, L2Spd];
-                    j = j+1;
+                    %MaxEvents1(j,:) = [datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, L1Veh, L2Veh, L1Load, L2Load, L1Ax, L2Ax, L1Spd, L2Spd];
+                    %j = j+1;
+                    MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, L1Veh, L2Veh, L1Load, L2Load, L1Ax, L2Ax, L1Spd, L2Spd];
                     
                     % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                     AllTrAxSub(BrInds-(Starti-1),:) = 0;
@@ -176,17 +178,19 @@ for g = 1:height(BaseData)
             end % t, InfCases
         end % z, groups
     
-        MaxEvents(:,:,g) = MaxEvents1;
+        MaxEvents= [MaxEvents; MaxEvents1];
     
         % Update progress bar
         UpProgBar(u, st, g, 1, length(UYears), 1)
         
     end % r, years
+    
+    
 end % g, BaseData
 
 % Trim back
-MaxEvents = reshape(permute(MaxEvents,[1 3 2]),[],14);
-MaxEvents(isnan(MaxEvents(:,1)),:) = [];
+%MaxEvents = reshape(permute(MaxEvents,[1 3 2]),[],14);
+%MaxEvents(isnan(MaxEvents(:,1)),:) = [];
 
 % Convert back to datetime !!
 % Delete empty rows and convert to table

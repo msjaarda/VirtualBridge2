@@ -16,8 +16,8 @@ clear, clc, tic, format long g, rng('shuffle'), close all;
 % Read Input File
 BaseData = VBReadInputFile('Input/VBWIMQ1Q2Input.xlsx');
 
-% Initialize variables and start row counter
-MaxEvents = nan(500000,13); j = 1;
+% Initialize variable
+MaxEvents = nan(500000,13);
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -176,13 +176,12 @@ for g = 1:height(BaseData)
                 
             end % k, analyses
         end % z, groups
-        
-        MaxEvents(:,:,g) = MaxEvents1;
-        
+
         % Update progress bar
         UpProgBar(u, st, g, 1, length(UYears), 1)
         
     end % r, years
+    MaxEvents(:,:,g) = MaxEvents1;
 end % g, BaseData
 
 % Trim back
