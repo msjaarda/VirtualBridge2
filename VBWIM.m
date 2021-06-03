@@ -4,7 +4,7 @@
 % Find maximum load effects over a bridge from real WIM traffic
 
 % Initializing commands
-clear, clc, close all, format long g, rng('shuffle');
+clear, clc, format long g, rng('shuffle');
 
 % Read Input File
 BaseData = VBReadInputFile('Input/VBWIMInput.xlsx');
@@ -12,10 +12,6 @@ BaseData = VBReadInputFile('Input/VBWIMInput.xlsx');
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
 u = StartProgBar(height(BaseData), 1, 1, 1); tic; st = now;
-
-% After that we need to add back specific time period... daily,
-% weekly, yearly, with logging of block maxima.
-%For Q1/Q2 and q Investigations (but they will have their own names).
 
 % Initialize variables and start row counter
 MaxEvents = nan(500000,13); j = 1;
@@ -37,21 +33,20 @@ for g = 1:height(BaseData)
         if strcmp(BaseData.ClassType(g),'Class')
             PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 50 | PDs.CLASS < 40),:);
         elseif strcmp(BaseData.ClassType(g),'ClassOW')
-            PDs = PDs(PDs.CLASS > 0),:);
+            PDs = PDs(PDs.CLASS > 0,:);
         end
     catch end
     
     % Let's choose a certain amount for a demo
-    try
-        PDs = PDs(1:800000,:);
-    catch
-        PDs = PDs(1:end,:);
-    end
+%     try
+%         PDs = PDs(1:800000,:);
+%     catch
+%        PDs = PDs(1:end,:);
+%     end
     
     % Convert PDC to AllTrAx - Spacesave at MaxLength
-    MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)/BaseData.ILRes(g);
+    MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
     [PDs, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDs,MaxLength,Lane,BaseData.ILRes(g));
-
     
     % Round TrLineUp first row, move unrounded to fifth row
     TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
@@ -96,11 +91,9 @@ for g = 1:height(BaseData)
             if BaseData.Apercu(g) == 1
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
                 T = VBApercu(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
-                exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
+                %exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end
             
-            % Delete vehicle entries from TrLineUp for re-analysis
-            TrLineUpt(TrLineUpt(:,1) > BrStInd & TrLineUpt(:,1) < BrStInd + BrLengthInds,:) = [];
             % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
             AllTrAxt(BrInds,:) = 0;
             
