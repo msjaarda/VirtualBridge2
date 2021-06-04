@@ -31,17 +31,10 @@ for g = 1:height(BaseData)
     load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
     
     %Stage2Prune
-    UnderW = PDs.GW_TOT<6000;
-    TotUnderW = sum(UnderW);
-    PDs(UnderW,:) = [];
-    
-    % 2) Disqualification by Swiss10 Class (exclude 2,3,4,6)
-    
-    WrongC = PDs.CS == 2 | PDs.CS == 3 | PDs.CS == 4 | PDs.CS == 6;
-    TotWrongC = sum(WrongC);
+    PDs(PDs.GW_TOT<6000,:) = [];
     % Only do the disqualification if we actually have SW10 Classification
-    if sum(WrongC) < 0.7*height(PDs)
-        PDs(WrongC,:) = [];
+    if sum(PDs.CS == 2 | PDs.CS == 3 | PDs.CS == 4 | PDs.CS == 6) < 0.7*height(PDs)
+        PDs(PDs.CS == 2 | PDs.CS == 3 | PDs.CS == 4 | PDs.CS == 6,:) = [];
     end
 
     % Separate for each year...
@@ -50,12 +43,13 @@ for g = 1:height(BaseData)
     % Start Progress Bar
     u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
     
-    parfor r = 1:length(UYears)
-    %for r = 1:length(UYears)
+    %parfor r = 1:length(UYears)
+    for r = 1:length(UYears)
         
         %MaxEvents1 = nan(500000,14);
         %j = 1;
-    
+        MaxEvents1 = [];
+        
         PDsy = PDs(year(PDs.DTS) == UYears(r),:);
     
         % Convert PDC to AllTrAx - Spacesave at MaxLength
@@ -78,11 +72,12 @@ for g = 1:height(BaseData)
         for z = 1:max(PDsy.Group)
             
             % Store starting and end indices
-            Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1))-1000);
-            Endi = min(max(TrLineUp(TrLineUp(:,6) == z,1)+1000),length(AllTrAx));
+            Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1)));
+            Endi = min(max(TrLineUp(TrLineUp(:,6) == z,1)),length(AllTrAx));
             
             % Subdivide AllTrAx
             AllTrAxSub = AllTrAx(Starti:Endi,:);
+            TrLineUpGr = TrLineUp(TrLineUp(:,6) == z,:);
             
             % Don't bother running if the segment is too small
             if length(AllTrAxSub) < 20000
@@ -93,21 +88,25 @@ for g = 1:height(BaseData)
             for t = 1:Num.InfCases
                 
                 % Get length of bridge in number of indices
-                BrLengthInd = size(ILData(t).v,1);
-                
-                % Eliminate the need for padding or BrStInd index issues
-                AllTrAxSub(1:BrLengthInd,:) = 0;
-                AllTrAxSub(end-BrLengthInd:BrLengthInd,:) = 0;
+                BrLengthInd = size(ILData(t).v,1);                
                 
                 % Reset for each t
                 AllTrAxSub = AllTrAx(Starti:Endi,:);
                 k = 0;
+                
+                % Eliminate the need for padding or BrStInd index issues
+                AllTrAxSub(1:BrLengthInd,:) = 0;
+                AllTrAxSub(end-BrLengthInd:end,:) = 0;
             
                 % For each analysis
-                while k < BaseData.NumAnalyses(g) & sum(AllTrAxSub,'all') > 0
+                while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                     
                     % Subject Influence Line to Truck Axle Stream
-                    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
+                    if BrLengthInd/BaseData.ILRes(g) < 60
+                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
+                    else
+                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,0);
+                    end
                     
                     % Now add to k
                     k = k+1;
@@ -120,12 +119,10 @@ for g = 1:height(BaseData)
                     
                     % Get Bridge Indices
                     BrInds = [BrStIndx:BrEndIndx]';
-                    % Only for when we use a strip
-                    BrInds = BrInds(flip(ILData.v(:,1)) == 1);
                     %AxOnBr = sum(AllTrAxt(StripInds,:),2);
                     
                     % Get Key Info to Save
-                    TrNums = TrLineUp(TrLineUp(:,1) >= min(BrInds) & TrLineUp(:,1) <= max(BrInds),3);
+                    TrNums = TrLineUpGr(TrLineUpGr(:,1) >= min(BrInds) & TrLineUpGr(:,1) <= max(BrInds),3);
                     TrNumsU = unique(TrNums);
                     
                     % We use TrNums because they don't depend on Starti shift

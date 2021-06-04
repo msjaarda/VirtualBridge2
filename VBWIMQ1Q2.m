@@ -81,8 +81,8 @@ for g = 1:height(BaseData)
         for z = 1:max(PDsy.Group)
             
             % Store starting and end indices
-            Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1))-1000);
-            Endi = min(max(TrLineUp(TrLineUp(:,6) == z,1)+1000),length(AllTrAx));
+            Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1))-30);
+            Endi = min(max(TrLineUp(TrLineUp(:,6) == z,1)+30),length(AllTrAx));
             
             % Subdivide AllTrAx
             AllTrAxSub = AllTrAx(Starti:Endi,:);
@@ -98,7 +98,7 @@ for g = 1:height(BaseData)
             
             % Eliminate the need for padding or BrStInd index issues
             AllTrAxSub(1:BrLengthInd,:) = 0;
-            AllTrAxSub(end-BrLengthInd:BrLengthInd,:) = 0;
+            AllTrAxSub(end-BrLengthInd:end,:) = 0;
             
             % For each analysis
             while k < BaseData.NumAnalyses(g) & sum(AllTrAxSub,'all') > 0
