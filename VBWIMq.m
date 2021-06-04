@@ -43,8 +43,8 @@ for g = 1:height(BaseData)
     % Start Progress Bar
     u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
     
-    %parfor r = 1:length(UYears)
-    for r = 1:length(UYears)
+    parfor r = 1:length(UYears)
+    %for r = 1:length(UYears)
         
         %MaxEvents1 = nan(500000,14);
         %j = 1;
@@ -102,11 +102,11 @@ for g = 1:height(BaseData)
                 while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                     
                     % Subject Influence Line to Truck Axle Stream
-                    if BrLengthInd/BaseData.ILRes(g) < 60
+                    %if BrLengthInd/BaseData.ILRes(g) < 60
                         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
-                    else
-                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,0);
-                    end
+                    %else
+                        %[MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,0);
+                    %end
                     
                     % Now add to k
                     k = k+1;
