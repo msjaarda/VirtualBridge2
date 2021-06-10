@@ -61,7 +61,7 @@ if strcmp(BaseData.AnalysisType,"Sim")
         elseif strcmp(BaseData.Flow{:},'Free-flowing')
             VehSpd = 1000; % > 100 therefore, veh/hr
         else
-            fprintf('\nWarning: Not a recognized FolDist input\n\n')
+            fprintf('\nWarning: Not a recognized FolDist input\n')
         end
         %  end
     else

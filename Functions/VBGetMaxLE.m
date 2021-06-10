@@ -24,9 +24,9 @@ Rx = zeros(size(AllTrAx,1)+size(IL,1)-1,size(IL,2));
 % Compute maximum load effects
 for i = 1:size(IL,2)
     % Only Convolute lanes with loads
-    if any(AllTrAx(:,i))
+    %if any(AllTrAx(:,i))
         Rx(:,i) = conv(IL(:,i),AllTrAx(:,i));
-    end
+    %end
 end
 
 % If there is more than one influence line, perform first sum
