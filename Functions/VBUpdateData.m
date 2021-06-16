@@ -22,6 +22,7 @@ if strcmp(BaseData.AnalysisType,"WIM")
     else
         Lane.Dir(i) = 2;
     end
+    end
 end
 
 % Get Lane Truck Distribution, Lane.TrDistr, and Lane Directions, Lane.Dir
@@ -121,7 +122,7 @@ end
 % - Must work with IL which have different x steps
 % - Num lanes is from traffic input. Use multidimentional arrays. When only 1
 % dim is given, this is equivalent to a "0", applying to all lanes
-% - In the future we can make "Area average" for somputation of AGB area
+% - In the future we can make "Area average" for computation of AGB area
 % loads from the code
 % - You can specify groups or individual lines. Dot notation for groups. Take
 % everything downstream of the dot!
@@ -158,7 +159,30 @@ for i = 1:length(ILs)
                                 for z = 1:length(FNames4)
                                     try
                                         TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k} '.' FNames3{p} '.' FNames4{z}];
-                                        fprintf('\nWARNING: Too many levels of IL given!\n\n')
+                                        FNames5 = fieldnames(eval(TName));
+                                        for u = 1:length(FNames5)
+                                            try
+                                                 TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k} '.' FNames3{p} '.' FNames4{z} '.' FNames5{u}];
+                                                fprintf('\nWARNING: Too many levels of IL given!\n\n')
+                                            catch
+                                                Num.InfCases = Num.InfCases + 1;
+                                                ILx = eval([TName '(:,1)']);
+                                                ILv = eval([TName '(:,2:end)']);
+                                                RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
+                                                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
+                                                ILData(Num.InfCases).Name = TName;
+                                                if size(ILData(Num.InfCases).v,2) < Num.Lanes
+                                                    if size(ILData(Num.InfCases).v,2) == 1
+                                                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
+                                                    else
+                                                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
+                                                            ILData(Num.InfCases).v(:,t) = 0;
+                                                            fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
                                     catch
                                         Num.InfCases = Num.InfCases + 1;
                                         ILx = eval([TName '(:,1)']);
@@ -291,21 +315,31 @@ for i = 1:Num.InfCases
     % Interpolate around influence lines to figure out next biggest max
     for j = 1:size(ILData(i).v,2)
         x = 0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes;
-        % In case we are already at the start or end (can't interpolate
-        % less or more)
-        if k == 1 | k == length(ILData(i).v)
-            b(j) = ILData(i).v(k(j),j);
-            c(j) = ILData(i).v(k(j),j);
-        % Normal procedure
-        else
-            b(j) = interp1(0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes,ILData(i).v(:,j),x(k(j))+0.6);
-            c(j) = interp1(0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes,ILData(i).v(:,j),x(k(j))-0.6);
-        end
+        
+        % Lucas 11/06/21 : We have to find the worst position of the axles,
+        % it could be before or after k (Shear cases with a peak
+        % value), or in between of k (+ or - Moment cases).
+        
+        % No need for previous if statement because interpolating outside
+        % of x simply returns NaN
+                    
+            top(1) = interp1(x,ILData(i).v(:,j),x(k(j)));
+            bot(1) = interp1(x,ILData(i).v(:,j),x(k(j))-1.2);
+                        
+            top(2) = interp1(x,ILData(i).v(:,j),x(k(j))+0.6);
+            bot(2) = interp1(x,ILData(i).v(:,j),x(k(j))-0.6);
+            
+            top(3) = interp1(x,ILData(i).v(:,j),x(k(j))+1.2);
+            bot(3) = interp1(x,ILData(i).v(:,j),x(k(j)));
+            
+            [~,Posmax] = max(top+bot);
+            
+            b(j) = top(Posmax); 
+            c(j) = bot(Posmax);
     end
     
-    aprime = max(b,c);
+    aprime = (b+c)/2;
     MaxInfv(:,i) = aprime';
-    % Decide if we go + or - 0.6... try both, take higher? make sure no error
 
 end
 
