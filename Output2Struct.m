@@ -72,7 +72,6 @@ for i = 1:length(OInfo)
     % COLLECT IL INFO (MULTIPLE) -----------------------------------------
     for k = 1:length(OInfo(i).ILData)
         
-        warning('off','MATLAB:table:RowsAddedExistingVars')
         Temp = OInfo(i).ILData(k).Name; Temp2 = strfind(Temp,'S'); Temp3 = strfind(Temp,'.');
         % Get Span from InfName
         Span = str2num(Temp(Temp2(end)+1:end));

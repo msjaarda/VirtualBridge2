@@ -7,7 +7,7 @@
 clear, clc, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputAGB2002.xlsx');
+BaseData = VBReadInputFile('VBSimInputDengesVW.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -106,7 +106,7 @@ for g = 1:height(BaseData)
         
         % Log overall maximum cases into OverMax and ApercuOverMax if necessary
         for i = 1:Num.InfCases
-            OverMax = [OverMax; [i, v, Simk(i), SimMaxLE(i), SimDLF(i), SimBrStInd(i), SimDamage(t)]];
+            OverMax = [OverMax; [i, v, Simk(i), SimMaxLE(i), SimDLF(i), SimBrStInd(i), SimDamage(i)]];
             % Save VWIM to ApercuOverMax, and add column for InfCase
             if BaseData.Apercu(g) == 1
                 ApercuOverMax = [ApercuOverMax; [ApercuMax{i}, repmat(i,size(ApercuMax{i},1),1)]];

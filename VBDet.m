@@ -4,23 +4,28 @@
 % Run deterministic vehicles over a bridge to find maximum load effects
 
 % Initial commands
-clear, clc, format long g, rng('shuffle'), close all; BaseData = table;
+clear, clc, format long g, rng('shuffle'), close all; 
 
 % Input Information --------------------
 
+% Read Input File
+%BaseData = VBReadInputFile('VBSimInputAGB2002.xlsx');
+
+% Manual BaseData Input
+BaseData = table;
 % Roadway Info
 BaseData.LaneDir = {'1,2'};
 % Influence Line Info
-BaseData.ILs = {'AGBBox.Mp.S30'};  BaseData.ILRes = 0.1;
+BaseData.ILs = {'AGBSlab.PartFixed50.p3.Mp.S5'};  BaseData.ILRes = 0.1;
 % Analysis Info
 BaseData.RunDyn = 0; % 1.3 added manually
 % Analysis Type
 BaseData.AnalysisType = "Det";
 
 BaseData.Save = 0;
-BaseData.Folder = '/AGBDet';
+BaseData.Folder = '/AGB2002_VB';
 
-FName = 'VB60t.mat'; % 'Det60t.mat'
+FName = 'VB22.mat'; % 'Det60t.mat'
 load(FName)
 
 BaseData.ApercuTitle = sprintf('%s','Deterministic Analysis');
@@ -41,7 +46,7 @@ PDC{PDC.GW_TOT == 40000,InAxs} = 1.5*PDC{PDC.GW_TOT == 40000,InAxs};
 PDCx = PDC;
 
 % Convert PDC to AllTrAx
-[PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,0,Lane.Dir,BaseData.ILRes);
+[PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,0,Lane,BaseData.ILRes);
 
 % Round TrLineUp first row, move unrounded to fifth row
 TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes);
@@ -49,7 +54,7 @@ TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRe
 for t = 1:Num.InfCases
 
     % Subject Influence Line to Truck Axle Stream
-    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData.v{t},BaseData.RunDyn);
+    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,BaseData.RunDyn);
     % Record Maximums
     % Add AGB 1.3 DLF
     OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
@@ -57,7 +62,7 @@ for t = 1:Num.InfCases
 end
 
 % Display Apercu
-T = VBApercu(PDCx,BaseData.ApercuTitle,ILData,1,BrStInd,TrLineUp,1.3*MaxLE/ESIA.Total(1),1.3,Lane.Dir,BaseData.ILRes);
+T = VBApercu(PDCx,BaseData.ApercuTitle,ILData(t),BrStInd,TrLineUp,1.3*MaxLE/ESIA.Total(1),1.3,Lane,BaseData.ILRes);
 
 % Convert Results to Table
 OverMaxT = array2table(OverMax,'VariableNames',{'InfCase','MaxLE','DLF','BrStInd'});
@@ -69,9 +74,14 @@ ESIA.T69 = 1.5*(ESIA.EQ(1)*aQ1+ESIA.EQ(2)*aQ2+ESIA.Eq*aq);
 
 % Optional save of OutInfo (used for deterministic AGB matching)
 OutInfo.Name = datestr(now,'mmmdd-yy HHMMSS'); OutInfo.BaseData = BaseData;
-OutInfo.ESIM = OverMaxT.MaxLE;
+OutInfo.ESIM = 1.1*OverMaxT.MaxLE;
 OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
 OutInfo.ILData = ILData; OutInfo.ESIA = ESIA;
+
+% Create folders where there are none
+if BaseData.Save == 1
+    CreateFolders(BaseData.Folder{g},BaseData.VWIM(g),BaseData.Apercu(g),BaseData.Save(g))
+end
 
 if BaseData.Save == 1
     save(['Output' BaseData.Folder '/' OutInfo.Name], 'OutInfo')

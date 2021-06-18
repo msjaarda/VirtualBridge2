@@ -24,13 +24,10 @@ TrNames = ["NC" "11" "11bis" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "
 % Get number and name of lanes
 LaneswTr = unique(PDC.LANE); NumLaneswTr = length(LaneswTr);
 % Get TotalLanes and get Aperçu lanes (ALane)
-if isWIM
-    TotalLanes = Lane.Sites.NumLanes;
-    ALane = Lane.Details.ALANE;
-else
-    TotalLanes = NumLaneswTr;
-    ALane = LaneswTr;
-end
+
+TotalLanes = Lane.Sites.NumLanes;
+ALane = Lane.Details.ALANE;
+
 % Get total number of subplots
 NumSubplots = TotalLanes + 2;
 
@@ -134,7 +131,6 @@ set(gca,'xticklabel',[])
 % Show text of DLA and Total Weight
 text(1,ceil(max(max(barp/9.81))/5)*5-3,sprintf('Total: %.0f (DLF = %.2f)',sum(sum(barp)),DLF),'FontSize',11,'FontWeight','bold','Color','k')
 
-
 if ILRes ~= 1
     xtemp = 0:ILRes:Infx(end);
     Infvtemp = interp1(Infx,Infv,xtemp);
@@ -157,8 +153,6 @@ for i = 1:NumLaneswTr
         h(i).FaceColor = Col{i};
     end
 end
-
-
 
 
 % j counts up in order (1, 2, 3)
@@ -189,7 +183,8 @@ for j = 1:TotalLanes
         end
     end
     % Write extra data on second subplot if we have Lane Details
-    if ALane(j) == 2 && isfield(Lane,'Details')
+    %if ALane(j) == 2 && isfield(Lane,'Details')
+    if ALane(j) == 2 && isWIM
         if Lane.Details.NSEW(j) == 2 | Lane.Details.NSEW(j) == 4
             text(0,1.25,char(8592) + " " + Lane.Details.DIR(j),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
             text(Span,1.25,Lane.Details.FROM(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
@@ -281,7 +276,11 @@ for j = 1:TotalLanes
     % Set axis limits
     xlim([-0.5 Span+0.5]); ylim([0 10])
     % Label y axis
-    ylabel(['Lane ' num2str(Lane.Details.LANE(j))]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
+    if isfield(Lane,'Details')
+        ylabel(['Lane ' num2str(Lane.Details.LANE(j))]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
+    else
+        ylabel(['Lane ' num2str(j)]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
+    end
     % Turn y axis off
     yaxish = gca; yaxish.YRuler.Axle.Visible = 'off';
 
