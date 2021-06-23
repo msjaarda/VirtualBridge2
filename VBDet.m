@@ -16,7 +16,7 @@ BaseData = table;
 % Roadway Info
 BaseData.LaneDir = {'1,2'};
 % Influence Line Info
-BaseData.ILs = {'AGBSlab.PartFixed50.p3.Mp.S5'};  BaseData.ILRes = 0.1;
+BaseData.ILs = {'AGBBox.Mn.S80'};  BaseData.ILRes = 0.1;
 % Analysis Info
 BaseData.RunDyn = 0; % 1.3 added manually
 % Analysis Type

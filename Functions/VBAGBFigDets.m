@@ -1,4 +1,4 @@
-function [FName,Section,Config,Dist,AE,Title,PLoc] = VBAGBFigDets(Fig)
+function [FName,Section,Config,Dist,AE,Title,PLoc,X,XTIX] = VBAGBFigDets(Fig)
 %AGBFigDets gives figure details according to AGB 2002/005 Report
 
 if Fig == 1
@@ -173,13 +173,18 @@ end
 if ~iscell(Dist)
     temp = Dist; clear Dist; [Dist{1:3}] = deal(temp);
 end
-% if ~iscell(PLoc)
-%     temp = PLoc; clear PLoc; [PLoc{1:3}] = deal(temp);
-% end
+
+if Fig < 6
+    % X Data
+    X = [10:10:80]'; XTIX = 10:10:80;
+elseif Fig > 7
+    X = [5:5:30]'; XTIX = 5:5:30;
+else
+    X = [20:10:30]'; XTIX = 15:5:35;
+end    
 
 
-% Storing Custom Input here... just in case we wanna bring it back into the
-% script one day
+% Storing Custom Input here... just in case we wanna bring it back
 
 % % CUSTOM INPUT ----------
 % 

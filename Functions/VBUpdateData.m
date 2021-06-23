@@ -357,7 +357,13 @@ end
 
 % Assign integral values into IntInfv (each InfCase)
 for i = 1:Num.InfCases
-    IntInfv(:,i) = trapz(ILData(i).v);
+    x = 0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes;
+    A = ILData(i).v;
+    A(A<0) = 0;
+    IntInfv(:,i) = trapz(x,A);
+%  IntInfv(:,i) = trapz(ILData(i).v);
+%     trapz(ILData(i).v);
+%     BPlan = trapz(Infx(Infv(:,i)>=0),Infv(Infv(:,i)>=0,i));
 end
 
 % Define ESIA details
