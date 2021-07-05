@@ -22,7 +22,7 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 MaxEvents = [];
 
 % Each row of BaseData represents one analysis
-for g = 1:height(BaseData)
+for g = 2:height(BaseData)
 
     % Update analysis data for current row of BaseData
     [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));

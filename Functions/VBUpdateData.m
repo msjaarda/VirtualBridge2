@@ -142,164 +142,12 @@ end
 % BaseData.ILs = ILFamily.SpecificILName,OtherILFamily,OtherILFamily. ...
 
 % A generic AGBBox or AGBTwin.Standard.Mn means all in the family
-% A specific 'Mp20' or 'V80' can be selected with dot '.' demarcation
 % Example: AGBBox.Mp.S80 means just Span of 80 for M+ Box Girder
 % See ILGuide.xls
 
 % Split input by the commas to get individual IL families
 ILs = split(BaseData.ILs{:},',');
-
-% Step through each IL given in ILs
-Num.InfCases = 0;
-for i = 1:length(ILs) 
-    try
-        TName = ['ILLib.' ILs{i}];
-        FNames = fieldnames(eval(TName));
-        % Put in a loop... we go till we find a line!
-        for j = 1:length(FNames)
-            try
-                TName = ['ILLib.' ILs{i} '.' FNames{j}];
-                FNames2 = fieldnames(eval(TName));
-                for k = 1:length(FNames2)
-                    try
-                        TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k}];
-                        FNames3 = fieldnames(eval(TName));
-                        for p = 1:length(FNames3)
-                            try
-                                TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k} '.' FNames3{p}];
-                                FNames4 = fieldnames(eval(TName));
-                                for z = 1:length(FNames4)
-                                    try
-                                        TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k} '.' FNames3{p} '.' FNames4{z}];
-                                        FNames5 = fieldnames(eval(TName));
-                                        for u = 1:length(FNames5)
-                                            try
-                                                 TName = ['ILLib.' ILs{i} '.' FNames{j} '.' FNames2{k} '.' FNames3{p} '.' FNames4{z} '.' FNames5{u}];
-                                                fprintf('\nWARNING: Too many levels of IL given!\n\n')
-                                            catch
-                                                Num.InfCases = Num.InfCases + 1;
-                                                ILx = eval([TName '(:,1)']);
-                                                ILv = eval([TName '(:,2:end)']);
-                                                RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                                                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-                                                ILData(Num.InfCases).Name = TName;
-                                                if size(ILData(Num.InfCases).v,2) < Num.Lanes
-                                                    if size(ILData(Num.InfCases).v,2) == 1
-                                                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-                                                    else
-                                                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                                                            ILData(Num.InfCases).v(:,t) = 0;
-                                                            fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                                                        end
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    catch
-                                        Num.InfCases = Num.InfCases + 1;
-                                        ILx = eval([TName '(:,1)']);
-                                        ILv = eval([TName '(:,2:end)']);
-                                        RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                                        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-                                        ILData(Num.InfCases).Name = TName;
-                                        if size(ILData(Num.InfCases).v,2) < Num.Lanes
-                                            if size(ILData(Num.InfCases).v,2) == 1
-                                                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-                                            else
-                                                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                                                    ILData(Num.InfCases).v(:,t) = 0;
-                                                    fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            catch
-                                Num.InfCases = Num.InfCases + 1;
-                                ILx = eval([TName '(:,1)']);
-                                ILv = eval([TName '(:,2:end)']);
-                                RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-                                ILData(Num.InfCases).Name = TName;
-                                if size(ILData(Num.InfCases).v,2) < Num.Lanes
-                                    if size(ILData(Num.InfCases).v,2) == 1
-                                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-                                    else
-                                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                                            ILData(Num.InfCases).v(:,t) = 0;
-                                            fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    catch
-                        Num.InfCases = Num.InfCases + 1;
-                        ILx = eval([TName '(:,1)']);
-                        ILv = eval([TName '(:,2:end)']);
-                        RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-                        ILData(Num.InfCases).Name = TName;
-                        if size(ILData(Num.InfCases).v,2) < Num.Lanes
-                            if size(ILData(Num.InfCases).v,2) == 1
-                                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-                            else
-                                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                                    ILData(Num.InfCases).v(:,t) = 0;
-                                    fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                                end
-                            end
-                        end
-                    end
-                end
-            catch
-                Num.InfCases = Num.InfCases + 1;
-                ILx = eval([TName '(:,1)']);
-                ILv = eval([TName '(:,2:end)']);
-                RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-                ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-                ILData(Num.InfCases).Name = TName;
-                if size(ILData(Num.InfCases).v,2) < Num.Lanes
-                    if size(ILData(Num.InfCases).v,2) == 1
-                        ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-                    else
-                        for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                            ILData(Num.InfCases).v(:,t) = 0;
-                            fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                        end
-                    end
-                end
-            end
-        end
-    catch % If caught, it means we are at the end of the structure... @ IL
-        % Just make the first row the x value...
-        Num.InfCases = Num.InfCases + 1;
-        ILx = eval([TName '(:,1)']);
-        ILv = eval([TName '(:,2:end)']);
-        % Round to refinement level (ILRes)
-        RoundedILx = ILx(1):BaseData.ILRes:ILx(end); RoundedILx = RoundedILx';
-        % Now we interpolate the influence lines and populate IL.v | We will have no need for x after this!
-        ILData(Num.InfCases).v = interp1(ILx,ILv,RoundedILx);
-        % Add to IL.Name
-        ILData(Num.InfCases).Name = TName;
-        if size(ILData(Num.InfCases).v,2) < Num.Lanes
-            % Can choose to duplicate, or add zeros. The rule will be that
-            % if size(ILData.v{Num.InfCases},2) == 1, we duplicate, but if
-            % it is greater, we add zeros with a notification
-            if size(ILData(Num.InfCases).v,2) == 1
-                ILData(Num.InfCases).v = repmat(ILData(Num.InfCases).v,1,Num.Lanes);
-            else
-                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                    ILData(Num.InfCases).v(:,t) = 0;
-                    fprintf('\nWARNING: Lane mismatch for IL: %s\n\n',TName)
-                end
-            end
-        end
-    end
-end
-% We have to do successive loops until we've explored all parts of the structure and obtained all lines.
-%ILData.v = ILData.v';
-%ILData.Name = ILData.Name';
+[Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes);
 
 % NOTE - sometimes the "track average" (average of two wheel positions) is
 % not equal to the "area average", and so ESIA calculations which involve
@@ -391,7 +239,7 @@ for i = 1:Num.InfCases
     Intv = IntInfv(:,i);
     ESIA.Total(i) = 1.5*Alpha*(Maxv'*Qk*2+Intv'*qk*LaneWidth);
     ESIA.EQ(:,i) = Maxv.*Qk*2;
-    ESIA.Eq(i) = Intv'*qk*LaneWidth;
+    ESIA.Eq(:,i) = Intv.*qk*LaneWidth;
 end
 
 end

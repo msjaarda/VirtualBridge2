@@ -31,8 +31,8 @@ for g = 1:height(BaseData)
     if BaseData.Parallel(g) > 0, gcp; clc; end, 
     m = StartProgBar(BaseData.NumSims(g), Num.Batches, g, height(BaseData)); tic; st = now;
     
-    %parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
-    for v = 1:BaseData.NumSims(g)
+    parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
+    %for v = 1:BaseData.NumSims(g)
         
         % Initialize variables outside of batch simulation loop
         LaneAxLineUp = cell(Num.Lanes,1); LaneVehLineUp = cell(Num.Lanes,1); ApercuMax = [];
