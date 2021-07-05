@@ -22,7 +22,7 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 MaxEvents = [];
 
 % Each row of BaseData represents one analysis
-for g = 2:height(BaseData)
+for g = 1:height(BaseData)
 
     % Update analysis data for current row of BaseData
     [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
@@ -43,8 +43,8 @@ for g = 2:height(BaseData)
     % Start Progress Bar
     u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
     
-    parfor r = 1:length(UYears)
-    %for r = 1:length(UYears)
+    %parfor r = 1:length(UYears)
+    for r = 1:length(UYears)
         
         %MaxEvents1 = nan(500000,14);
         %j = 1;
@@ -85,7 +85,8 @@ for g = 2:height(BaseData)
             end
             
             % For each InfCase
-            for t = 1:Num.InfCases
+            %for t = 1:Num.InfCases
+            parfor t = 1:Num.InfCases
                 
                 % Get length of bridge in number of indices
                 BrLengthInd = size(ILData(t).v,1);                

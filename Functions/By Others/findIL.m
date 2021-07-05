@@ -33,8 +33,8 @@ function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLane
             if size(ILData(NumInfCases).v,2) == 1
                 ILData(NumInfCases).v = repmat(ILData(NumInfCases).v,1,NumLanes);
             else
-                for t = size(ILData(Num.InfCases).v,2) + 1:Num.Lanes
-                    ILData(Num.InfCases).v(:,t) = 0;
+                for t = size(ILData(NumInfCases).v,2) + 1:NumLanes
+                    ILData(NumInfCases).v(:,t) = 0;
                     fprintf('\nWARNING: Lane mismatch for IL: %s, ILs with zeros added\n\n',TName)
                 end
             end
