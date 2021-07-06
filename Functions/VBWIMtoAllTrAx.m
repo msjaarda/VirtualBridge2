@@ -85,7 +85,7 @@ WB = [PDCx.SpCu PDCx.SpCu + WBL];
 % Must eliminate useless WB values
 WB(AX == 0) = 0;
 T = ones(size(AX)).*(AX > 0);
-TrNum = 1:size(WB,1); TrNum = TrNum';
+TrNum = [1:size(WB,1)]';
 Q = repmat(TrNum,1,size(T,2));
 TrNum = Q.*T;
 
@@ -115,7 +115,7 @@ TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
 
 % Make a separate axle stream vector for each lane, and last one for all
 % Put max() function in incase one lane has no representation in TrLineUp
-AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes))+1);
+AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes)));
 
 for i = 1:length(Lanes)
     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));

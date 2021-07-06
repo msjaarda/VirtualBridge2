@@ -35,7 +35,8 @@ function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLane
             else
                 for t = size(ILData(NumInfCases).v,2) + 1:NumLanes
                     ILData(NumInfCases).v(:,t) = 0;
-                    fprintf('\nWARNING: Lane mismatch for IL: %s, ILs with zeros added\n\n',TName)
+                    % Turn back on later... was annoying!
+                    %fprintf('\nWARNING Lane mismatch for IL: %s, ILs with zeros added',TName)
                 end
             end
         end

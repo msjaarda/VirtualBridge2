@@ -8,6 +8,8 @@
 % VBWIMQ1Q2      >> Q1Q2MaxEvents >> Q1Q2 Investigation
 % VBWIMq         >> qMaxEvents    >> q    Investigation
 
+% Must REDESIGN for less memory
+
 % Initializing commands
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
@@ -43,15 +45,16 @@ for g = 1:height(BaseData)
     % Start Progress Bar
     u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
     
-    %parfor r = 1:length(UYears)
-    for r = 1:length(UYears)
+    parfor r = 1:length(UYears)
+    %for r = 1:length(UYears)
         
         %MaxEvents1 = nan(500000,14);
         %j = 1;
         MaxEvents1 = [];
         
+        %PDsy = PDs(year(PDs.DTS)*100+month(PDs.DTS) == UYears(r),:);
         PDsy = PDs(year(PDs.DTS) == UYears(r),:);
-    
+        
         % Convert PDC to AllTrAx - Spacesave at MaxLength
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
         [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
@@ -69,7 +72,11 @@ for g = 1:height(BaseData)
         %           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)
     
         % Perform search for maximums for each day
+        %parfor z = 1:max(PDsy.Group)
         for z = 1:max(PDsy.Group)
+            
+            % Delete after exp
+            MaxEvents1 = [];
             
             % Store starting and end indices
             Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1)));
@@ -85,8 +92,8 @@ for g = 1:height(BaseData)
             end
             
             % For each InfCase
-            %for t = 1:Num.InfCases
-            parfor t = 1:Num.InfCases
+            for t = 1:Num.InfCases
+            % parfor t = 1:Num.InfCases
                 
                 % Get length of bridge in number of indices
                 BrLengthInd = size(ILData(t).v,1);                
@@ -103,11 +110,7 @@ for g = 1:height(BaseData)
                 while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                     
                     % Subject Influence Line to Truck Axle Stream
-                    %if BrLengthInd/BaseData.ILRes(g) < 60
-                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
-                    %else
-                        %[MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,0);
-                    %end
+                    [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
                     
                     % Now add to k
                     k = k+1;
@@ -176,13 +179,12 @@ for g = 1:height(BaseData)
             end % t, InfCases
         end % z, groups
     
-        MaxEvents= [MaxEvents; MaxEvents1];
+        MaxEvents = [MaxEvents; MaxEvents1];
     
         % Update progress bar
         UpProgBar(u, st, g, 1, length(UYears), 1)
         
     end % r, years
-    
     
 end % g, BaseData
 
