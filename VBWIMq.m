@@ -61,7 +61,7 @@ for g = 1:height(BaseData)
         
         % Make groups out of each unique day
         % In the end make this weekly
-        PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
+        PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','week'));
         
         % Round TrLineUp first row, move unrounded to fifth row
         TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
