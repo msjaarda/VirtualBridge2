@@ -45,12 +45,12 @@ for g = 1:height(BaseData)
     % Start Progress Bar
     u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
     
-    parfor r = 1:length(UYears)
-    %for r = 1:length(UYears)
+    %parfor r = 1:length(UYears)
+    for r = 1:length(UYears)
         
         %MaxEvents1 = nan(500000,14);
         %j = 1;
-        MaxEvents1 = [];
+        %MaxEvents1 = [];
         
         %PDsy = PDs(year(PDs.DTS)*100+month(PDs.DTS) == UYears(r),:);
         PDsy = PDs(year(PDs.DTS) == UYears(r),:);
@@ -61,7 +61,7 @@ for g = 1:height(BaseData)
         
         % Make groups out of each unique day
         % In the end make this weekly
-        PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','week'));
+        PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
         
         % Round TrLineUp first row, move unrounded to fifth row
         TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
@@ -72,8 +72,8 @@ for g = 1:height(BaseData)
         %           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)
     
         % Perform search for maximums for each day
-        %parfor z = 1:max(PDsy.Group)
-        for z = 1:max(PDsy.Group)
+        parfor z = 1:max(PDsy.Group)
+        %for z = 1:max(PDsy.Group)
             
             % Delete after exp
             MaxEvents1 = [];
