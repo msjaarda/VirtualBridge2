@@ -177,9 +177,11 @@ for g = 1:height(BaseData)
                     
                 end % k, analyses
             end % t, InfCases
+            
+            MaxEvents = [MaxEvents; MaxEvents1];
         end % z, groups
     
-        MaxEvents = [MaxEvents; MaxEvents1];
+        
     
         % Update progress bar
         UpProgBar(u, st, g, 1, length(UYears), 1)
