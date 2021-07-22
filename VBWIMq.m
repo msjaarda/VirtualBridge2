@@ -15,7 +15,7 @@ clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
 % Start just with 2 lane locations
-BaseData = VBReadInputFile('Input/VBWIMqInput.xlsx');
+BaseData = VBReadInputFile('Input/VBWIMqInputx.xlsx');
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
@@ -58,6 +58,9 @@ for g = 1:height(BaseData)
         % Convert PDC to AllTrAx - Spacesave at MaxLength
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
         [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+        % We only ever need the two lanes for q Investigation right now...
+        % Can't do this cause ILData still has 3...
+        %AllTrAx = AllTrAx(:,1:2);
         
         % Make groups out of each unique day
         % In the end make this weekly
@@ -68,8 +71,18 @@ for g = 1:height(BaseData)
         % Expand TrLineUp to include groups
         TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
         
-        % TrLineUp [     1            2         3         4          5     ]
-        %           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)
+        % TrLineUp [     1            2         3         4          5          6   ]
+        %           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)   Group
+        
+        % In order to prevent broadcast variables, and instead have sliced
+        % variables, particularly for TrLineUp, AllTrAx, and PDsy, we need
+        % to have these in a better format...
+        for z = 1:max(PDsy.Group)
+            TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
+            StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
+            EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
+            AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
+        end
     
         % Perform search for maximums for each day
         parfor z = 1:max(PDsy.Group)
@@ -78,16 +91,29 @@ for g = 1:height(BaseData)
             % Delete after exp
             MaxEvents1 = [];
             
-            % Store starting and end indices
-            Starti = max(1,min(TrLineUp(TrLineUp(:,6) == z,1)));
-            Endi = min(max(TrLineUp(TrLineUp(:,6) == z,1)),length(AllTrAx));
+            % Avoid Broadcast vars...
+            %TrLineUpPF = TrLineUp(   ;
             
+            TrLineUpSub = TrLineUpGr{z};
+            Starti = StartiGr{z};
+            Endi = EndiGr{z};
+ 
             % Subdivide AllTrAx
-            AllTrAxSub = AllTrAx(Starti:Endi,:);
-            TrLineUpGr = TrLineUp(TrLineUp(:,6) == z,:);
+            AllTrAxSub = AllTrAxGr{z};
+            
+%             TrLineUpGr = TrLineUp(TrLineUp(:,6) == z,:);
+%             
+%             % Store starting and end indices
+%             Starti = max(1,min(TrLineUpGr(:,1)));
+%             Endi = min(max(TrLineUpGr(:,1)),length(AllTrAx));
+%             
+%             % Subdivide AllTrAx
+%             AllTrAxSub = AllTrAx(Starti:Endi,:);
+            %TrLineUpGr = TrLineUp(TrLineUp(:,6) == z,:);
             
             % Don't bother running if the segment is too small
-            if length(AllTrAxSub) < 20000
+            %if length(AllTrAxSub) < 20000/ILRes
+            if length(AllTrAxSub) < 20000/BaseData.ILRes(g)
                 continue
             end
             
@@ -126,7 +152,7 @@ for g = 1:height(BaseData)
                     %AxOnBr = sum(AllTrAxt(StripInds,:),2);
                     
                     % Get Key Info to Save
-                    TrNums = TrLineUpGr(TrLineUpGr(:,1) >= min(BrInds) & TrLineUpGr(:,1) <= max(BrInds),3);
+                    TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrInds) & TrLineUpSub(:,1) <= max(BrInds),3);
                     TrNumsU = unique(TrNums);
                     
                     % We use TrNums because they don't depend on Starti shift
