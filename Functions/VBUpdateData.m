@@ -175,6 +175,28 @@ for i = 1:Num.InfCases
     % Interpolate around influence lines to figure out next biggest max
     for j = 1:size(ILData(i).v,2)
         x = 0:BaseData.ILRes:(length(ILData(i).v)-1)*BaseData.ILRes;
+        yILv = ILData(i).v(:,j);
+        
+        if j == 1
+            PL = 300;
+        elseif j == 2
+            PL = 200;
+        else
+            PL = 0;
+        end
+        
+        Conc = zeros(round(1.2/BaseData.ILRes),1);
+        if max(size(Conc)) == 1
+            Conc(1) = PL*2;
+        else
+            Conc(1) = PL; Conc(end) = PL;
+        end
+        
+        MaxInfvCONV(j,i) = max(conv(Conc,yILv));
+        
+        % New convolution 25/7/21
+        % Lets create a concentrated load matrix... then add padding
+        % depending on length of IL..
         
         % Lucas 11/06/21 : We have to find the worst position of the axles,
         % it could be before or after k (Shear cases with a peak
@@ -235,12 +257,20 @@ Alpha = 1;
 
 % Calculate ESIA for each InfCase
 for i = 1:Num.InfCases
+    MaxvCONV = MaxInfvCONV(:,i);
     Maxv = MaxInfv(:,i);
     Intv = IntInfv(:,i);
-    ESIA.Total(i) = 1.5*Alpha*(Maxv'*Qk*2+Intv'*qk*LaneWidth);
-    ESIA.EQ(:,i) = Maxv.*Qk*2;
+%     ESIA.Total(i) = 1.5*Alpha*(Maxv'*Qk*2+Intv'*qk*LaneWidth);
+%     ESIA.EQ(:,i) = Maxv.*Qk*2;
+    ESIA.Total(i) = 1.5*Alpha*(sum(MaxvCONV)+Intv'*qk*LaneWidth);
+    ESIA.EQ(:,i) = MaxvCONV;
     ESIA.Eq(:,i) = Intv.*qk*LaneWidth;
 end
+
+% This method is not good enough when doing influence lines of only 2m and
+% such... we need a better method. I think Convolution will solve it.
+% Nothing wrong with the integration side of things, point loads are the
+% problem... do convolution with padding... no multiplying by 2...
 
 end
 
