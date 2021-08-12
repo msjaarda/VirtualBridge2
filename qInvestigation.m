@@ -10,8 +10,8 @@ clear, clc, close all
 
 % Analysis Type Option
 %AType = 'BoxTwin';    % - Box and Standard Twin
-%AType = 'SlabShort';
-AType = 'SlabLong';
+AType = 'SlabShort';
+%AType = 'SlabLong';
 
 % I want to process all at the same time... how can i do this?
 
@@ -243,7 +243,7 @@ disp(ST(HL).SumTableLogNorm)
 % Prepare plot data for VBTriPlot
 % Get xdata
 xdata = 2:2:10;
-xdata = 10:5:30;
+%xdata = 10:5:30;
 % Titles
 %Title{1} = 'M+ p1'; Title{2} = 'M+ p2'; Title{3} = 'M+ p3'; FigNum = 0;
 Title{1} = 'M- p1'; Title{2} = 'M- p2'; Title{3} = 'M- p3'; FigNum = 0;
