@@ -85,8 +85,8 @@ for g = 1:height(BaseData)
         end
     
         % Perform search for maximums for each day
-        parfor z = 1:max(PDsy.Group)
-        %for z = 1:max(PDsy.Group)
+        %parfor z = 1:max(PDsy.Group)
+        for z = 1:max(PDsy.Group)
             
             % Delete after exp
             MaxEvents1 = [];
