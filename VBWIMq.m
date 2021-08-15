@@ -21,7 +21,7 @@ BaseData = VBReadInputFile('Input/VBWIMqInputx.xlsx');
 if BaseData.Parallel(1) > 0, gcp; clc; end
 
 % Initialize variables and start row counter
-MaxEvents = [];
+MaxEvents = []; RamUsed = []; LenPrint = [];
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -210,8 +210,10 @@ for g = 1:height(BaseData)
         
     
         % Update progress bar
-        UpProgBar(u, st, g, 1, length(UYears), 1)
-        
+        user = memory;
+        RamUsed = [RamUsed;user.MemUsedMATLAB/user.MemAvailableAllArrays*100];
+        LenPrint = VBUpProgBar(u, st, g, 1, length(UYears), 1, RamUsed(end), r, LenPrint);
+
     end % r, years
     
 end % g, BaseData
