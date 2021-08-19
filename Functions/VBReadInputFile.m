@@ -40,6 +40,12 @@ end
 if ~ismember('AnalysisType', BaseData.Properties.VariableNames)
     BaseData.AnalysisType(:) = "Sim";
 end
+if ~ismember('Plots', BaseData.Properties.VariableNames)
+    BaseData.Plots(:) = false;
+end
+if ~ismember('Period', BaseData.Properties.VariableNames)
+    BaseData.Period(:) = "Yearly";
+end
 
 % Start with Folder
 % Folder is optional, but when not included (or when given as 0), must be '/'

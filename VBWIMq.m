@@ -15,7 +15,7 @@ clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
 % Start just with 2 lane locations
-BaseData = VBReadInputFile('Input/VBWIMqInputx.xlsx');
+BaseData = VBReadInputFile('Input/VBWIMqInput.xlsx');
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
