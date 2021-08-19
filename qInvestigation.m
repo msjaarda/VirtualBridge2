@@ -202,8 +202,7 @@ for r = 1:length(ILData)
     end
 end
 
-format bank, fprintf('\n')
-if ~isempty(HL), disp(ST(HL).SumTable), end
+if ~isempty(HL), format bank, fprintf('\n'), disp(ST(HL).SumTable), end
 
 % Weekly data only
 j = 2; BlockM = BM{j};
@@ -217,7 +216,7 @@ for m = 1:3
     for i = 1:length(ClassType)
         Class = ClassType{i};
         % Get ydata
-        ydata{m}(i,:) = PlotAQ.(Class).(BlockM)(SP(m):SP(m)+length(xdata)-1);
+        ydata{m,i} = PlotAQ.(Class).(BlockM)(SP(m):SP(m)+length(xdata)-1);
         % DisplayName
         PDets.DN{m,i} = strcat(Class,BlockM);
         % Marker Size, Edge Color, Face Color
@@ -236,7 +235,7 @@ for m = 1:3
     for i = 1:length(ClassType)
         Class = ClassType{i};
         % Get ydata
-        ydata{m}(i,:) = PlotAQ.(Class).(BlockM)(SP2(m):SP2(m)+length(xdata)-1);
+        ydata{m,i} = PlotAQ.(Class).(BlockM)(SP2(m):SP2(m)+length(xdata)-1);
         % DisplayName
         PDets.DN{m,i} = strcat(Class,BlockM);
         % Marker Size, Edge Color, Face Color

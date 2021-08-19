@@ -1,4 +1,4 @@
-clear, clc, %close all
+clear, clc, close all
 
 % Get VBResults using VBOutput2Struct
 [VBResults] = VBOutput2Struct('NewILLib');
@@ -28,9 +28,9 @@ for m = 1:3
     % All ClassTypes
     for i = 1:4
         % Get ydata
-        ydata{m}(i,:) = VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic(i));
+        ydata{m,i} = VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic(i));
         % xdata should always be equal... give a warning if one isn't?
-        xdata = VBResults.x.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic(i));
+        xdata{m,i} = VBResults.x.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic(i));
         % DisplayName
         PDets.DN{m,i} = Traffic(i);
         % Marker Size, Edge Color, Face Color

@@ -5,16 +5,33 @@ function [FigNum] = VBTriPlot(xdata,ydata,PDets,Title,Type,FigNum,FigTitle)
 figure('Name',FigTitle,'NumberTitle','off','Position',[200+FigNum*25 200+FigNum*25 730 400]);
 FigNum = FigNum + 1;
 
+% What is xdata is different for different cases? We duplicate when it is
+% the same always, to allow for the fact that it
+if ~iscell(xdata)
+    xdata2 = xdata; clear xdata
+    for m = 1:3
+        for i = 1:size(ydata,2)
+            xdata{m,i} = xdata2;
+        end
+    end
+end
+
+Len = 0;
 for m = 1:3
     
     subplot(1,3,m)
     hold on
-    for i = 1:size(ydata{m},1)
-        plot(xdata,ydata{m}(i,:),'-s','Color','k','MarkerEdgeColor',PDets.MEC{m}(i,:),'MarkerFaceColor',PDets.MFC{m}(i,:),'MarkerSize',PDets.MS{m}(i),'DisplayName',PDets.DN{m,i})
+    for i = 1:size(ydata,2)
+        plot(xdata{m,i},ydata{m,i},'-s','Color','k','MarkerEdgeColor',PDets.MEC{m}(i,:),'MarkerFaceColor',PDets.MFC{m}(i,:),'MarkerSize',PDets.MS{m}(i),'DisplayName',PDets.DN{m,i})
+        % Get xdataL{m} - the longest xdata
+        if length(xdata{m,i}) > Len
+            xdataL{m} = xdata{m,i};
+            Len = length(xdata{m,i});
+        end
     end
     
     % Set tick details, x-axis label, and title
-    ytickformat('%.2f'); yticks(0:0.1:1); xticks(xdata); set(gca,'TickDir','out'); set(gca,'YGrid','on')
+    ytickformat('%.2f'); yticks(0:0.1:1); set(gca,'TickDir','out'); set(gca,'YGrid','on'); xticks(xdataL{m}); 
     xlabel('Span (m)')
     title(Title{m})
     % get handle of current, set box property to off and remove background color
@@ -24,7 +41,7 @@ for m = 1:3
     % set original axes as active, and link axes in case of zooming
     axes(a); linkaxes([a b]);
     % Set axis limits
-    ylim([0 1]); xlim([xdata(1) xdata(end)])
+    ylim([0 1]); xlim([xdataL{m}(1) xdataL{m}(end)])
     
     % Y-axis only for the leftmost (first) plot
     if m == 1
@@ -40,6 +57,7 @@ for m = 1:3
         set(yh,'position',p)   % set the new position
         legend('location','best')
     end
+    Len = 0;
 end
 
 end
