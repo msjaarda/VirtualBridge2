@@ -8,21 +8,6 @@
 % VBWIMQ1Q2      >> Q1Q2MaxEvents >> Q1Q2 Investigation
 % VBWIMq         >> qMaxEvents    >> q    Investigation
 
-% Difference between VBWIM and VBWIMq...
-
-% VBWIM can do ClassType
-% VBWIM doesn't save (only for Aperçu)
-% VBWIM takes the safe approach to padding
-% VBWIMq always does Daily maxes
-% VBWIMq gives a weath of info
-
-% I am not convinced that we need the mountains of info that VBWIMq gives
-% perhaps we should have 2 options, the details (down to daily maxes and
-% all associated infos), and an overview, with just weekly maxes
-% - Each option will convert to block maxima at the end, and MaxEvents will
-% be an optional user save, but OutInfo will be saved to the folder. This
-% will contain, effectively, MaxEventsMax.
-
 % Initializing commands
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
@@ -39,7 +24,7 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
-    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEvents1 = [];
+    MaxEvents = []; RamUsed = []; LenPrint = []; %MaxEvents1 = [];
 
     % Recognize if BaseData.SITE(g) is actually a 'set'
     load('SiteGroups.mat')
@@ -76,7 +61,7 @@ for g = 1:height(BaseData)
         %parfor r = 1:length(UYears)
         for r = 1:length(UYears)
             
-            MaxEvents1 = [];
+            %MaxEvents1 = [];
             
             PDsy = PDs(year(PDs.DTS) == UYears(r),:);
             
@@ -103,8 +88,10 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
+            
+                MaxEvents1 = [];
                 
                 % Get TrLineUpSub and AllTrAxSub
                 TrLineUpSub = TrLineUpGr{z};
@@ -116,8 +103,8 @@ for g = 1:height(BaseData)
                 if length(AllTrAxSub) < 20000/BaseData.ILRes(g), continue, end
                 
                 % For each InfCase
-                parfor t = 1:Num.InfCases
-                %for t = 1:Num.InfCases
+                %parfor t = 1:Num.InfCases
+                for t = 1:Num.InfCases
                     
                     % Get length of bridge in number of indices
                     BrLengthInd = size(ILData(t).v,1);
@@ -134,7 +121,7 @@ for g = 1:height(BaseData)
                         
                         % Subject Influence Line to Truck Axle Stream
                         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
-                        if MaxLE == 0, continue, end
+                        if MaxLE == 0, k = k+1, continue, end
                         k = k+1; % Add to k
                         
                         % Adjust BrStInd for Starti
@@ -175,7 +162,7 @@ for g = 1:height(BaseData)
                     end % k, analyses
                 end % t, InfCases
                 
-                MaxEvents = [MaxEvents; MaxEvents1]; MaxEvents1 = [];
+                MaxEvents = [MaxEvents; MaxEvents1]; %MaxEvents1 = [];
             end % z, groups
             
             % Update progress bar
