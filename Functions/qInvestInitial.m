@@ -1,21 +1,5 @@
-function [Max,pd,x_values,y_values,ILData,ESIA,BaseData] = qInvestInitial(AType,Years,Stations,BM,ClassType,ClassT,DistTypes)
+function [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData)
 %qINVESTINITIAL Steps 2, 3, and 4 of qInvestigation
-
-load(strcat(AType,'MaxEventsq'))
-load(strcat(AType,'ESIAq'))
-load(strcat(AType,'ILDataq'))
-load(strcat(AType,'BaseDataq'))
-
-% --- Step 2: Filter Axles based on desired year and station (location) ---
-% Filter Axles based on desired year and station (location)
-if Stations > 0
-    y = MaxEvents.SITE == Stations;
-    MaxEvents(~any(y,2),:) = [];
-end
-if Years > 0
-    y = year(MaxEvents.DTS) == Years;
-    MaxEvents(~any(y,2),:) = [];
-end
 
 % --- Step 3: Build Structure with Block Maxima ---
 % Convert ClassT to m (number) form m = 1 is All, m = 2 is ClassOW, m = 3 is Class
@@ -68,7 +52,8 @@ for r = 1:length(ILData)
             Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z),Z,Gr);
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
-            Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
+            %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
+            Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'BrStInd', 'DTS', 'm'};
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
         end

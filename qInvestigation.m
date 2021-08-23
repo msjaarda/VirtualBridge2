@@ -11,7 +11,7 @@ clear, clc, close all, FigNum = 0;
 
 % ---- INPUT ----
 % Analysis Type Option
-AType = 'BoxTwin';  % BoxTwin, SlabShort, or SlabLong
+AType = 'SlabLong';  % BoxTwin, SlabShort, or SlabLong
 % Which IL to Highlight?
 HL = [];
 % -----  END  ----
@@ -39,16 +39,21 @@ else
 end
 
 % Possible to load variables and skip first section
-Initial = false;
+Initial = true;
     
 if Initial
-    % --- Step 1: Input desired filters/parameters ---
-    % Select which year to analyze %Years = 2011:2019;
-    Years = 0;
-    % Select stations (locations) to analyze %Stations = [408 409 405 406 402 415 416];
-    Stations = 0;
+
+    load(strcat(AType,'MaxEventsq'))
+    load(strcat(AType,'ESIAq'))
+    load(strcat(AType,'ILDataq'))
+    load(strcat(AType,'BaseDataq'))
+%     load(strcat('MaxEventsSlabLongSemi2'))
+%     load('C:\Users\mjsja\Desktop\SwissTraffic2\Results Variables\qInvestigation\ILDataSemi2.mat')
+%     load('C:\Users\mjsja\Desktop\SwissTraffic2\Results Variables\qInvestigation\ESIASemi2.mat')
+%     load('C:\Users\mjsja\Desktop\SwissTraffic2\Results Variables\qInvestigation\BaseDataSemi2.mat')
+
     % Get Initial Vars from Steps 2 to 4
-    [Max,pd,x_values,y_values,ILData,ESIA,BaseData] = qInvestInitial(AType,Years,Stations,BM,ClassType,ClassT,DistTypes);
+    [Max,pd,x_values,y_values] = qInvestInitial(AType,Years,Stations,BM,ClassType,ClassT,DistTypes);
     
 else
     load(strcat(AType,'MaxEventsqMax'))

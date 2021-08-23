@@ -4,17 +4,14 @@
 % Find maximum load effects over a bridge from real WIM traffic
 
 % Initializing commands
-clear, clc, format long g, rng('shuffle');
+clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
 BaseData = VBReadInputFile('Input/VBWIMInput.xlsx');
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
-u = StartProgBar(height(BaseData), 1, 1, 1); tic; st = now;
-
-% Initialize variables and start row counter
-MaxEvents = nan(500000,13); j = 1;
+u = StartProgBar(height(BaseData), 1, 1, 1); st = now;
 
 % Each row of BaseData represents one analysis
 %parfor g = 1:height(BaseData)
@@ -36,13 +33,6 @@ for g = 1:height(BaseData)
             PDs = PDs(PDs.CLASS > 0,:);
         end
     catch end
-    
-    % Let's choose a certain amount for a demo
-%     try
-%         PDs = PDs(1:800000,:);
-%     catch
-%        PDs = PDs(1:end,:);
-%     end
     
     % Convert PDC to AllTrAx - Spacesave at MaxLength
     MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
