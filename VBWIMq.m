@@ -85,6 +85,8 @@ for g = 1:height(BaseData)
                 StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
                 EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
                 AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
+                %PDsyDTGr{z} = PDsy.DTS(TrLineUpGr{z}(1):TrLineUpGr{z}(end));
+                %PDsyCLGr{z} = PDsy.CLASS(TrLineUpGr{z}(1):TrLineUpGr{z}(end));
             end
             
             % Perform search for maximums for each day
@@ -98,6 +100,8 @@ for g = 1:height(BaseData)
                 Starti = StartiGr{z};
                 Endi = EndiGr{z};
                 AllTrAxSub = AllTrAxGr{z};
+                %PDsyDTSub = PDsyDTGr{z};
+                %PDsyCLSub = PDsyCLGr{z};
                 
                 % Don't bother running if the segment is too small
                 if length(AllTrAxSub) < 20000/BaseData.ILRes(g), continue, end
@@ -110,7 +114,8 @@ for g = 1:height(BaseData)
                     BrLengthInd = size(ILData(t).v,1);
                     
                     % Reset for each t
-                    AllTrAxSub = AllTrAx(Starti:Endi,:);
+                    %AllTrAxSub = AllTrAx(Starti:Endi,:);
+                    AllTrAxSub = AllTrAxGr{z};
                     
                     % Eliminate the need for padding or BrStInd index issues
                     AllTrAxSub(1:BrLengthInd,:) = 0; AllTrAxSub(end-BrLengthInd:end,:) = 0;
