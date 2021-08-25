@@ -25,7 +25,8 @@ for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
     MaxEvents = []; RamUsed = []; LenPrint = []; %MaxEvents1 = [];
-
+    MaxEventsStop = [];
+    
     % Recognize if BaseData.SITE(g) is actually a 'set'
     load('SiteGroups.mat')
     if BaseData.SITE(g) == 11, Sites = SiteGroups.('Uni2L');
@@ -93,7 +94,7 @@ for g = 1:height(BaseData)
             parfor z = 1:max(PDsy.Group)
             %for z = 1:max(PDsy.Group)
             
-                MaxEvents1 = [];
+                MaxEvents1 = []; MaxEvents1Stop = [];
                 
                 % Get TrLineUpSub and AllTrAxSub
                 TrLineUpSub = TrLineUpGr{z};
