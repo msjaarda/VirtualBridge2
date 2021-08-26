@@ -91,8 +91,8 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
             
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
@@ -164,8 +164,8 @@ for g = 1:height(BaseData)
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
                         
-                        T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                        T = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        %T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        %TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                         
                         % Only collect detailed info if desired
                         %[L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIM(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,Starti);
