@@ -178,7 +178,10 @@ AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes)));
 
 for i = 1:length(Lanes)
     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));
-    AllTrAx(1:length(A(1:1:end)),i) = A(1:1:end); 
+    % Fixed issues 26/8/21 when PDCx only had lane 2 included it would place stuff
+    % in lane 1 (for exmaple)
+    %AllTrAx(1:length(A(1:1:end)),i) = A(1:1:end); 
+    AllTrAx(1:length(A(1:1:end)),Lanes(i)) = A(1:1:end); 
 end
 
 % Return TrLineUp first row unrounded

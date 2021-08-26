@@ -91,8 +91,8 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            parfor z = 1:max(PDsy.Group)
-            %for z = 1:max(PDsy.Group)
+            %parfor z = 1:max(PDsy.Group)
+            for z = 1:max(PDsy.Group)
             
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
@@ -109,7 +109,7 @@ for g = 1:height(BaseData)
                 
                 % For each InfCase
                 %parfor t = 1:Num.InfCases
-                for t = 1:Num.InfCases
+                for t = 5:Num.InfCases
                     
                     % Get length of bridge in number of indices
                     BrLengthInd = size(ILData(t).v,1);
@@ -146,7 +146,8 @@ for g = 1:height(BaseData)
                         
                         TrNumsU = unique(TrNums);
                         
-                        TrNumsUE = [TrNumsU(1)-10:TrNumsU(end)+10]';
+                        TrNumsUE = [max(1,TrNumsU(1)-20):min(TrNumsU(end)+20,height(PDsy))]';
+                        
                         PDe = PDsy(TrNumsUE,:);
                     
                         % Call VBWIMtoAllTrAx w/ mods... must give stationary point or truck
@@ -162,6 +163,9 @@ for g = 1:height(BaseData)
                         % We use TrNums because they don't depend on Starti shift
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
+                        
+                        T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        T = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                         
                         % Only collect detailed info if desired
                         %[L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIM(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,Starti);
@@ -223,7 +227,7 @@ for g = 1:height(BaseData)
     MaxEvents.ClassT(MaxEvents.m == 2) = "ClassOW";
     MaxEvents.ClassT(MaxEvents.m == 3) = "Class";
     MaxEvents.m = [];
-    MaxEventsStop.ClassT(MaxEventStop.m == 1) = "All";
+    MaxEventsStop.ClassT(MaxEventsStop.m == 1) = "All";
     MaxEventsStop.ClassT(MaxEventsStop.m == 2) = "ClassOW";
     MaxEventsStop.ClassT(MaxEventsStop.m == 3) = "Class";
     MaxEventsStop.m = [];
@@ -233,7 +237,7 @@ for g = 1:height(BaseData)
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     ClassT = {'All', 'Classified+', 'Classified'};
     DistTypes = {'Lognormal'};
-    [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData(g,:));
+    [Max,~,~,~] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData(g,:));
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
@@ -247,7 +251,7 @@ for g = 1:height(BaseData)
         for i = 1:length(ClassType)
             Class = ClassType{i};
             BlockM = BM{2};
-            %[pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.Max(:,r),'Lognormal',BaseData.Plots(g));
+            [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
         end
@@ -264,7 +268,7 @@ for g = 1:height(BaseData)
     
     [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEventsStop,ESIA,ILData,BaseData(g,:));
     
-    TName = datestr(now+1/864000,'mmmdd-yy HHMMSS')
+    TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
     OutInfo.SimStop = true;
     

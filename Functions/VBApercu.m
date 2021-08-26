@@ -22,7 +22,10 @@ TrNames = ["NC" "11" "11bis" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "
     "60t Crane" "6ax 60t" "7ax 72t" "8ax 84t" "9ax 96t" "96t Crane" "Libherr 132" "Libherr 15" "84t AT7"];
 
 % Get number and name of lanes
-LaneswTr = unique(PDC.LANE); NumLaneswTr = length(LaneswTr);
+LaneswTr = unique(PDC.LANE); 
+% Changed 26/08/21 to fix a bug when PDC has only lane 2 for ex.
+LaneswTr = [1:LaneswTr(end)]';
+NumLaneswTr = length(LaneswTr);
 % Get TotalLanes and get Aperçu lanes (ALane)
 
 TotalLanes = Lane.Sites.NumLanes;
@@ -65,6 +68,7 @@ T = PDC(unique(Q(:,3)),:);
 
 % Gather variables for the plots of each lane (vehicle corners and axle vals)
 for i = 1:NumLaneswTr
+  
     % If there is no traffic on a given lane
     if i > NumLaneswTr
         % Set vehicle corners and accummulated axles to zero
