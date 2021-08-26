@@ -109,7 +109,7 @@ for g = 1:height(BaseData)
                 
                 % For each InfCase
                 %parfor t = 1:Num.InfCases
-                for t = 5:Num.InfCases
+                for t = 1:Num.InfCases
                     
                     % Get length of bridge in number of indices
                     BrLengthInd = size(ILData(t).v,1);
@@ -266,7 +266,7 @@ for g = 1:height(BaseData)
     
     
     
-    [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEventsStop,ESIA,ILData,BaseData(g,:));
+    [Max,~,~,~] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEventsStop,ESIA,ILData,BaseData(g,:));
     
     TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
@@ -277,7 +277,7 @@ for g = 1:height(BaseData)
         for i = 1:length(ClassType)
             Class = ClassType{i};
             BlockM = BM{2};
-            %[pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.Max(:,r),'Lognormal',BaseData.Plots(g));
+            [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
         end
