@@ -53,7 +53,7 @@ if Initial
 %     load('C:\Users\mjsja\Desktop\SwissTraffic2\Results Variables\qInvestigation\BaseDataSemi2.mat')
 
     % Get Initial Vars from Steps 2 to 4
-    [Max,pd,x_values,y_values] = qInvestInitial(AType,Years,Stations,BM,ClassType,ClassT,DistTypes);
+    [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
     
 else
     load(strcat(AType,'MaxEventsqMax'))
@@ -70,7 +70,7 @@ if ~isempty(HL)
     HLName = ILData(HL).Name; HLName = HLName(7:end);
 end
 
-for r = HL;
+for r = HL
      
     figure('Position',[300 300 1200 350]);
     xLims = [0 max(x_values(r).All.Yearly)+100*max(x_values(r).All.Yearly)/1500];
@@ -94,7 +94,7 @@ for r = HL;
                 Dist = DistTypes{k};
                 plot(X,y_values(r).(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
 
-                if strcmp(BlockM,'Yearly') & (~strcmp(Dist,'ExtremeValue') | ~strcmp(Dist,'GeneralizedExtremeValue'))
+                if strcmp(BlockM,'Yearly') && (~strcmp(Dist,'ExtremeValue') || ~strcmp(Dist,'GeneralizedExtremeValue'))
                     plot(X,pdf(pd(r).(Class).D2Y.(Dist),X)/ScaleDown(j),'k--','DisplayName',[Dist 'D2Y'])
                     plot(X,pdf(pd(r).(Class).W2Y.(Dist),X)/ScaleDown(j),'k:','DisplayName',[Dist 'W2Y'])
                 end
@@ -122,7 +122,7 @@ end
 PlotB = zeros(1,length(ILData)); PlotB(HL) = 1;
 
 % For each Influence Case
-for r = 1:length(ILData);
+for r = 1:length(ILData)
     if PlotB(r) == 1
         figure('Position',[300 300 1200 350]);
     end

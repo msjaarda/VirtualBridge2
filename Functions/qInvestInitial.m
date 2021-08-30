@@ -1,4 +1,4 @@
-function [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData)
+function [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData)
 %qINVESTINITIAL Steps 2, 3, and 4 of qInvestigation
 
 % --- Step 3: Build Structure with Block Maxima ---
@@ -40,12 +40,12 @@ for r = 1:length(ILData)
             if strcmp(BlockM,'Daily')
                 
                 % Make groups out of unique locations and days
-                [Gr, GrIDDay, GrIDSITE, GrIDInf] = findgroups(dateshift(MaxEventsSub.DTS,'start','day'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
+                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','day'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
                
             elseif strcmp(BlockM,'Weekly')
-                [Gr, GrIDWeek, GrIDSITE, GrIDInf] = findgroups(dateshift(MaxEventsSub.DTS,'start','week'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
+                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','week'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             else
-                [Gr, GrIDYear, GrIDSITE, GrIDInf] = findgroups(year(MaxEventsSub.DTS),MaxEventsSub.SITE,MaxEventsSub.InfCase);
+                [Gr, ~, ~, ~] = findgroups(year(MaxEventsSub.DTS),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)

@@ -204,9 +204,8 @@ for g = 1:height(BaseData)
     % qInvestInitial Inputs
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
     ClassType = {'All', 'ClassOW', 'Class'};        % i
-    ClassT = {'All', 'Classified+', 'Classified'};
     DistTypes = {'Lognormal'};
-    [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData(g,:));
+    [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);

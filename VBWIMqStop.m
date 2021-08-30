@@ -91,8 +91,8 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            parfor z = 1:max(PDsy.Group)
-            %for z = 1:max(PDsy.Group)
+            %parfor z = 1:max(PDsy.Group)
+            for z = 1:max(PDsy.Group)
             
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
@@ -146,7 +146,7 @@ for g = 1:height(BaseData)
                         
                         TrNumsU = unique(TrNums);
                         
-                        TrNumsUE = [max(1,TrNumsU(1)-20):min(TrNumsU(end)+20,height(PDsy))]';
+                        TrNumsUE = [max(1,TrNumsU(1)-5):min(TrNumsU(end)+5,height(PDsy))]';
                         
                         PDe = PDsy(TrNumsUE,:);
                     
@@ -164,8 +164,8 @@ for g = 1:height(BaseData)
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
                         
-                        %T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                        %TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                         
                         % Only collect detailed info if desired
                         %[L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIM(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,Starti);
@@ -235,9 +235,8 @@ for g = 1:height(BaseData)
     % qInvestInitial Inputs
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
     ClassType = {'All', 'ClassOW', 'Class'};        % i
-    ClassT = {'All', 'Classified+', 'Classified'};
     DistTypes = {'Lognormal'};
-    [Max,~,~,~] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEvents,ESIA,ILData,BaseData(g,:));
+    [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
@@ -265,8 +264,7 @@ for g = 1:height(BaseData)
     end
     
     
-    
-    [Max,~,~,~] = qInvestInitial(BM,ClassType,ClassT,DistTypes,MaxEventsStop,ESIA,ILData,BaseData(g,:));
+    [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
     
     TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
