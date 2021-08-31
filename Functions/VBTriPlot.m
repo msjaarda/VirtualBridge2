@@ -22,7 +22,14 @@ for m = 1:3
     subplot(1,3,m)
     hold on
     for i = 1:size(ydata,2)
-        plot(xdata{m,i},ydata{m,i},'-s','Color','k','MarkerEdgeColor',PDets.MEC{m}(i,:),'MarkerFaceColor',PDets.MFC{m}(i,:),'MarkerSize',PDets.MS{m}(i),'DisplayName',PDets.DN{m,i})
+        if strcmp(PDets.DN{m,i},'off') || strcmp(PDets.DN{m,i},'none')
+            HandV = 'off';
+        else, HandV = 'on'; end
+        if isequal(PDets.MFC{m}(i,:),[.98 .98 .98])
+            plot(xdata{m,i},ydata{m,i},'-s','Color','k','MarkerEdgeColor',PDets.MEC{m}(i,:),'MarkerFaceColor','none','MarkerSize',PDets.MS{m}(i),'DisplayName',PDets.DN{m,i},'HandleVisibility',HandV)
+        else
+            plot(xdata{m,i},ydata{m,i},'-s','Color','k','MarkerEdgeColor',PDets.MEC{m}(i,:),'MarkerFaceColor',PDets.MFC{m}(i,:),'MarkerSize',PDets.MS{m}(i),'DisplayName',PDets.DN{m,i},'HandleVisibility',HandV)
+        end
         % Get xdataL{m} - the longest xdata
         if length(xdata{m,i}) > Len
             xdataL{m} = xdata{m,i};
