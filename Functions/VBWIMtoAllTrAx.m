@@ -49,7 +49,7 @@ if isWIM
         PDCx.LnTrSpacing(LaneInds) = AA;
         % The following only makes sense in direction 1. We don't circshift
         % for the 2 direction... why not?
-        if Lane.Dir(i) == 1
+        if Lane.Dir(Lanes(i)) == 1
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
@@ -75,7 +75,7 @@ for i = 1:length(Lanes)
     LaneInds = PDCx.LANE == Lanes(i);
     
     % Change the sign of the WBL for those in direction 2
-    if Lane.Dir(i) == 2
+    if Lane.Dir(Lanes(i)) == 2
         WBL(LaneInds,:) = -WBL(LaneInds,:);
     end 
 end
