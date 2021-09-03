@@ -267,6 +267,10 @@ for i = 1:Num.InfCases
     ESIA.Eq(:,i) = Intv.*qk*LaneWidth;
 end
 
+% if AnalysisType == WIM & Chan.
+%    % Delete interior  
+% end
+
 % This method is not good enough when doing influence lines of only 2m and
 % such... we need a better method. I think Convolution will solve it.
 % Nothing wrong with the integration side of things, point loads are the
