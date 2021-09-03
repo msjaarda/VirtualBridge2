@@ -91,8 +91,8 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
             
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
@@ -109,7 +109,7 @@ for g = 1:height(BaseData)
                 
                 % For each InfCase
                 %parfor t = 1:Num.InfCases
-                for t = 13:Num.InfCases
+                for t = 1:Num.InfCases
                     
                     % Get length of bridge in number of indices
                     BrLengthInd = size(ILData(t).v,1);
@@ -146,7 +146,7 @@ for g = 1:height(BaseData)
                         
                         TrNumsU = unique(TrNums);
                         
-                        NumExtra = 200;
+                        NumExtra = 20;
                         TrNumsUE = [max(1,TrNumsU(1)-NumExtra):min(TrNumsU(end)+NumExtra,height(PDsy))]';
                         
                         PDe = PDsy(TrNumsUE,:);
