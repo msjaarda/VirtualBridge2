@@ -15,7 +15,8 @@ TtkN = 102;
 % Classified Only (only applies to All Axles - others are class only always)
 ClassOnly = false;
 
-shift = find(string(PDC.Properties.VariableNames) == "AX");
+%shift = find(string(PDC.Properties.VariableNames) == "AX");
+shift = find(string(PDC.Properties.VariableNames) == "AWT01") -1;
 
 % if width(PDC) > 35
 %     if sum(strcmp('Head',PDC.Properties.VariableNames)) > 0
