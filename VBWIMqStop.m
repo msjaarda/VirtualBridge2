@@ -264,7 +264,7 @@ for g = 1:height(BaseData)
         save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')
     end
     
-    
+    MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
     
     TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
