@@ -8,16 +8,17 @@ function [PD] = VBClassify(PD)
 % ---------------- TYPE START -------------------
 
 IndW = find(string(PD.Properties.VariableNames) == "W1_2");
+NumW = sum(cell2mat(regexp(string(PD.Properties.VariableNames), 'W\d_*')));
 
 % Create the table of axeles. 0: >2m ; 1: <2m, NaN: no axle
-axleTable = double(PD{:,IndW:IndW+7} < 200);
-axleTable(PD{:,IndW:IndW+7} == 0) = NaN;
+axleTable = double(PD{:,IndW:IndW+NumW-1} < 200);
+axleTable(PD{:,IndW:IndW+NumW-1} == 0) = NaN;
 
 % Initilize the empty count of axles and count of axles per group. 
-count = ones(height(axleTable),1);
+count = ones(size(axleTable,1),1);
 countGroup = nan(size(axleTable)+[0 1]);
 
-for j = 1:width(axleTable)
+for j = 1:size(axleTable,2)
     
     % Find vehicule with current axle being seperated from the previous
     % group
@@ -234,6 +235,7 @@ Type = logical(UnClass.*RType.*Dist12.*Weight);
 % Change table entries
 PD.CLASS(Type,:) = 41;
 
+try
 % Type 46) 96 tonne crane truck from FA.8 AGB 2002/005
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 332;
@@ -242,7 +244,10 @@ Dist67 = PD.W6_7 < 300;
 Weight = PD.GW_TOT >= 70000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist34.*Dist67.*Weight);
 PD.CLASS(Type,:) = 46;
+catch
+end
 
+try
 % Type 42) 60 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 Axles = PD.AX == 6;
@@ -254,7 +259,10 @@ Dist56 = PD.W5_6 < 200;
 Weight = PD.GW_TOT >= 50000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*Axles.*Dist12.*Dist23.*Dist34.*Dist45.*Dist56.*Weight);
 PD.CLASS(Type,:) = 42;
+catch
+end
 
+try
 % Type 43) 72 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 34;
@@ -262,7 +270,10 @@ Dist34 = PD.W3_4 >= 400 & PD.W3_4 < 600;
 Weight = PD.GW_TOT >= 50000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist34.*Weight);
 PD.CLASS(Type,:) = 43;
+catch
+end
 
+try
 % Type 44) 84 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 44;
@@ -270,7 +281,10 @@ Dist45 = PD.W4_5 >= 440 & PD.W4_5 < 740;
 Weight = PD.GW_TOT >= 60000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist45.*Weight);
 PD.CLASS(Type,:) = 44;
-        
+catch
+end
+
+try       
 % Type 45) 96 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 Axles = PD.AX == 9;
@@ -285,7 +299,10 @@ Dist89 = PD.W8_9 < 200;
 Weight = PD.GW_TOT >= 70000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*Axles.*Dist12.*Dist23.*Dist34.*Dist45.*Dist56.*Dist67.*Dist78.*Dist89.*Weight);
 PD.CLASS(Type,:) = 45;
+catch
+end
 
+try
 % Type 47) 84 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 132;
@@ -294,7 +311,10 @@ Dist45 = PD.W4_5 < 300;
 Weight = PD.GW_TOT >= 50000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist12.*Dist45.*Weight);
 PD.CLASS(Type,:) = 47;
+catch
+end
 
+try
 % Type 48) 84 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 15;
@@ -302,7 +322,10 @@ Dist12 = PD.W1_2 < 340;
 Weight = PD.GW_TOT >= 50000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist12.*Weight);
 PD.CLASS(Type,:) = 48;
+catch
+end
 
+try
 % Type 49) 84 tonne crane truck from Veicoli Standard Spreadsheet
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 25;
@@ -310,6 +333,8 @@ Dist23 = PD.W2_3 < 300;
 Weight = PD.GW_TOT >= 60000 & PD.GW_TOT < 100000;
 Type = logical(UnClass.*RType.*Dist23.*Weight);
 PD.CLASS(Type,:) = 49;
+catch
+end
 
 % --------------- CLASS OW DONE ------------------
 

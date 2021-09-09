@@ -28,7 +28,7 @@ for g = 1:height(BaseData)
     [VirtualWIM, OverMax, ApercuOverMax] = deal([]);
     
     % Initialize parpool if necessary and initialize progress bar
-    if BaseData.Parallel(g) > 0, gcp; clc; end, 
+    if BaseData.Parallel(g) > 0, gcp; clc; end 
     m = StartProgBar(BaseData.NumSims(g), Num.Batches, g, height(BaseData)); tic; st = now;
     
     parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
@@ -153,22 +153,22 @@ for g = 1:height(BaseData)
         save(['Apercu' BaseData.Folder{g} '/AWIM_' TName], 'PD')
     end
     
-    % Save structure variable with essential simulation information
-    OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
-    OutInfo.ESIA = ESIA; OutInfo.ESIM = ESIM;
-    OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
-    OutInfo.ILData = ILData;
-    
-    % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-    for r = 1:Num.InfCases
-        [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
-        [ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(OutInfo.OverMax(:,r),false);
-        [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
-    end
-    % Apply Model Factor to EdLN and AQ
-    OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;
-    
     if BaseData.Save(g) == 1
+        % Save structure variable with essential simulation information
+        OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
+        OutInfo.ESIA = ESIA; OutInfo.ESIM = ESIM;
+        OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
+        OutInfo.ILData = ILData;
+        
+        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+        for r = 1:Num.InfCases
+            [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
+            [ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(OutInfo.OverMax(:,r),false);
+            [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
+        end
+        % Apply Model Factor to EdLN and AQ
+        OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;
+        
         save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')
     end
     
