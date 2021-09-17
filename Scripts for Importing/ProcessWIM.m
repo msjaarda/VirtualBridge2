@@ -18,7 +18,7 @@ load('SiteLanes.mat')
 % Sites.EndDate = repmat(datetime('now'),height(Sites),1);
 % Sites.TrRateEst = zeros(height(Sites),1);
 
-for i = 2%:length(SNames)
+for i = 1:length(SNames)
     
     SName = SNames{i};
     
