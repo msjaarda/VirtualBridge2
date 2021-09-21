@@ -92,6 +92,15 @@ TrNames = ["NC" "11" "11bis" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "
 % Add a table column for Classification "CLASS"
 PD.CLASS = zeros(size(PD,1),1);
 
+% NEW 21.09.2021 MS for LSVA
+% Type 91)
+% Weight
+Weight = PD.GW_TOT < 3500;
+% Change table entries
+PD.CLASS(Weight,:) = 91; 
+% 91 is for LIGHT VEHICLE
+
+
 % Type 11)
 % Num Axles
 Axles = PD.AX == 2;
