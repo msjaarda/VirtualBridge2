@@ -8,6 +8,9 @@
 % VBWIMQ1Q2      >> Q1Q2MaxEvents >> Q1Q2 Investigation
 % VBWIMq         >> qMaxEvents    >> q    Investigation
 
+% Must re-write a little for the sake of memory... split PDs up into years
+% perhaps.
+
 % Initializing commands
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
@@ -44,10 +47,13 @@ for g = 1:height(BaseData)
         [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
         
         % Load File
-        load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
-        
-        % Stage2Prune
-        PDs = Stage2Prune(PDs);
+        if BaseData.LSVA(g)
+            load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
+        else
+            load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
+            % Stage2Prune
+            PDs = Stage2Prune(PDs);
+        end
         
         % Separate for each year...
         if ismember('Year',BaseData.Properties.VariableNames)
@@ -57,14 +63,15 @@ for g = 1:height(BaseData)
         end
         
         % Start Progress Bar
-        u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
+         u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
         
         %parfor r = 1:length(UYears)
         for r = 1:length(UYears)
             
             %MaxEvents1 = [];
-            
+            load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
             PDsy = PDs(year(PDs.DTS) == UYears(r),:);
+            clear PDs
             
             % Convert PDC to AllTrAx - Spacesave at MaxLength
             MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
@@ -91,8 +98,8 @@ for g = 1:height(BaseData)
             end
             
             % Perform search for maximums for each day
-            parfor z = 1:max(PDsy.Group)
-            %for z = 1:max(PDsy.Group)
+            %parfor z = 1:max(PDsy.Group)
+            for z = 1:max(PDsy.Group)
             
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 

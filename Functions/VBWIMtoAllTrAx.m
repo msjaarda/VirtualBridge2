@@ -119,7 +119,8 @@ AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes)));
 
 for i = 1:length(Lanes)
     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));
-    AllTrAx(1:length(A(1:1:end)),i) = A(1:1:end); 
+    AllTrAx(1:length(A),i) = A;
+    %AllTrAx(1:length(A(1:1:end)),i) = A(1:1:end); 
 end
 
 % Return TrLineUp first row unrounded
