@@ -95,8 +95,8 @@ for g = 1:height(BaseData)
 %             end
             
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
@@ -236,7 +236,7 @@ for g = 1:height(BaseData)
     
     % qInvestInitial Inputs
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
-    BM = {'Daily'}; 
+    %BM = {'Daily'}; 
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
@@ -252,8 +252,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            %BlockM = BM{2};
-            BlockM = BM{1};
+            BlockM = BM{2};
+            %BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
@@ -278,8 +278,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            %BlockM = BM{2};
-            BlockM = BM{1};
+            BlockM = BM{2};
+            %BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
