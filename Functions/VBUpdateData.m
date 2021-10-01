@@ -185,7 +185,8 @@ for i = 1:Num.InfCases
             PL = 0;
         end
         
-        Conc = zeros(round(1.2/BaseData.ILRes),1);
+        % Should be 1.3... changed on 30/9/21
+        Conc = zeros(round(1.3/BaseData.ILRes),1);
         if max(size(Conc)) == 1
             Conc(1) = PL*2;
         else

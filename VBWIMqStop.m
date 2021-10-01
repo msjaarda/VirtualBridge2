@@ -20,21 +20,18 @@ BaseData = VBReadInputFile('Input/VBWIMqInputx.xlsx');
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
 
-% Initialize variables and start row counter
-%MaxEvents = []; RamUsed = []; LenPrint = []; MaxEvents1 = [];
-
 % Each row of BaseData represents one analysis OR analysis 'set'/'group'
 for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
-    MaxEvents = []; RamUsed = []; LenPrint = []; %MaxEvents1 = [];
+    MaxEvents = []; RamUsed = []; LenPrint = [];
     MaxEventsStop = [];
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
     load('SiteGroups.mat')
     if BaseData.SITE(g) == 11, Sites = SiteGroups.('Uni2L');
-    elseif BaseData.SITE(g) == 111, Sites = SiteGroups.('Uni3L'); 
-    elseif BaseData.SITE(g) == 12, Sites = SiteGroups.('Bi2L'); 
+    elseif BaseData.SITE(g) == 111, Sites = SiteGroups.('Uni3L');
+    elseif BaseData.SITE(g) == 12, Sites = SiteGroups.('Bi2L');
     elseif BaseData.SITE(g) == 1122, Sites = SiteGroups.('Bi4L');
     else Sites = BaseData.SITE(g);
     end
@@ -46,12 +43,15 @@ for g = 1:height(BaseData)
         % Update analysis data for current row of BaseData
         [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
         
+        % Get MaxLength for Spacesave
+        MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
+        
         % Load File
         if BaseData.LSVA(g)
             load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
         else
             load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
-            % Stage2Prune
+            % Stage2Prune (not for LSVA)
             PDs = Stage2Prune(PDs);
         end
         
@@ -65,42 +65,40 @@ for g = 1:height(BaseData)
         % Start Progress Bar
          u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
         
-        %parfor r = 1:length(UYears)
         for r = 1:length(UYears)
             
-            %MaxEvents1 = [];
-            load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
-            PDsy = PDs(year(PDs.DTS) == UYears(r),:);
-            clear PDs
+            % Try to save mem by clearing PDs and re-loading
+            [PDsy] = LoadPDYear(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat'],UYears(r));
             
-            % Convert PDC to AllTrAx - Spacesave at MaxLength
-            MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
-            [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+            % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
+            [TrLineUpGr,StartiGr,EndiGr,AllTrAxGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
             
-            % Make groups out of each unique day
-            PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
-            
-            % Round TrLineUp first row, move unrounded to fifth row
-            TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
-            % Expand TrLineUp to include groups
-            TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
-            % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
-            
-            % In order to prevent broadcast variables, and instead have sliced
-            % variables, particularly for TrLineUp, AllTrAx, and PDsy -- Necessary?
-            for z = 1:max(PDsy.Group)
-                TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
-                StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
-                EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
-                AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
-                %PDsyDTGr{z} = PDsy.DTS(TrLineUpGr{z}(1):TrLineUpGr{z}(end));
-                %PDsyCLGr{z} = PDsy.CLASS(TrLineUpGr{z}(1):TrLineUpGr{z}(end));
-            end
+%             % Convert PDsy to AllTrAx
+%             [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+%             
+%             % Make groups out of each unique day
+%             PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
+%             
+%             % Round TrLineUp first row, move unrounded to fifth row
+%             TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
+%             % Expand TrLineUp to include groups
+%             TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
+%             % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
+%             
+%             % In order to prevent broadcast variables, and instead have sliced
+%             % variables, particularly for TrLineUp, and AllTrAx
+%             for z = 1:max(PDsy.Group)
+%                 TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
+%                 StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
+%                 EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
+%                 AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
+%             end
             
             % Perform search for maximums for each day
             %parfor z = 1:max(PDsy.Group)
             for z = 1:max(PDsy.Group)
-            
+                
+                % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
                 % Get TrLineUpSub and AllTrAxSub
@@ -108,21 +106,17 @@ for g = 1:height(BaseData)
                 Starti = StartiGr{z};
                 Endi = EndiGr{z};
                 AllTrAxSub = AllTrAxGr{z};
-                %PDsyDTSub = PDsyDTGr{z};
-                %PDsyCLSub = PDsyCLGr{z};
                 
                 % Don't bother running if the segment is too small
                 if length(AllTrAxSub) < 20000/BaseData.ILRes(g), continue, end
                 
                 % For each InfCase
-                %parfor t = 1:Num.InfCases
                 for t = 1:Num.InfCases
                     
                     % Get length of bridge in number of indices
                     BrLengthInd = size(ILData(t).v,1);
                     
                     % Reset for each t
-                    %AllTrAxSub = AllTrAx(Starti:Endi,:);
                     AllTrAxSub = AllTrAxGr{z};
                     
                     % Eliminate the need for padding or BrStInd index issues
@@ -134,7 +128,7 @@ for g = 1:height(BaseData)
                         
                         % Subject Influence Line to Truck Axle Stream
                         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
-                        if MaxLE == 0, k = k+1, continue, end
+                        if MaxLE == 0, k = k+1; continue, end
                         k = k+1; % Add to k
                         
                         % Adjust BrStInd for Starti
@@ -167,7 +161,6 @@ for g = 1:height(BaseData)
                         
                         [MaxLEe,DLFe,BrStInde,Re] = VBGetMaxLE(AllTrAxStop,ILData(t).v,BaseData.RunDyn(g));
   
-                        
                         % We use TrNums because they don't depend on Starti shift
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
@@ -190,21 +183,20 @@ for g = 1:height(BaseData)
                         % Save MaxEvents... save Times and Datenums and then convert
                         MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
                         MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
-                        %MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, L1Veh, L2Veh, L1Load, L2Load, L1Ax, L2Ax, L1Spd, L2Spd];
-                        
+
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                         AllTrAxSub(BrInds-(Starti-1),:) = 0;
                         
                     end % k, analyses
                 end % t, InfCases
                 
-                MaxEvents = [MaxEvents; MaxEvents1]; %MaxEvents1 = [];
+                MaxEvents = [MaxEvents; MaxEvents1];
                 MaxEventsStop = [MaxEventsStop; MaxEvents1Stop];
             end % z, groups
             
             % Update progress bar
             user = memory;
-            RamUsed = [RamUsed;user.MemUsedMATLAB/user.MemAvailableAllArrays*100];
+            RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
             LenPrint = VBUpProgBar(u,st,g,1,length(UYears),1,RamUsed(end),r,LenPrint);
             
         end % r, years
@@ -231,6 +223,8 @@ for g = 1:height(BaseData)
     MaxEventsStop.Datenum = [];
     
     % Add Column for All, Class, ClassOW and delete former m
+    % CONSIDER DOING ALL THIS AFTER qINVESTINITIAL... delete first part of
+    % qINVESTINITIAL...
     MaxEvents.ClassT(MaxEvents.m == 1) = "All";
     MaxEvents.ClassT(MaxEvents.m == 2) = "ClassOW";
     MaxEvents.ClassT(MaxEvents.m == 3) = "Class";
@@ -242,6 +236,7 @@ for g = 1:height(BaseData)
     
     % qInvestInitial Inputs
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
+    BM = {'Daily'}; 
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
@@ -257,7 +252,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{2};
+            %BlockM = BM{2};
+            BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
@@ -282,7 +278,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{2};
+            %BlockM = BM{2};
+            BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
