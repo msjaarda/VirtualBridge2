@@ -62,11 +62,11 @@ if isWIM
 end
 
 % Create wheelbase and axle load vectors
-WBL = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
+WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
 AX = PDCx{:,strncmp(PDCx.Properties.VariableNames,'AW',2)}/102;
 
 % Make wheelbase length cummulative
-WBL = cumsum(WBL,2);
+WB = cumsum(WB,2);
 
 % Switch WBL for direction 2
 for i = 1:length(Lanes)
@@ -76,11 +76,11 @@ for i = 1:length(Lanes)
     
     % Change the sign of the WBL for those in direction 2
     if Lane.Dir(Lanes(i)) == 2
-        WBL(LaneInds,:) = -WBL(LaneInds,:);
+        WB(LaneInds,:) = -WB(LaneInds,:);
     end 
 end
 
-WB = [PDCx.SpCu PDCx.SpCu + WBL];
+WB = [PDCx.SpCu PDCx.SpCu + WB];
 
 % Must eliminate useless WB values
 WB(AX == 0) = 0;
