@@ -239,8 +239,8 @@ for g = 1:height(BaseData)
     MaxEventsStop.m = [];
     
     % qInvestInitial Inputs
-    BM = {'Daily', 'Weekly', 'Yearly'};             % j
-    %BM = {'Daily'}; 
+    %BM = {'Daily', 'Weekly', 'Yearly'};             % j
+    BM = {'Daily'}; 
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
@@ -274,7 +274,7 @@ for g = 1:height(BaseData)
     MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
     
-    TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
+    TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
     OutInfo.SimStop = true;
     

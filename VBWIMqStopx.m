@@ -77,14 +77,17 @@ for g = 1:height(BaseData)
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx2(PDsy,MaxLength,Lane,BaseData.ILRes(g));
 
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
                 % Get TrLineUpSub and AllTrAxSub
                 TrLineUpSub = TrLineUpGr{z};
+                % Must sort due to direction switch and accumarray not
+                % having negatives for first few
+                TrLineUpSub = sortrows(TrLineUpSub);
                 %Starti = StartiGr{z};
                 %Endi = EndiGr{z};
                 
@@ -232,8 +235,8 @@ for g = 1:height(BaseData)
     MaxEventsStop.m = [];
     
     % qInvestInitial Inputs
-    BM = {'Daily', 'Weekly', 'Yearly'};             % j
-    %BM = {'Daily'}; 
+    %BM = {'Daily', 'Weekly', 'Yearly'};             % j
+    BM = {'Daily'}; 
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
@@ -267,7 +270,7 @@ for g = 1:height(BaseData)
     MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
     
-    TName = datestr(now+1/864000,'mmmdd-yy HHMMSS');
+    TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
     OutInfo.SimStop = true;
     
