@@ -71,7 +71,7 @@ for g = 1:height(BaseData)
             [PDsy] = LoadPDYear(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat'],UYears(r));
             
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
-            [TrLineUpGr,StartiGr,EndiGr,AllTrAxGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+            [TrLineUpGr,StartiGr,~,AllTrAxGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
             
 %             % Convert PDsy to AllTrAx
 %             [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
@@ -95,8 +95,8 @@ for g = 1:height(BaseData)
 %             end
             
             % Perform search for maximums for each day
-            parfor z = 1:max(PDsy.Group)
-            %for z = 1:max(PDsy.Group)
+            %parfor z = 1:max(PDsy.Group)
+            for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
@@ -104,7 +104,6 @@ for g = 1:height(BaseData)
                 % Get TrLineUpSub and AllTrAxSub
                 TrLineUpSub = TrLineUpGr{z};
                 Starti = StartiGr{z};
-                Endi = EndiGr{z};
                 AllTrAxSub = AllTrAxGr{z};
                 
                 % Don't bother running if the segment is too small
@@ -183,7 +182,12 @@ for g = 1:height(BaseData)
                         % Save MaxEvents... save Times and Datenums and then convert
                         MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
                         MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
-
+                        
+                        if m == 3
+                            % Bump k up so that analysis doesn't continue!
+                            k = 100;
+                        end
+                        
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                         AllTrAxSub(BrInds-(Starti-1),:) = 0;
                         
@@ -252,8 +256,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{2};
-            %BlockM = BM{1};
+            %BlockM = BM{2};
+            BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
@@ -278,8 +282,8 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{2};
-            %BlockM = BM{1};
+            %BlockM = BM{2};
+            BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
