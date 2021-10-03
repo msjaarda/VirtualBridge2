@@ -1,8 +1,8 @@
-function [TrLineUpGr,StartiGr,EndiGr,AllTrAxGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,ILRes)
+function [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,ILRes)
 %GETSLICEDPDS2ALLTRAX Effective way of only have Sliced vars in mem
 
 % Convert PDsy to AllTrAx
-[PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,ILRes);
+[PDsy, TrLineUp] = VBWIMtoAllTrAx_Exp(PDsy,MaxLength,Lane,ILRes);
 
 % Make groups out of each unique day
 PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
@@ -17,11 +17,8 @@ TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
 % variables, particularly for TrLineUp, and AllTrAx
 for z = 1:max(PDsy.Group)
     TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
-    StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
-    EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
-    AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
 end
-            
+                   
             
 end
 

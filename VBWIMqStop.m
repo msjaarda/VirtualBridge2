@@ -62,52 +62,56 @@ for g = 1:height(BaseData)
             UYears = unique(year(PDs.DTS));
         end
         
+        if BaseData.LSVA(g)
+            clear PDs
+        end
         % Start Progress Bar
          u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
         
         for r = 1:length(UYears)
             
+            if BaseData.LSVA(g)
             % Try to save mem by clearing PDs and re-loading
             [PDsy] = LoadPDYear(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat'],UYears(r));
+            %PDsy = PDs(year(PDs.DTS) == UYears(r),:);
+            else
+               %[PDsy] = LoadPDYear(['WIM/',num2str(BaseData.SITE(g)),'.mat'],UYears(r));
+               PDsy = PDs(year(PDs.DTS) == UYears(r),:);
+            end
+            
+            % To speed up, could do groups as single vector showing indexes
+            % of change.
             
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
-            [TrLineUpGr,StartiGr,~,AllTrAxGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
-            
-%             % Convert PDsy to AllTrAx
-%             [PDsy, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
-%             
-%             % Make groups out of each unique day
-%             PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
-%             
-%             % Round TrLineUp first row, move unrounded to fifth row
-%             TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
-%             % Expand TrLineUp to include groups
-%             TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
-%             % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
-%             
-%             % In order to prevent broadcast variables, and instead have sliced
-%             % variables, particularly for TrLineUp, and AllTrAx
-%             for z = 1:max(PDsy.Group)
-%                 TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
-%                 StartiGr{z} = max(1,min(TrLineUpGr{z}(:,1)));
-%                 EndiGr{z} = min(max(TrLineUpGr{z}(:,1)),length(AllTrAx));
-%                 AllTrAxGr{z} = AllTrAx(StartiGr{z}:EndiGr{z},:);
-%             end
-            
+            [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+
             % Perform search for maximums for each day
-            %parfor z = 1:max(PDsy.Group)
-            for z = 1:max(PDsy.Group)
+            parfor z = 1:max(PDsy.Group)
+            %for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
                 
                 % Get TrLineUpSub and AllTrAxSub
                 TrLineUpSub = TrLineUpGr{z};
-                Starti = StartiGr{z};
-                AllTrAxSub = AllTrAxGr{z};
+                % Must sort due to direction switch and accumarray not
+                % having negatives for first few
+                TrLineUpSub = sortrows(TrLineUpSub);
+                %Starti = StartiGr{z};
+                %Endi = EndiGr{z};
+                
+                % Get Lanes
+                Lanes = unique(PDsy.LANE);
+                AllTrAxGr = zeros(max(TrLineUpSub(:,1))-TrLineUpSub(1,1)+1,length(Lanes));
+                for i = 1:length(Lanes)
+                    A = accumarray(TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),1)-TrLineUpSub(1,1)+1,TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),2));
+                    AllTrAxGr(1:length(A),i) = A;
+                end
+
+                %AllTrAxSub = AllTrAxGr{z};
                 
                 % Don't bother running if the segment is too small
-                if length(AllTrAxSub) < 20000/BaseData.ILRes(g), continue, end
+                if length(AllTrAxGr) < 20000/BaseData.ILRes(g), continue, end
                 
                 % For each InfCase
                 for t = 1:Num.InfCases
@@ -116,7 +120,7 @@ for g = 1:height(BaseData)
                     BrLengthInd = size(ILData(t).v,1);
                     
                     % Reset for each t
-                    AllTrAxSub = AllTrAxGr{z};
+                    AllTrAxSub = AllTrAxGr;
                     
                     % Eliminate the need for padding or BrStInd index issues
                     AllTrAxSub(1:BrLengthInd,:) = 0; AllTrAxSub(end-BrLengthInd:end,:) = 0;
@@ -126,21 +130,22 @@ for g = 1:height(BaseData)
                     while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                         
                         % Subject Influence Line to Truck Axle Stream
-                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v,BaseData.RunDyn(g));
+                        [MaxLE,DLF,BrStInd,~] = VBGetMaxLE(AllTrAxSub,ILData(t).v(:,1:length(Lanes)),BaseData.RunDyn(g));
                         if MaxLE == 0, k = k+1; continue, end
                         k = k+1; % Add to k
                         
                         % Adjust BrStInd for Starti
-                        BrStIndx = BrStInd + Starti -1;
+                        BrStIndx = BrStInd + TrLineUpSub(1,1) -1;
                         % Get BrEndIndx
                         BrEndIndx = BrStIndx + BrLengthInd - 1;
                         % Get Bridge Indices
-                        BrInds = [BrStIndx:BrEndIndx]';
+                        BrIndsx = [BrStIndx:BrEndIndx]';
+                        BrInds = [BrStInd:BrStInd+BrLengthInd - 1]';
                         %AxOnBr = sum(AllTrAxt(StripInds,:),2);
                         
                         % Get Key Info to Save
-                        TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrInds) & TrLineUpSub(:,1) <= max(BrInds),3);
-                        TrLineUpOnBr = TrLineUpSub(TrLineUpSub(:,1) >= min(BrInds) & TrLineUpSub(:,1) <= max(BrInds),:);
+                        TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),3);
+                        TrLineUpOnBr = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),:);
                         [MaxM, MaxI] = max(TrLineUpOnBr(:,2));
                         TrIdMax = TrLineUpOnBr(MaxI,3);
                         
@@ -164,7 +169,7 @@ for g = 1:height(BaseData)
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
                         
-                        %T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                        %T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                         %TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                         
                         % Only collect detailed info if desired
@@ -182,14 +187,14 @@ for g = 1:height(BaseData)
                         % Save MaxEvents... save Times and Datenums and then convert
                         MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
                         MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
-                        
+
                         if m == 3
                             % Bump k up so that analysis doesn't continue!
                             k = 100;
                         end
                         
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
-                        AllTrAxSub(BrInds-(Starti-1),:) = 0;
+                        AllTrAxSub(BrInds,:) = 0;
                         
                     end % k, analyses
                 end % t, InfCases
@@ -239,8 +244,8 @@ for g = 1:height(BaseData)
     MaxEventsStop.m = [];
     
     % qInvestInitial Inputs
-    %BM = {'Daily', 'Weekly', 'Yearly'};             % j
-    BM = {'Daily'}; 
+    BM = {'Daily', 'Weekly', 'Yearly'};             % j
+    %BM = {'Daily'}; 
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
@@ -251,13 +256,14 @@ for g = 1:height(BaseData)
     %OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
     OutInfo.ILData = ILData;
     OutInfo.SimStop = false;
+    OutInfo.Max = Max;
     
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            %BlockM = BM{2};
-            BlockM = BM{1};
+            BlockM = BM{2};
+            %BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
@@ -277,13 +283,14 @@ for g = 1:height(BaseData)
     TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
     OutInfo.Name = TName;
     OutInfo.SimStop = true;
+    OutInfo.Max = Max;
     
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            %BlockM = BM{2};
-            BlockM = BM{1};
+            BlockM = BM{2};
+            %BlockM = BM{1};
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
