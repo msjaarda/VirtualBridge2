@@ -1,11 +1,9 @@
 function [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData)
-%qINVESTINITIAL Steps 2, 3, and 4 of qInvestigation
+%qINVESTINITIAL Steps 2, 3, and 4 of former qInvestigation
 
 % --- Step 3: Build Structure with Block Maxima ---
 % Convert ClassT to m (number) form m = 1 is All, m = 2 is ClassOW, m = 3 is Class
-MaxEvents.m(strcmp(MaxEvents.ClassT,"All")) = 1;
-MaxEvents.m(strcmp(MaxEvents.ClassT,"ClassOW")) = 2;
-MaxEvents.m(strcmp(MaxEvents.ClassT,"Class")) = 3; MaxEvents.ClassT = [];
+% Reminder, m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
 
 % For each Influence case
 for r = 1:length(ILData)

@@ -52,7 +52,7 @@ for g = 1:height(BaseData)
         k = 0;
         
         % For each analysis
-        while k < BaseData.NumAnalyses(g) & sum(AllTrAxt,'all') > 0
+        while k < BaseData.NumAnalyses(g) && sum(AllTrAxt,'all') > 0
             
             % Subject Influence Line to Truck Axle Stream
             [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxt,ILData(t).v,BaseData.RunDyn(g));
@@ -61,7 +61,7 @@ for g = 1:height(BaseData)
             BrLengthInds = size(ILData(t).v,1);
             
             % Add Padding if necessary
-            if BrStInd < 1 | BrStInd + BrLengthInds - 1 > height(AllTrAxt)
+            if BrStInd < 1 || BrStInd + BrLengthInds - 1 > height(AllTrAxt)
                 % Add Padding
                 PadLen = BrLengthInds -1;
                 AllTrAxt = [zeros(PadLen,size(AllTrAxt,2)); AllTrAxt; zeros(PadLen,size(AllTrAxt,2))];

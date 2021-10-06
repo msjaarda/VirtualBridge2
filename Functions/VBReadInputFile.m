@@ -46,6 +46,18 @@ end
 if ~ismember('Period', BaseData.Properties.VariableNames)
     BaseData.Period(:) = "Yearly";
 end
+if ~ismember('LSVA', BaseData.Properties.VariableNames)
+    BaseData.LSVA(:) = false;
+end
+if ~ismember('Stage2P', BaseData.Properties.VariableNames)
+    BaseData.Stage2P(:) = false;
+end
+if ~ismember('StopSim', BaseData.Properties.VariableNames)
+    BaseData.StopSim(:) = false;
+end
+% if ~ismember('Detailed', BaseData.Properties.VariableNames)
+%     BaseData.Detailed(:) = false;
+% end
 
 % Start with Folder
 % Folder is optional, but when not included (or when given as 0), must be '/'
