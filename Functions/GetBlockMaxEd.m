@@ -35,6 +35,7 @@ Delta2 = log(COV^2+1);
 
 if strcmp(Dist,'Normal')
     Ed = Em*(1+Alpha*Beta*COV);
+    % FYI ESIAT has the 1.5 in it already...
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
 elseif strcmp(Dist,'Lognormal')
