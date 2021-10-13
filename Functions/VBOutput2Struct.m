@@ -50,13 +50,13 @@ for i = 1:length(OInfo)
             VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(OInfo(i).BaseData.Traffic{:}) = OInfo(i).AQ(ic == k);
             VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(OInfo(i).BaseData.Traffic{:}) = cellfun(@str2num,ILSplit(ic == k,8));
         elseif strcmp(OInfo(i).BaseData.AnalysisType,'WIM')
-            if OInfo(i).BaseData.SITE == 11, Traffic = SiteGroups.('Uni2L');
-            elseif OInfo(i).BaseData.SITE == 111, Traffic = SiteGroups.('Uni3L');
-            elseif OInfo(i).BaseData.SITE == 12, Traffic = SiteGroups.('Bi2L');
-            elseif OInfo(i).BaseData.SITE == 1122, Traffic = SiteGroups.('Bi4L');
-            elseif OInfo(i).BaseData.SITE == 110, Traffic = SiteGroups.('LSVAUni2L');
+            if OInfo(i).BaseData.SITE == 11, Traffic = 'Uni2L'; Group = SiteGroups.('Uni2L');
+            elseif OInfo(i).BaseData.SITE == 111, Traffic = 'Uni3L'; Group = SiteGroups.('Uni3L');
+            elseif OInfo(i).BaseData.SITE == 12, Traffic = 'Bi2L'; Group = SiteGroups.('Bi2L');
+            elseif OInfo(i).BaseData.SITE == 1122, Traffic = 'Bi4L'; Group = SiteGroups.('Bi4L');
+            elseif OInfo(i).BaseData.SITE == 110, Traffic = 'LSVAUni2L'; Group = SiteGroups.('LSVAUni2L');
             else
-                Traffic = strcat(Sites.SName(Sites.SITE == OInfo(i).BaseData.SITE),num2str(OInfo(i).BaseData.SITE));
+                Traffic = strcat(Sites.SName(Sites.SITE == OInfo(i).BaseData.SITE),num2str(OInfo(i).BaseData.SITE)); Group = [];
             end
             try
                 if OInfo(i).SimStop
@@ -66,9 +66,7 @@ for i = 1:length(OInfo)
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = cellfun(@str2num,ILSplit(ic == k,8));
-                    
                 else
-                    
                     VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);
                     VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
                     VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = OInfo(i).AQ.Class.Weekly(ic == k);
@@ -83,10 +81,102 @@ for i = 1:length(OInfo)
                 VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = cellfun(@str2num,ILSplit(ic == k,8));
                 VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
                 VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = cellfun(@str2num,ILSplit(ic == k,8));
-                
             end
+            if ~isempty(Group)
+                % Cycle through each element in Group and filter Max
+                
+                try
+                    if OInfo(i).SimStop
+                    
+                        BM = {'Daily', 'Weekly', 'Yearly'};             % j
+                        ClassType = {'All', 'ClassOW', 'Class'};        % i
+                        DistTypes = {'Lognormal'};
+                    
+                        for z = 1:length(Group)
+                            % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+                            for r = ia(k):ia(k)+sum(ic == k)-1
+                                for p = 1:length(ClassType)
+                                    Class = ClassType{p};
+                                    BlockM = BM{2};
+                                    % Filter Max for Group element
+                                    Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
+                                
+                                
+                                    %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
+                                    %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+                                    [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
+                                
+                                    Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
+                                
+                                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = AQ;
+                                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                
+                                end
+                            end
+                        end
+                    else
+                    
+                        BM = {'Daily', 'Weekly', 'Yearly'};             % j
+                        ClassType = {'All', 'ClassOW', 'Class'};        % i
+                        DistTypes = {'Lognormal'};
+                    
+                        for z = 1:length(Group)
+                            % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+                            for r = ia(k):ia(k)+sum(ic == k)-1
+                                for p = 1:length(ClassType)
+                                    Class = ClassType{p};
+                                    BlockM = BM{2};
+                                    % Filter Max for Group element
+                                    Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
+                                
+                                
+                                    %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
+                                    %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+                                    [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
+                                
+                                    Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
+                                
+                                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = AQ;
+                                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                
+                                end
+                            end
+                        end
+                
+                    end
+                    
+                catch
+                    
+                    BM = {'Daily', 'Weekly', 'Yearly'};             % j
+                    ClassType = {'All', 'ClassOW', 'Class'};        % i
+                    DistTypes = {'Lognormal'};
+                    
+                    for z = 1:length(Group)
+                        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+                        for r = ia(k):ia(k)+sum(ic == k)-1
+                            for p = 1:length(ClassType)
+                                Class = ClassType{p};
+                                BlockM = BM{2};
+                                % Filter Max for Group element
+                                Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
+                                
+                                
+                                %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
+                                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+                                [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
+                                
+                                Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
+                                
+                                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = AQ;
+                                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                
+                            end
+                        end
+                    end
+                end
+            end
+            Group = [];
         end
-        
     end
 clear ILSplit
 end

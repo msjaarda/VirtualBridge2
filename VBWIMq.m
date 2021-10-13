@@ -11,7 +11,8 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-BaseData = VBReadInputFile('Input/VBWIMqInputxxx.xlsx');
+FName = 'Input/VBWIMqInputxxx.xlsx';
+BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
@@ -243,6 +244,8 @@ for g = 1:height(BaseData)
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
+    % Need to go back to original BaseData... no SITE switch
+    BaseData = VBReadInputFile(FName);
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
     OutInfo.ESIA = ESIA;
     OutInfo.ILData = ILData;
