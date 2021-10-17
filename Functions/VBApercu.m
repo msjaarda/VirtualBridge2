@@ -102,12 +102,13 @@ for i = 1:NumLaneswTr
             end
             
             Temp = TrLineUp(TrLineUp(:,3) == a(j),5);
+            Temp = sort(Temp,'descend');
             if Lane.Dir(i) == 1
                 vc{i}(j,1) = Temp(1)-ILRes*BrStInd-1;
                 vc{i}(j,2) = Temp(end)-ILRes*BrStInd+1;
-            else
-                vc{i}(j,2) = Temp(1)-ILRes*BrStInd+1;
-                vc{i}(j,1) = Temp(end)-ILRes*BrStInd-1;
+             else
+                 vc{i}(j,2) = Temp(1)-ILRes*BrStInd+1;
+                 vc{i}(j,1) = Temp(end)-ILRes*BrStInd-1;
             end
         end
         barp(:,i) = [sum(initial(i,:),2); sum(ac{i},2)];
@@ -264,7 +265,9 @@ for j = 1:TotalLanes
             % Dashed if between same direction
             hold on
             xlim([-0.5 Span+0.5]); ylim([0 10])
-            dashline([0 Span],[0.1 0.1],Span/10,Span/10,Span/10,Span/10,'w','LineWidth',2);
+            %dashline([0 Span],[0.1 0.1],Span/10,Span/10,Span/10,Span/10,'w','LineWidth',2);
+            dashline([0 Span],[0.1 0.1],5,5,5,5,'w','LineWidth',2);
+            %dashedline([0 Span],[0.1 0.1],Span/10,'w','LineWidth',2);
         else
             % Solid if change of direction
             yline(0.1,'-w','LineWidth',2);
