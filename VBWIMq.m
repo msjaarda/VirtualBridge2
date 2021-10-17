@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInputxxx.xlsx';
+FName = 'Input/VBWIMqInputxx.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -91,8 +91,8 @@ for g = 1:height(BaseData)
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
 
             % Perform search for maximums for each day
-            parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
-            %for z = 1:max(PDsy.Group)
+            %parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
+            for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
@@ -134,7 +134,7 @@ for g = 1:height(BaseData)
                         if MaxLE == 0, k = k+1; continue, end
                         k = k+1; % Add to k
                         
-                        % Adjust BrStInd for Starti
+                        % Adjust BrStInd for Starti [now TrLineUpSub(1,1)]
                         BrStIndx = BrStInd + TrLineUpSub(1,1) -1;
                         % Get BrEndIndx
                         BrEndIndx = BrStIndx + BrLengthInd - 1;
@@ -181,7 +181,9 @@ for g = 1:height(BaseData)
                         
                         % Only collect detailed info if desired... function
                         % not written right now
-                        %[L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIM(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,Starti);
+                        if BaseData.Detailed(g)
+                            [L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIMq(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,TrLineUpSub(1,1));
+                        end
                         
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
