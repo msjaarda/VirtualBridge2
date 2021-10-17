@@ -55,9 +55,9 @@ end
 if ~ismember('StopSim', BaseData.Properties.VariableNames)
     BaseData.StopSim(:) = false;
 end
-% if ~ismember('Detailed', BaseData.Properties.VariableNames)
-%     BaseData.Detailed(:) = false;
-% end
+if ~ismember('Detailed', BaseData.Properties.VariableNames)
+    BaseData.Detailed(:) = false;
+end
 
 % Start with Folder
 % Folder is optional, but when not included (or when given as 0), must be '/'

@@ -56,7 +56,7 @@ if Print
 end
 
 % Find those with GW_TOT within 7.5%
-LogSameGW = abs(PDs1.GW_TOT-PDs2.GW_TOT)./PDs1.GW_TOT < 0.075;
+LogSameGW = abs(PDs1.GW_TOT-PDs2.GW_TOT)./PDs1.GW_TOT < 0.1;
 LogSameGWnSPEEDnAX = LogSameGW & LogSameSPEEDnAX;
 % Report
 if Print
@@ -70,7 +70,7 @@ CIndAxs = contains(PDs1.Properties.VariableNames, 'AWT');
 AXCheck = abs((PDs1{:,CIndAxs}-PDs2{:,CIndAxs})./PDs1{:,CIndAxs});
 % Replace all NaNs
 AXCheck(isnan(AXCheck)) = 0;
-LogAXCheck = AXCheck < 0.1;
+LogAXCheck = AXCheck < 0.125;
 LogSameAWT = all(LogAXCheck,2);
 LogSameAWTnGWnSPEEDnAX = LogSameAWT & LogSameGWnSPEEDnAX;
 % Report
@@ -100,11 +100,11 @@ PDs.Dup(IndSame(LogSameAWTnGWnSPEEDnAX)-1) = true;
 % as well as -1!
 
 % Get histogram of weights for offenders
-histogram(PDs.GW_TOT(IndSame(LogSameWBnAWTnGWnSPEEDnAX))/1000)
+%histogram(PDs.GW_TOT(IndSame(LogSameWBnAWTnGWnSPEEDnAX))/1000);
 % Show
-[a, b] = max(PDs.GW_TOT(IndSame(LogSameWBnAWTnGWnSPEEDnAX))/1000);
+[~, b] = max(PDs.GW_TOT(IndSame(LogSameWBnAWTnGWnSPEEDnAX))/1000);
 IndB = IndSame(LogSameWBnAWTnGWnSPEEDnAX);
-PDs(IndB(b)-1:IndB(b),:)
+%PDs(IndB(b)-1:IndB(b),:)
 
 PDs(DeleteAtEnd,:) = []; 
 

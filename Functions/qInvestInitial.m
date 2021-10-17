@@ -21,12 +21,12 @@ for r = 1:length(ILData)
         % Filter based on Class - MaxEvents is compromised after this (deleting entries)
         if strcmp(Class,'ClassOW')
             MaxEventsSub(MaxEventsSub.m == 1,:) = []; %#ok<*SAGROW>
-            Z(Z(:,end) == 1,:) = [];
+            Z(Z(:,4) == 1,:) = [];
         elseif strcmp(Class,'Class')
             MaxEventsSub(MaxEventsSub.m == 1,:) = [];
-            Z(Z(:,end) == 1,:) = [];
+            Z(Z(:,4) == 1,:) = [];
             MaxEventsSub(MaxEventsSub.m == 2,:) = [];
-            Z(Z(:,end) == 2,:) = [];
+            Z(Z(:,4) == 2,:) = [];
         end
         
         for j = 1:length(BM)
@@ -51,7 +51,7 @@ for r = 1:length(ILData)
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
             %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
-            Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'BrStInd', 'DTS', 'm'};
+            Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'DTS'};
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
         end
