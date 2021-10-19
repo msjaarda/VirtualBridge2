@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInputxx.xlsx';
+FName = 'Input/VBWIMqInputx.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -53,7 +53,14 @@ for g = 1:height(BaseData)
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
-        
+        if BaseData.SITE(g) == 405 || BaseData.SITE(g) == 406
+            PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
+        end
+        % Get Duplicates
+        PDs = FindDup2(PDs,0,0);
+        % Delete Duplicates - from L1
+        PDs(PDs.Dup & PDs.LANE == 1,:) = [];
+         
         % Get Only the ClassType Specified
         try
             if strcmp(BaseData.ClassType(g),'Class')
@@ -91,8 +98,8 @@ for g = 1:height(BaseData)
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
 
             % Perform search for maximums for each day
-            %parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
-            for z = 1:max(PDsy.Group)
+            parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
+            %for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
@@ -173,16 +180,10 @@ for g = 1:height(BaseData)
                         
                         if BaseData.Apercu(g) == 1
                             T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                            %exportgraphics(gcf,"Apercu" + BaseData.Folder(g) + "/" + ApercuTitle + ".jpg",'Resolution',600)
+                            %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
                                 TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                             end
-                        end
-                        
-                        % Only collect detailed info if desired... function
-                        % not written right now
-                        if BaseData.Detailed(g)
-                            [L1Veh,L2Veh,L1Spd,L2Spd,L1Load,L2Load,L1Ax,L2Ax] = DetailedVBWIMq(PDsy,TrNumsU,Vehs,AllTrAxSub,BrInds,TrLineUpSub(1,1));
                         end
                         
                         % Get ClassT (in m form for now)
@@ -227,8 +228,6 @@ for g = 1:height(BaseData)
   
     % Convert back to datetime
     MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
-    % Below for Details VBWIM
-    %MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp'});
     MaxEvents.DTS = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
     MaxEvents.Datenum = [];
     
