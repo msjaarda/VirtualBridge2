@@ -52,6 +52,7 @@ for i = 1:length(OInfo)
             VBResults.LaneTrDistr.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(char(OInfo(i).BaseData.Traffic)) = char(OInfo(i).BaseData.LaneTrDistr);
        
         elseif strcmp(OInfo(i).BaseData.AnalysisType,'WIM')
+            %VBResults.LaneTrDistr.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(char(OInfo(i).BaseData.Traffic)) = ' , ';
             if OInfo(i).BaseData.SITE == 11, Traffic = 'Uni2L'; Group = SiteGroups.('Uni2L');
             elseif OInfo(i).BaseData.SITE == 111, Traffic = 'Uni3L'; Group = SiteGroups.('Uni3L');
             elseif OInfo(i).BaseData.SITE == 12, Traffic = 'Bi2L'; Group = SiteGroups.('Bi2L');
@@ -180,6 +181,6 @@ for i = 1:length(OInfo)
             Group = [];
         end
     end
-clear ILSplit
+clear ILSplit ILJoin
 end
 

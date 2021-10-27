@@ -2,7 +2,7 @@ function [FigNum] = VBTriPlotPro(xdata,ydata,PDets,Title,Type,FigNum,FigTitle,La
 %VBTRIPLOT Makes a 3-panel plot in the style of AGB 2002-005
 
 % Use FigNum to cascade figures
-figure('Name',FigTitle,'NumberTitle','off','Position',[200+FigNum*25 200+FigNum*25 730 400]);
+figure('Name',FigTitle,'NumberTitle','off','Position',[200+FigNum*25 200+FigNum*25 830 450]);
 FigNum = FigNum + 1;
 
 % What is xdata is different for different cases? We duplicate when it is
@@ -16,15 +16,30 @@ if ~iscell(xdata)
     end
 end
 
+% Height of Upper
+HtU = 0.11;
+HtL = 0.66;
+IoV = 0.12;
+SpV = 0.06;
+%LoH = IoV+HtL+SpV+HtU;
+
+WiH = 0.18;
+IoH = 0.09;
+SpH = 0.06;
+SpHx = 0.04;
+%OoH = IoH+(WiH+SpH)*2+WiH+SpHx+WiH;
+
 %Define positions for all elements
-Pos.PosGraph(1,:)=[0.08 0.12 0.18 0.62];
-Pos.PosGraph(2,:)=[0.32 0.12 0.18 0.62];
-Pos.PosGraph(3,:)=[0.56 0.12 0.18 0.62];
-Pos.PosSysStat(1,:)=[0.08 0.79 0.18 0.18];
-Pos.PosSysStat(2,:)=[0.32 0.79 0.18 0.18];
-Pos.PosSysStat(3,:)=[0.56 0.79 0.18 0.18];
-Pos.PosTypePont =[0.78 0.79 0.182 0.18];
-Pos.PosTrafi =[0.78 0.12 0.18 0.62];
+Pos.PosGraph(1,:) = [IoH              IoV    WiH    HtL];
+Pos.PosGraph(2,:) = [IoH+WiH+SpH      IoV    WiH    HtL];
+Pos.PosGraph(3,:) = [IoH+(WiH+SpH)*2  IoV    WiH    HtL];
+
+Pos.PosSysStat(1,:) = [IoH              IoV+HtL+SpV     WiH    HtU];
+Pos.PosSysStat(2,:) = [IoH+WiH+SpH      IoV+HtL+SpV     WiH    HtU];
+Pos.PosSysStat(3,:) = [IoH+(WiH+SpH)*2  IoV+HtL+SpV     WiH    HtU];
+
+Pos.PosTypePont = [IoH+(WiH+SpH)*2+WiH+SpHx   IoV+HtL+SpV  WiH    HtU];
+Pos.PosTrafi =    [IoH+(WiH+SpH)*2+WiH+SpHx   IoV          WiH    HtL];
 
 
 Len = 0;
@@ -126,12 +141,16 @@ end
     set(gca,'XTick',[],'YTick',[]);
     
     %Trafic distr
-    LaneTrDistr = strsplit(char(LaneTrDistr),',');
-    [~,TrSize] = size(LaneTrDistr);
-    for i=1:TrSize
-    TrDist(i) = str2num(char(LaneTrDistr(i)));
+    if strcmp(Type,'WIM')
+        LaneTrDistr = {' ',' ',' ',' ',' ',' '};
+    else
+        LaneTrDistr = strsplit(char(LaneTrDistr),',');
+        [~, sizeLTD] = size(LaneTrDistr);
+        for q = 1:sizeLTD
+            LaneTrDistr{q} = append(LaneTrDistr{q},' %');
+        end
     end
-    clear TrSize LaneTrDistr
+    
     
     %Import image trafic
     subplot('Position',Pos.PosTrafi);
@@ -140,148 +159,148 @@ end
         img = imread('Graphs Drawings/DispoVoies/Uni11.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','g','FontSize',15);
         elseif contains(FigTitle,'3L')||contains(FigTitle,'Wid15')
         img = imread('Graphs Drawings/DispoVoies/Uni111.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,177.5,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,177.5,LaneTrDistr{3},'Color','g','FontSize',15);
         elseif contains(FigTitle,'4L')||contains(FigTitle,'Wid18')
         img = imread('Graphs Drawings/DispoVoies/Uni1111.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,177.5,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
-        text(150,232.5,append(int2str(TrDist(4)),'%'),'Color','g','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,177.5,LaneTrDistr{3},'Color','g','FontSize',15);
+        text(150,232.5,LaneTrDistr{4},'Color','g','FontSize',15);
         end
     elseif contains(FigTitle,'Bi')
         if contains(FigTitle,'2L')||contains(FigTitle,'Wid12')
         img = imread('Graphs Drawings/DispoVoies/Bi12.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','y','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','y','FontSize',15);
         elseif contains(FigTitle,'3L')||contains(FigTitle,'Wid15')
         img = imread('Graphs Drawings/DispoVoies/Bi112.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,177.5,append(int2str(TrDist(3)),'%'),'Color','y','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,177.5,LaneTrDistr{3},'Color','y','FontSize',15);
         elseif contains(FigTitle,'4L')||contains(FigTitle,'Wid18')
         img = imread('Graphs Drawings/DispoVoies/Bi1122.png');
         image(img);
         hold on;
-        text(150,69,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,122.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,177.5,append(int2str(TrDist(3)),'%'),'Color','y','FontSize',15);
-        text(150,232.5,append(int2str(TrDist(4)),'%'),'Color','y','FontSize',15);
+        text(150,69,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,122.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,177.5,LaneTrDistr{3},'Color','y','FontSize',15);
+        text(150,232.5,LaneTrDistr{4},'Color','y','FontSize',15);
         end
     elseif contains(FigTitle,'PUN')
         if contains(FigTitle,'3L')||contains(FigTitle,'Wid12')
         img = imread('Graphs Drawings/DispoVoies/PUN111.png');
         image(img);
         hold on;
-        text(150,46,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,100.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,154,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
+        text(150,46,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,100.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,154,LaneTrDistr{3},'Color','g','FontSize',15);
         elseif contains(FigTitle,'4L')||contains(FigTitle,'Wid15')
         img = imread('Graphs Drawings/DispoVoies/PUN1111.png');
         image(img);
         hold on;
-        text(150,46,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,100.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,154,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
-        text(150,206,append(int2str(TrDist(4)),'%'),'Color','g','FontSize',15);
+        text(150,46,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,100.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,154,LaneTrDistr{3},'Color','g','FontSize',15);
+        text(150,206,LaneTrDistr{4},'Color','g','FontSize',15);
         elseif contains(FigTitle,'5L')||contains(FigTitle,'Wid18')
         img = imread('Graphs Drawings/DispoVoies/PUN11111.png');
         image(img);
         hold on;
-        text(150,46,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,100.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,154,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
-        text(150,206,append(int2str(TrDist(4)),'%'),'Color','g','FontSize',15);
-        text(150,257,append(int2str(TrDist(5)),'%'),'Color','g','FontSize',15);
+        text(150,46,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,100.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,154,LaneTrDistr{3},'Color','g','FontSize',15);
+        text(150,206,LaneTrDistr{4},'Color','g','FontSize',15);
+        text(150,257,LaneTrDistr{5},'Color','g','FontSize',15);
         end
     elseif contains(FigTitle,'Chan')
          if contains(FigTitle,'4L')||contains(FigTitle,'Wid12')
         img = imread('Graphs Drawings/DispoVoies/Chan1122.png');
         image(img);
         hold on;
-        text(150,43,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,95.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,150.5,append(int2str(TrDist(3)),'%'),'Color','y','FontSize',15);
-        text(150,205.5,append(int2str(TrDist(4)),'%'),'Color','y','FontSize',15);
+        text(150,43,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,95.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,150.5,LaneTrDistr{3},'Color','y','FontSize',15);
+        text(150,205.5,LaneTrDistr{4},'Color','y','FontSize',15);
         elseif contains(FigTitle,'5L')||contains(FigTitle,'Wid15')
         img = imread('Graphs Drawings/DispoVoies/Chan11122.png');
         image(img);
         hold on;
-        text(150,43,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,95.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,150.5,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
-        text(150,205.5,append(int2str(TrDist(4)),'%'),'Color','y','FontSize',15);
-        text(150,260.5,append(int2str(TrDist(5)),'%'),'Color','y','FontSize',15);
+        text(150,43,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,95.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,150.5,LaneTrDistr{3},'Color','g','FontSize',15);
+        text(150,205.5,LaneTrDistr{4},'Color','y','FontSize',15);
+        text(150,260.5,LaneTrDistr{5},'Color','y','FontSize',15);
         elseif contains(FigTitle,'6L')||contains(FigTitle,'Wid18')
         img = imread('Graphs Drawings/DispoVoies/Chan111222.png');
         image(img);
         hold on;
-        text(150,43,append(int2str(TrDist(1)),'%'),'Color','g','FontSize',15);
-        text(150,95.5,append(int2str(TrDist(2)),'%'),'Color','g','FontSize',15);
-        text(150,150.5,append(int2str(TrDist(3)),'%'),'Color','g','FontSize',15);
-        text(150,205.5,append(int2str(TrDist(4)),'%'),'Color','y','FontSize',15);
-        text(150,260.5,append(int2str(TrDist(5)),'%'),'Color','y','FontSize',15);
-        text(150,315,append(int2str(TrDist(6)),'%'),'Color','y','FontSize',15);
+        text(150,43,LaneTrDistr{1},'Color','g','FontSize',15);
+        text(150,95.5,LaneTrDistr{2},'Color','g','FontSize',15);
+        text(150,150.5,LaneTrDistr{3},'Color','g','FontSize',15);
+        text(150,205.5,LaneTrDistr{4},'Color','y','FontSize',15);
+        text(150,260.5,LaneTrDistr{5},'Color','y','FontSize',15);
+        text(150,315,LaneTrDistr{6},'Color','y','FontSize',15);
         end
     end
         
     if contains(FigTitle,'Uni')||contains(FigTitle,'Bi')
         if contains(FigTitle,'p1')
         plot(50,43,'*','Color','r','LineWidth',6);
-        text(60,23,'p1','Color','r','FontSize',15);
+        text(60,23,'p1','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p2')
         plot(50,69,'*','Color','r','LineWidth',6);
-        text(60,49,'p2','Color','r','FontSize',15);
+        text(60,49,'p2','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p3')
         plot(50,95,'*','Color','r','LineWidth',6);
-        text(60,75,'p3','Color','r','FontSize',15);
+        text(60,75,'p3','Color','r','FontSize',15,'fontweight','bold');
         end
     elseif contains(FigTitle,'PUN')
         if contains(FigTitle,'p1')
         plot(50,19.5,'*','Color','r','LineWidth',6);
-        text(60,0,'p1','Color','r','FontSize',15);
+        text(60,0,'p1','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p2')
         plot(50,46,'*','Color','r','LineWidth',6);
-        text(60,26,'p2','Color','r','FontSize',15);
+        text(60,26,'p2','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p3')
         plot(50,73,'*','Color','r','LineWidth',6);
-        text(60,53,'p3','Color','r','FontSize',15);
+        text(60,53,'p3','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p4')
         plot(50,100.5,'*','Color','r','LineWidth',6);
-        text(60,80.5,'p4','Color','r','FontSize',15);
+        text(60,80.5,'p4','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p5')
         plot(50,128,'*','Color','r','LineWidth',6);
-        text(60,108,'p5','Color','r','FontSize',15);
+        text(60,108,'p5','Color','r','FontSize',15,'fontweight','bold');
         end
      elseif contains(FigTitle,'Chan')
         if contains(FigTitle,'p1')
         plot(50,17.5,'*','Color','r','LineWidth',6);
-        text(60,0,'p1','Color','r','FontSize',15);
+        text(60,0,'p1','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p2')
         plot(50,43,'*','Color','r','LineWidth',6);
-        text(60,23,'p2','Color','r','FontSize',15);
+        text(60,23,'p2','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p3')
         plot(50,68,'*','Color','r','LineWidth',6);
-        text(60,48,'p3','Color','r','FontSize',15);
+        text(60,48,'p3','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p4')
         plot(50,95.5,'*','Color','r','LineWidth',6);
-        text(60,75.5,'p4','Color','r','FontSize',15);
+        text(60,75.5,'p4','Color','r','FontSize',15,'fontweight','bold');
         elseif contains(FigTitle,'p5')
         plot(50,123,'*','Color','r','LineWidth',6);
-        text(60,103,'p5','Color','r','FontSize',15);
+        text(60,103,'p5','Color','r','FontSize',15,'fontweight','bold');
         end
     end
     set(gca,'TickLength',[0,0]);

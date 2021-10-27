@@ -102,11 +102,13 @@ for i = 1:NumLaneswTr
             end
             
             Temp = TrLineUp(TrLineUp(:,3) == a(j),5);
-            Temp = sort(Temp,'descend');
+            %Temp = sort(Temp,'descend');
             if Lane.Dir(i) == 1
+                Temp = sort(Temp,'ascend');
                 vc{i}(j,1) = Temp(1)-ILRes*BrStInd-1;
                 vc{i}(j,2) = Temp(end)-ILRes*BrStInd+1;
-             else
+            else
+                 Temp = sort(Temp,'descend');
                  vc{i}(j,2) = Temp(1)-ILRes*BrStInd+1;
                  vc{i}(j,1) = Temp(end)-ILRes*BrStInd-1;
             end
