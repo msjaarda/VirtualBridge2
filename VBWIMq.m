@@ -28,6 +28,8 @@ for g = 1:height(BaseData)
     if BaseData.SITE(g) == 11, Sites = SiteGroups.('Uni2L');
     elseif BaseData.SITE(g) == 111, Sites = SiteGroups.('Uni3L');
     elseif BaseData.SITE(g) == 12, Sites = SiteGroups.('Bi2L');
+        if BaseData.StopSim(g), Sites(Sites == 441) = [];
+        end
     elseif BaseData.SITE(g) == 1122, Sites = SiteGroups.('Bi4L');
     elseif BaseData.SITE == 110, Traffic = SiteGroups.('LSVAUni2L');
     else Sites = BaseData.SITE(g);
@@ -53,13 +55,16 @@ for g = 1:height(BaseData)
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
+        PDs(PDs.SPEED > 145,:) = [];
         if BaseData.SITE(g) == 405 || BaseData.SITE(g) == 406
             PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
         end
-        % Get Duplicates
-        PDs = FindDup2(PDs,0,0);
-        % Delete Duplicates - from L1
-        PDs(PDs.Dup & PDs.LANE == 1,:) = [];
+        if sum(BaseData.SITE(g)== SiteGroups.Bi4L) == 0 && sum(BaseData.SITE(g)== SiteGroups.Uni3L) == 0
+            % Get Duplicates
+            PDs = FindDup2(PDs,0,0);
+            % Delete Duplicates - from L1
+            PDs(PDs.Dup & PDs.LANE == 1,:) = [];
+        end
          
         % Get Only the ClassType Specified
         try
