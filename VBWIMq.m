@@ -123,7 +123,7 @@ for g = 1:height(BaseData)
                 end
                 
                 % Don't bother running if the segment is too small
-                if length(AllTrAxGr) < 20000/BaseData.ILRes(g), continue, end
+                if length(AllTrAxGr) < 2000/BaseData.ILRes(g), continue, end
                 
                 % For each InfCase
                 for t = 1:Num.InfCases
@@ -142,7 +142,14 @@ for g = 1:height(BaseData)
                     while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                         
                         % Subject Influence Line to Truck Axle Stream
-                        [MaxLE,DLF,BrStInd,~] = VBGetMaxLE(AllTrAxSub,ILData(t).v(:,1:length(Lanes)),BaseData.RunDyn(g));
+                        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v(:,1:length(Lanes)),BaseData.RunDyn(g));
+                        
+                        if BaseData.RunFat(g) == 1
+                            [c,hist,edges,rmm,idx] = rainflow(R);
+                            T = array2table(c,'VariableNames',{'Count','Range','Mean','Start','End'});
+                        end
+                        % Next find a way to save T for every week
+                        
                         if MaxLE == 0, k = k+1; continue, end
                         k = k+1; % Add to k
                         
@@ -202,6 +209,7 @@ for g = 1:height(BaseData)
                         
                         % Save MaxEvents... save Times and Datenums and then convert
                         MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
+                        
                         % Rewrite line if DetailedVBWIM Desired
                         if BaseData.StopSim(g)
                             MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];

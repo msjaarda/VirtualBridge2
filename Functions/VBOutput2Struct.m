@@ -21,6 +21,15 @@ end
 % Clear OutInfo to avoid confusion (we now use complete OInfo)
 clear OutInfo
 
+% Make a table
+VBResults.Weekly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.Yearly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.Daily = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+
+VBResults.SS.Weekly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.SS.Yearly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.SS.Daily = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+
 % Loop through OutInfo
 for i = 1:length(OInfo)
     
@@ -37,6 +46,8 @@ for i = 1:length(OInfo)
     % Remove "AGB" and "MAT"
     %ILSplit(:,1) = extractAfter(ILSplit(:,1),3);
     
+    
+    
     % Loop through ILNames
     for j = 1:length(ILNames)
         ILJoin(j) = strjoin(ILSplit(j,1:7),'.');
@@ -50,7 +61,9 @@ for i = 1:length(OInfo)
             VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(OInfo(i).BaseData.Traffic{:}) = OInfo(i).AQ(ic == k);
             VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(OInfo(i).BaseData.Traffic{:}) = cellfun(@str2num,ILSplit(ic == k,8));
             VBResults.LaneTrDistr.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(char(OInfo(i).BaseData.Traffic)) = char(OInfo(i).BaseData.LaneTrDistr);
-       
+            %VBResults.AllAlpha = [VBResults.AllAlpha OInfo(i).AQ(ic == k)];
+            %VBResults.AllAlphax = [VBResults.AllAlphax cellfun(@str2num,ILSplit(ic == k,8))];
+            
         elseif strcmp(OInfo(i).BaseData.AnalysisType,'WIM')
             %VBResults.LaneTrDistr.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(char(OInfo(i).BaseData.Traffic)) = ' , ';
             if OInfo(i).BaseData.SITE == 11, Traffic = 'Uni2L'; Group = SiteGroups.('Uni2L');
@@ -71,6 +84,49 @@ for i = 1:length(OInfo)
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = cellfun(@str2num,ILSplit(ic == k,8));
+                    
+                    T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
+                    T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
+                    T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
+                    T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
+                    T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
+                    T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
+                    T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
+                    T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
+                    T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+                    T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
+                    T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
+                    T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
+                    VBResults.SS.Weekly = [VBResults.SS.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+                    
+%                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Type'});
+%                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'SubType'});
+%                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Width'});
+%                     T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Layout'});
+%                     T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Support'});
+%                     T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Trans'});
+%                     T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'AE'});
+%                     T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Traffic'});
+%                     T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+%                     T10 = array2table(OInfo(i).AQ.All.Yearly(ic == k)','VariableNames',{'All'});
+%                     T11 = array2table(OInfo(i).AQ.ClassOW.Yearly(ic == k)','VariableNames',{'ClassOW'});
+%                     T12 = array2table(OInfo(i).AQ.Class.Yearly(ic == k)','VariableNames',{'Class'});
+%                     VBResults.SS.Yearly = [VBResults.SS.Yearly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+%                     
+%                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Type'});
+%                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'SubType'});
+%                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Width'});
+%                     T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Layout'});
+%                     T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Support'});
+%                     T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Trans'});
+%                     T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'AE'});
+%                     T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Traffic'});
+%                     T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+%                     T10 = array2table(OInfo(i).AQ.All.Daily(ic == k)','VariableNames',{'All'});
+%                     T11 = array2table(OInfo(i).AQ.ClassOW.Daily(ic == k)','VariableNames',{'ClassOW'});
+%                     T12 = array2table(OInfo(i).AQ.Class.Daily(ic == k)','VariableNames',{'Class'});
+%                     VBResults.SS.Daily = [VBResults.SS.Daily; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+%                     
                 else
                     VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);
                     VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
@@ -78,6 +134,51 @@ for i = 1:length(OInfo)
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
                     VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = cellfun(@str2num,ILSplit(ic == k,8));
+                    
+                    % Increase height of table
+                    
+                    T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
+                    T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
+                    T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
+                    T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
+                    T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
+                    T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
+                    T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
+                    T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
+                    T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+                    T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
+                    T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
+                    T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
+                    VBResults.Weekly = [VBResults.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+                    
+%                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Type'});
+%                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'SubType'});
+%                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Width'});
+%                     T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Layout'});
+%                     T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Support'});
+%                     T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Trans'});
+%                     T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'AE'});
+%                     T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Traffic'});
+%                     T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+%                     T10 = array2table(OInfo(i).AQ.All.Yearly(ic == k)','VariableNames',{'All'});
+%                     T11 = array2table(OInfo(i).AQ.ClassOW.Yearly(ic == k)','VariableNames',{'ClassOW'});
+%                     T12 = array2table(OInfo(i).AQ.Class.Yearly(ic == k)','VariableNames',{'Class'});
+%                     VBResults.Yearly = [VBResults.Yearly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+%                     
+%                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Type'});
+%                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'SubType'});
+%                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Width'});
+%                     T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Layout'});
+%                     T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Support'});
+%                     T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Trans'});
+%                     T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'AE'});
+%                     T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Daily(ic == k)),1),'VariableNames',{'Traffic'});
+%                     T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+%                     T10 = array2table(OInfo(i).AQ.All.Daily(ic == k)','VariableNames',{'All'});
+%                     T11 = array2table(OInfo(i).AQ.ClassOW.Daily(ic == k)','VariableNames',{'ClassOW'});
+%                     T12 = array2table(OInfo(i).AQ.Class.Daily(ic == k)','VariableNames',{'Class'});
+%                     VBResults.SS.Daily = [VBResults.SS.Daily; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+
                 end
             catch
                 VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);

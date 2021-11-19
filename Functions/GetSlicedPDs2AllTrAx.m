@@ -5,7 +5,11 @@ function [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,ILRes)
 [PDsy, TrLineUp] = VBWIMtoAllTrAx_Exp(PDsy,MaxLength,Lane,ILRes);
 
 % Make groups out of each unique day
-PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
+if Lane.Sites.SITE == 460
+    PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','week'));
+else
+    PDsy.Group = findgroups(dateshift(PDsy.DTS,'start','day'));
+end
 
 % Round TrLineUp first row, move unrounded to fifth row
 TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);

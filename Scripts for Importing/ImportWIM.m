@@ -22,7 +22,8 @@ fprintf('\n Time: %s \n\n',datetime('now')), tic
 % -------- INPUT --------
 
 % Tell Matlab where the directory is that holds the daily files
-Directory = 'E:\Rohdaten';
+Directory = 'C:\Users\mjsja\switchdrive\WIMDrop';
+%E:\Rohdaten
 Folder_List = dir(Directory);
 
 % Get List of Folders, including SNames (strings) and Stations (nums)
@@ -52,7 +53,7 @@ end
 Folder_List = Folder_List(KeepFolder); SName = SNames'; Stations = Stations';
 
 % Loop through each folder
-for i = 1:length(Folder_List)
+for i = 6%:length(Folder_List)
     
     % Identify subfolders
     SFolder_List = dir([Folder_List(i).folder '\' Folder_List(i).name]);
@@ -170,7 +171,7 @@ for i = 1:length(Folder_List)
             % Create SITE and COUNTID
             RD.SITE = Station*ones(size(RDI,1),1);
             % Create datetime variable
-            RD.DTS = datetime(Year*ones(size(RDI,1),1),RDI(:,3),RDI(:,2),RDI(:,5),RDI(:,6),RDI(:,7),RDI(:,8));
+            RD.DTS = datetime(Year*ones(size(RDI,1),1),RDI(:,3),RDI(:,2),RDI(:,5),RDI(:,6),RDI(:,7),10*RDI(:,8));
             RD.COUNTID = RDI(:,1);
             % Delete column 18 (total wheelbase) and 1-9 (RESCOD and others)
             RDI(:,18) = []; RDI(:,1:9) = [];
@@ -194,19 +195,21 @@ for i = 1:length(Folder_List)
         if ~isfolder(strcat('Raw WIM\',SName))
             % Add if not there
             mkdir(strcat('Raw WIM\',SName))
-        else
-            % Look for pre-existing file with FileName
-            if ~isfile(strcat('Raw WIM\',SName,'\',FileName,'.mat'))
-                save(strcat('Raw WIM\',SName,'\',FileName),'RD')
-            else
-                RDx = RD;
-                RDx.DIR = zeros(length(RDx.DIR),1);
-                % If there, append
-                load(strcat('Raw WIM\',SName,'\',FileName,'.mat'))
-                RD = [RD; RDx];
-                save(strcat('Raw WIM\',SName,'\',FileName),'RD')
-            end
         end
+        
+        % Look for pre-existing file with FileName
+        if ~isfile(strcat('Raw WIM\',SName,'\',FileName,'.mat'))
+            save(strcat('Raw WIM\',SName,'\',FileName),'RD')
+        else
+            RDx = RD;
+            RDx.DIR = zeros(length(RDx.DIR),1);
+            % If there, append
+            load(strcat('Raw WIM\',SName,'\',FileName,'.mat'))
+            RD = [RD; RDx];
+            RD = sortrows(RD,2);
+            save(strcat('Raw WIM\',SName,'\',FileName),'RD')
+        end
+        
         
         clear RD
         fprintf('%s %d %d %s mins %.0f secs\n',SName,Station,Year,num2str(floor(toc/60)),rem(toc,60))
