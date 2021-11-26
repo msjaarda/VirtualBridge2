@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInputx.xlsx';
+FName = 'Input/VBWIMqInput_WIMClassPP.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -21,19 +21,10 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
-    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = [];
+    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; load('SiteGroups')
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
-    load('SiteGroups.mat')
-    if BaseData.SITE(g) == 11, Sites = SiteGroups.('Uni2L');
-    elseif BaseData.SITE(g) == 111, Sites = SiteGroups.('Uni3L');
-    elseif BaseData.SITE(g) == 12, Sites = SiteGroups.('Bi2L');
-        if BaseData.StopSim(g), Sites(Sites == 441) = [];
-        end
-    elseif BaseData.SITE(g) == 1122, Sites = SiteGroups.('Bi4L');
-    elseif BaseData.SITE == 110, Traffic = SiteGroups.('LSVAUni2L');
-    else Sites = BaseData.SITE(g);
-    end
+    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.StopSim(g));
         
     for w = 1:length(Sites)
         
@@ -65,11 +56,18 @@ for g = 1:height(BaseData)
             % Delete Duplicates - from L1
             PDs(PDs.Dup & PDs.LANE == 1,:) = [];
         end
+        
+        try
+            if BaseData.ClassPP(g)
+                [PDs] = VBClassifyPP(PDs,0);
+            end
+        catch
+        end
          
         % Get Only the ClassType Specified
         try
             if strcmp(BaseData.ClassType(g),'Class')
-                PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 50 | PDs.CLASS < 40),:);
+                PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 90 | PDs.CLASS < 40),:);
             elseif strcmp(BaseData.ClassType(g),'ClassOW')
                 PDs = PDs(PDs.CLASS > 0,:);
             end
@@ -201,7 +199,7 @@ for g = 1:height(BaseData)
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
-                        elseif sum(Vehs > 39 & Vehs < 50) > 0
+                        elseif sum(Vehs > 39 & Vehs < 90) > 0
                             m = 2;
                         else
                             m = 3;

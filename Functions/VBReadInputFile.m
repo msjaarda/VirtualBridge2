@@ -34,6 +34,9 @@ end
 if ~ismember('Save', BaseData.Properties.VariableNames)
     BaseData.Save(:) = 1;
 end
+if ~ismember('NumAnalyses', BaseData.Properties.VariableNames)
+    BaseData.NumAnalyses(:) = 1;
+end
 if ~ismember('VWIM', BaseData.Properties.VariableNames)
     BaseData.VWIM(:) = 0;
 end

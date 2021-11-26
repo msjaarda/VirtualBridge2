@@ -18,7 +18,7 @@ if isWIM
     PDCx = sortrows(PDCx,2);
     
     % Convert time to distance
-    PDCx.Dist = [1; seconds(diff(PDCx.DTS))].*((PDCx.SPEED)*0.2777777777778); %PDCx.Dist(1) = 1;
+    PDCx.Dist = [1; seconds(diff(PDCx.DTS))].*((PDCx.SPEED)*0.2777777777778);
     
     % Delete excess space according to IL... add max veh length
     if SpaceSaver > 0
@@ -29,6 +29,13 @@ if isWIM
     PDCx.SpCu = cumsum(PDCx.Dist);
     
 end
+
+% ATTENTION FOR PLATOONING WIM INTEGRATION...
+% WE NEED TO MAINTAIN THE LANE-2-LANE CORRELATION... NEED TO MODIFY
+% INTRAPLATOON DIST WHILE NOT TOUCHING THIS...
+
+% CAN WE DO THE CUMSUM LIKE
+% NORMAL... then turn around and alter the PDCx.DIST for PDCx.PLAT == true
 
 % Spacing is front of veh to front of veh
 PDCx.LnTrSpacing = zeros(height(PDCx),1);

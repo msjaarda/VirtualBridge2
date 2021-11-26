@@ -18,7 +18,7 @@ if isWIM
     PDCx = sortrows(PDCx,2);
     
     % Convert time to distance
-    PDCx.Dist = [1; seconds(diff(PDCx.DTS))].*((PDCx.SPEED)*0.2777777777778); %PDCx.Dist(1) = 1;
+    PDCx.Dist = [1; seconds(diff(PDCx.DTS))].*((PDCx.SPEED)*0.2777777777778);
     
     % Delete excess space according to IL... add max veh length
     if SpaceSaver > 0

@@ -17,9 +17,7 @@ end
 figure
 
 % Just for displaying class, see Classify...
-TrTyps = [0; 11; 119; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238; 41; 42; 43; 44; 45; 46; 47; 48; 49];
-TrNames = ["NC" "11" "11bis" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "11112r" "112a" "113a" "123a"...
-    "60t Crane" "6ax 60t" "7ax 72t" "8ax 84t" "9ax 96t" "96t Crane" "Libherr 132" "Libherr 15" "84t AT7"];
+[TrTyps,TrNames] = VBTypes2Names;
 
 % Get number and name of lanes
 LaneswTr = unique(PDC.LANE); 

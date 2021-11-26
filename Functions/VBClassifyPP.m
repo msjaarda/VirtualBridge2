@@ -1,4 +1,4 @@
-function [PD] = VBClassifyPP(PD)
+function [PD] = VBClassifyPP(PD,Report)
 %VB Classify PP (plus plus)
 
 load('ClassPPInfo')       % CPPInfo
@@ -41,8 +41,10 @@ ClassPBe = 100*sum(PD.CLASS > 0)/height(PD);
 % After
 ClassPAf = 100*(sum(PD.CLASS > 0)+height(YY))/height(PD);
 
+
+if Report
 % Original Number of Class+
-ClassPlusBe = sum(PD.CLASS > 40 & PD.CLASS < 80);
+ClassPlusBe = sum(PD.CLASS > 40 & PD.CLASS < 90);
 fprintf('\nTotal Before: %i\n',ClassPlusBe)
 % After
 ClassPlusAf = ClassPlusBe + height(YY);
@@ -59,8 +61,9 @@ figure; histogram(YY.GW_TOT/1000,40,'normalization','pdf','DisplayName','Newly C
 set(gca,'ytick',[],'yticklabel',[],'ycolor','k'); ylabel('Normalized PDFs')
 xlabel('Weight (tonnes)')
 % Weights of all
-hold on; histogram(PD.GW_TOT(PD.GW_TOT > 6000)/1000,30,'normalization','pdf','DisplayName','All Vehicles')
-
+hold on; histogram(PD.GW_TOT(PD.GW_TOT > 6000)/1000,50,'normalization','pdf','DisplayName','All Vehicles')
+legend('location','best')
+end
 % Save new var? Not yet...
 
 
