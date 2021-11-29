@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput_WIMClassPP.xlsx';
+FName = 'Input/VBWIMqInput_WIMPlatoonFull.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -57,13 +57,13 @@ for g = 1:height(BaseData)
             PDs(PDs.Dup & PDs.LANE == 1,:) = [];
         end
         
+        % Do Classified Plus Plus
         try
             if BaseData.ClassPP(g)
                 [PDs] = VBClassifyPP(PDs,0);
             end
         catch
         end
-         
         % Get Only the ClassType Specified
         try
             if strcmp(BaseData.ClassType(g),'Class')
@@ -72,6 +72,16 @@ for g = 1:height(BaseData)
                 PDs = PDs(PDs.CLASS > 0,:);
             end
         catch 
+        end
+        % Platoon
+        try
+            if BaseData.Plat(g)
+                TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
+                PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
+                PDs(PDs.SPEED == 0,:) = [];
+                PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
+            end
+        catch
         end
         
         % Separate for each year...
@@ -86,7 +96,7 @@ for g = 1:height(BaseData)
         end
         
         % Start Progress Bar
-         u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
+        u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
         
         for r = 1:length(UYears)
             

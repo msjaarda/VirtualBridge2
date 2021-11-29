@@ -47,7 +47,6 @@ for i = 1:length(OInfo)
     %ILSplit(:,1) = extractAfter(ILSplit(:,1),3);
     
     
-    
     % Loop through ILNames
     for j = 1:length(ILNames)
         ILJoin(j) = strjoin(ILSplit(j,1:7),'.');
@@ -78,28 +77,159 @@ for i = 1:length(OInfo)
                 Traffic = strcat(Sites.SName(Sites.SITE == OInfo(i).BaseData.SITE),num2str(OInfo(i).BaseData.SITE)); Group = [];
             end
             try
+                OInfo(i).SimStop = OInfo(i).SimStop;
+            catch
+                OInfo(i).SimStop = false;
+            end
+            if OInfo(i).SimStop
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = OInfo(i).AQ.All.Weekly(ic == k);
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = OInfo(i).AQ.Class.Weekly(ic == k);
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = cellfun(@str2num,ILSplit(ic == k,8));
+                
+                T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
+                T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
+                T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
+                T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
+                T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
+                T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
+                T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
+                T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
+                T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+                T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
+                T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
+                T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
+                VBResults.SS.Weekly = [VBResults.SS.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+                
+            else
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
+                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = OInfo(i).AQ.Class.Weekly(ic == k);
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = cellfun(@str2num,ILSplit(ic == k,8));
+                
+                T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
+                T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
+                T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
+                T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
+                T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
+                T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
+                T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
+                T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
+                T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
+                T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
+                T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
+                T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
+                VBResults.Weekly = [VBResults.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+                
+                
+            end
+            try
+                OInfo(i).BaseData.Plat = OInfo(i).BaseData.Plat;
+            catch
+                OInfo(i).BaseData.Plat = false;
+            end
+            % Now make one specifically for platooning (can still use normal with platoons)
+            if OInfo(i).BaseData.Plat
+
+                VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).All = OInfo(i).AQ.All.Weekly(ic == k);
+                VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
+                VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).Class = OInfo(i).AQ.Class.Weekly(ic == k);
+                VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).All = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
+                VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).Class = cellfun(@str2num,ILSplit(ic == k,8));
+                
+            end
+            
+            if ~isempty(Group)
+                % Cycle through each element in Group and filter Max
+                
                 if OInfo(i).SimStop
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = OInfo(i).AQ.All.Weekly(ic == k);
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = OInfo(i).AQ.Class.Weekly(ic == k);
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopAll = cellfun(@str2num,ILSplit(ic == k,8));
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClassOW = cellfun(@str2num,ILSplit(ic == k,8));
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).StopClass = cellfun(@str2num,ILSplit(ic == k,8));
                     
-                    T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
-                    T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
-                    T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
-                    T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
-                    T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
-                    T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
-                    T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
-                    T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
-                    T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
-                    T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
-                    T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
-                    T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
-                    VBResults.SS.Weekly = [VBResults.SS.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
+                    BM = {'Daily', 'Weekly', 'Yearly'};             % j
+                    ClassType = {'All', 'ClassOW', 'Class'};        % i
+                    DistTypes = {'Lognormal'};
                     
+                    for z = 1:length(Group)
+                        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+                        for r = ia(k):ia(k)+sum(ic == k)-1
+                            for p = 1:length(ClassType)
+                                Class = ClassType{p};
+                                BlockM = BM{2};
+                                % Filter Max for Group element
+                                Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
+                                
+                                
+                                %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
+                                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+                                [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
+                                
+                                Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
+                                
+                                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = AQ;
+                                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                
+                            end
+                        end
+                    end
+                else
+                    
+                    BM = {'Daily', 'Weekly', 'Yearly'};             % j
+                    ClassType = {'All', 'ClassOW', 'Class'};        % i
+                    DistTypes = {'Lognormal'};
+                    
+                    for z = 1:length(Group)
+                        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+                        for r = ia(k):ia(k)+sum(ic == k)-1
+                            for p = 1:length(ClassType)
+                                Class = ClassType{p};
+                                BlockM = BM{2};
+                                % Filter Max for Group element
+                                Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
+                                
+                                
+                                %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
+                                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+                                [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
+                                
+                                Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
+                                
+                                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = AQ;
+                                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                
+                                if OInfo(i).BaseData.Plat
+                                    
+                                    VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).(Class)(r-ia(k)+1) = AQ;
+                                    VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(i).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(i).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(i).BaseData.PlatFolDist))).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
+                                    
+                                end
+                                
+                            end
+                        end
+                    end
+                end
+            end
+            Group = [];
+        end
+    end
+clear ILSplit ILJoin
+end
+
+
+
+% Legacy
+
+% Make a table (LINE 24)
+% VBResults.Yearly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.Daily = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+
+% VBResults.SS.Yearly = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+% VBResults.SS.Daily = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+
+
 %                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Type'});
 %                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'SubType'});
 %                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Width'});
@@ -127,31 +257,8 @@ for i = 1:length(OInfo)
 %                     T11 = array2table(OInfo(i).AQ.ClassOW.Daily(ic == k)','VariableNames',{'ClassOW'});
 %                     T12 = array2table(OInfo(i).AQ.Class.Daily(ic == k)','VariableNames',{'Class'});
 %                     VBResults.SS.Daily = [VBResults.SS.Daily; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
-%                     
-                else
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
-                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = OInfo(i).AQ.Class.Weekly(ic == k);
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = cellfun(@str2num,ILSplit(ic == k,8));
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
-                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = cellfun(@str2num,ILSplit(ic == k,8));
-                    
-                    % Increase height of table
-                    
-                    T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Type'});
-                    T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'SubType'});
-                    T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Width'});
-                    T4 = array2table(repmat(ILSplit(ia(k),4),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Layout'});
-                    T5 = array2table(repmat(ILSplit(ia(k),5),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Support'});
-                    T6 = array2table(repmat(ILSplit(ia(k),6),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Trans'});
-                    T7 = array2table(repmat(ILSplit(ia(k),7),length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'AE'});
-                    T8 = array2table(repmat(convertCharsToStrings(Traffic) ,length(OInfo(i).AQ.All.Weekly(ic == k)),1),'VariableNames',{'Traffic'});
-                    T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
-                    T10 = array2table(OInfo(i).AQ.All.Weekly(ic == k)','VariableNames',{'All'});
-                    T11 = array2table(OInfo(i).AQ.ClassOW.Weekly(ic == k)','VariableNames',{'ClassOW'});
-                    T12 = array2table(OInfo(i).AQ.Class.Weekly(ic == k)','VariableNames',{'Class'});
-                    VBResults.Weekly = [VBResults.Weekly; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
-                    
+
+
 %                     T1 = array2table(repmat(ILSplit(ia(k),1),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Type'});
 %                     T2 = array2table(repmat(ILSplit(ia(k),2),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'SubType'});
 %                     T3 = array2table(repmat(ILSplit(ia(k),3),length(OInfo(i).AQ.All.Yearly(ic == k)),1),'VariableNames',{'Width'});
@@ -178,113 +285,4 @@ for i = 1:length(OInfo)
 %                     T10 = array2table(OInfo(i).AQ.All.Daily(ic == k)','VariableNames',{'All'});
 %                     T11 = array2table(OInfo(i).AQ.ClassOW.Daily(ic == k)','VariableNames',{'ClassOW'});
 %                     T12 = array2table(OInfo(i).AQ.Class.Daily(ic == k)','VariableNames',{'Class'});
-%                     VBResults.SS.Daily = [VBResults.SS.Daily; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
-
-                end
-            catch
-                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = OInfo(i).AQ.All.Weekly(ic == k);
-                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = OInfo(i).AQ.ClassOW.Weekly(ic == k);
-                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = OInfo(i).AQ.Class.Weekly(ic == k);
-                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).All = cellfun(@str2num,ILSplit(ic == k,8));
-                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).ClassOW = cellfun(@str2num,ILSplit(ic == k,8));
-                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).Class = cellfun(@str2num,ILSplit(ic == k,8));
-            end
-            if ~isempty(Group)
-                % Cycle through each element in Group and filter Max
-                
-                try
-                    if OInfo(i).SimStop
-                    
-                        BM = {'Daily', 'Weekly', 'Yearly'};             % j
-                        ClassType = {'All', 'ClassOW', 'Class'};        % i
-                        DistTypes = {'Lognormal'};
-                    
-                        for z = 1:length(Group)
-                            % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-                            for r = ia(k):ia(k)+sum(ic == k)-1
-                                for p = 1:length(ClassType)
-                                    Class = ClassType{p};
-                                    BlockM = BM{2};
-                                    % Filter Max for Group element
-                                    Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
-                                
-                                
-                                    %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
-                                    %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                                    [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
-                                
-                                    Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
-                                
-                                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = AQ;
-                                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' Class])(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
-                                
-                                end
-                            end
-                        end
-                    else
-                    
-                        BM = {'Daily', 'Weekly', 'Yearly'};             % j
-                        ClassType = {'All', 'ClassOW', 'Class'};        % i
-                        DistTypes = {'Lognormal'};
-                    
-                        for z = 1:length(Group)
-                            % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-                            for r = ia(k):ia(k)+sum(ic == k)-1
-                                for p = 1:length(ClassType)
-                                    Class = ClassType{p};
-                                    BlockM = BM{2};
-                                    % Filter Max for Group element
-                                    Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
-                                
-                                
-                                    %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
-                                    %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                                    [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
-                                
-                                    Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
-                                
-                                    VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = AQ;
-                                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
-                                
-                                end
-                            end
-                        end
-                
-                    end
-                    
-                catch
-                    
-                    BM = {'Daily', 'Weekly', 'Yearly'};             % j
-                    ClassType = {'All', 'ClassOW', 'Class'};        % i
-                    DistTypes = {'Lognormal'};
-                    
-                    for z = 1:length(Group)
-                        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-                        for r = ia(k):ia(k)+sum(ic == k)-1
-                            for p = 1:length(ClassType)
-                                Class = ClassType{p};
-                                BlockM = BM{2};
-                                % Filter Max for Group element
-                                Maxi = OInfo(i).Max(r).(Class).(BlockM).Max(OInfo(i).Max(r).(Class).(BlockM).SITE == Group(z));
-                                
-                                
-                                %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(i,'Lognormal',BaseData.Plots(g));
-                                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                                [~, AQ, ~] = GetBlockMaxEd(Maxi,BlockM,'Lognormal',OInfo(i).ESIA.Total(r),OInfo(i).ESIA.EQ(:,r),OInfo(i).ESIA.Eq(:,r),0.6,0.5);
-                                
-                                Traffic = strcat(Sites.SName(Sites.SITE == Group(z)),num2str(Group(z)));
-                                
-                                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = AQ;
-                                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(Class)(r-ia(k)+1) = cellfun(@str2num,ILSplit(r,8));
-                                
-                            end
-                        end
-                    end
-                end
-            end
-            Group = [];
-        end
-    end
-clear ILSplit ILJoin
-end
-
+%                     VBResults.Daily = [VBResults.SS.Daily; T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12];
