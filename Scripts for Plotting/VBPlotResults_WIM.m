@@ -9,8 +9,8 @@ AE(1) = "Mn"; AE(2) = "Mp"; AE(3) = "V";
 Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 %#ok<*SAGROW> ... to prevent warning messages
 % Get VBResults using VBOutput2Struct
-%[VBResults] = VBOutput2Struct('WIM');
-load('VBResults.mat')
+[VBResults] = VBOutput2Struct('WIM');
+%load('VBResults.mat')
 % Class
 Class = 'All'; ClassS = 'StopAll';
 
@@ -517,7 +517,7 @@ end
 % Global Definitions
 FigNum = 0; D = linspecer(30);      % Set colours
 
-clear Type SubType Support Trans
+clear Type SubType Support Trans Class Width
 
 Type{1} = 'Box';         SubType{1} = 'Stand';
 Support{1} = 'Simp';     Trans{1} = 'p0';
