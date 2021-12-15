@@ -23,6 +23,8 @@ for i = 1:NumTrTyp
     
     % Get all Platoon Candidates
     PrimeCand = PD.CLASS == TrTyps(i) & PD.GW_TOT > prctile(PD.GW_TOT(PD.CLASS == TrTyps(i)),35) & PD.Plat == false & PD.Trail == false & PD.Lead == false;
+    % TRY NO 35!! Change after 15/12/21
+    %PrimeCand = PD.CLASS == TrTyps(i) & PD.Plat == false & PD.Trail == false & PD.Lead == false;
     PrimeCand(1:4) = false;  PrimeCand(end-PlatSize-1:end) = false;
     
     % New Indexed Swapping Procedure

@@ -51,7 +51,11 @@ for r = 1:length(ILData)
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
             %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
-            Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'DTS'};
+            try
+                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'DTS'};
+            catch % For platooning
+                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType', 'DTS'};
+            end
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
         end

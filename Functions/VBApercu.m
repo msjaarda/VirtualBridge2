@@ -27,6 +27,9 @@ NumLaneswTr = length(LaneswTr);
 % Get TotalLanes and get Aperçu lanes (ALane)
 
 TotalLanes = Lane.Sites.NumLanes;
+%ALane = Lane.Details.ALANE;
+% We need to sort Lane.Details by LANE first... then do this.
+Lane.Details = sortrows(Lane.Details,3);
 ALane = Lane.Details.ALANE;
 
 % Get total number of subplots

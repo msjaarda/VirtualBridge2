@@ -37,7 +37,10 @@ if Plot
 
     y1 = ylim;
     text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
-    text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
+    if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
+%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+    end
     
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
     ylabel('Normalized Histograms (NTS)')
@@ -45,4 +48,17 @@ if Plot
 
 end
 
+% [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
+%     if strcmp(Dist,'Normal')
+%         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
+%     elseif strcmp(Dist,'Lognormal')
+%         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
+%     end
+%     
+%         if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
+%         %text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
+%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+%     end
+    
+    
 end

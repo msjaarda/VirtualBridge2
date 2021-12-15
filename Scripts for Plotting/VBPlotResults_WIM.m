@@ -9,8 +9,9 @@ AE(1) = "Mn"; AE(2) = "Mp"; AE(3) = "V";
 Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 %#ok<*SAGROW> ... to prevent warning messages
 % Get VBResults using VBOutput2Struct
-[VBResults] = VBOutput2Struct('WIM');
-%load('VBResults.mat')
+%[VBResults] = VBOutput2Struct('WIM');
+[VBResultsPP] = VBOutput2Struct('WIMClassPP');
+load('VBResults.mat')
 % Class
 Class = 'All'; ClassS = 'StopAll';
 

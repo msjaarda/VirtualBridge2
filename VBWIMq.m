@@ -78,6 +78,9 @@ for g = 1:height(BaseData)
             if BaseData.Plat(g)
                 TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
                 PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
+                if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
+                    PlatPct(3) = 0; PlatPct(4) = 0;
+                end
                 PDs(PDs.SPEED == 0,:) = [];
                 PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
             end
@@ -198,14 +201,6 @@ for g = 1:height(BaseData)
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
                         
-                        if BaseData.Apercu(g) == 1
-                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                            %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
-                            if BaseData.StopSim(g)
-                                TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                            end
-                        end
-                        
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
@@ -215,8 +210,26 @@ for g = 1:height(BaseData)
                             m = 3;
                         end
                         
+                        if BaseData.Apercu(g) == 1 
+                        %if MaxLE > 9000 && m == 3
+                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
+                            if BaseData.StopSim(g)
+                                TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            end
+                        end
+                        
+
                         % Save MaxEvents... save Times and Datenums and then convert
-                        MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
+                        if BaseData.Plat(g) % Also return platoon type
+                            if max(PDsy.Plat(TrNumsU)) > 0
+                                MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx mode(Vehs)];
+                            else
+                                MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx 0];
+                            end
+                        else
+                            MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
+                        end
                         
                         % Rewrite line if DetailedVBWIM Desired
                         if BaseData.StopSim(g)
@@ -248,7 +261,11 @@ for g = 1:height(BaseData)
     end % w, SiteGroups
   
     % Convert back to datetime
-    MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
+    if BaseData.Plat(g)
+        MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'});
+    else
+        MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
+    end
     MaxEvents.DTS = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
     MaxEvents.Datenum = [];
     

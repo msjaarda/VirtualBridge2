@@ -82,7 +82,7 @@ if strcmp(Type,'WIMComp')
         ytickformat('%.2f'); yticks(0:0.1:1); set(gca,'TickDir','out'); set(gca,'YGrid','on'); xticks(xSt:xFi);
         xticklabels(Lab(xSt:xFi));
         xlabel('Span (m)')
-        title(Title{m})
+        title(Title{m},'FontSize',18);
         % get handle of current, set box property to off and remove background color
         a = gca; set(a,'box','off','color','none');
         % create new, empty axes with box but without ticks

@@ -42,6 +42,10 @@ elseif strcmp(Dist,'Lognormal')
     Ed = Em*exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+elseif strcmp(Dist,'Extreme Value')
+    Ed = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
+    AQ = Ed/(ESIAT);
+    Aq = 1;   
 end
 
 end
