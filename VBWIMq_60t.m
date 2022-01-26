@@ -31,7 +31,8 @@ for g = 1:height(BaseData)
         % Modify BaseData.SITE(g) based on SiteSet
         BaseData.SITE(g) = Sites(w);
         % Update analysis data for current row of BaseData
-        [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
+        [Num,Lane,ILData,~,~,E] = VBUpdateDataLM(BaseData(g,:));
+        ESIA = E.E41;
         
         % Get MaxLength for Spacesave
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
@@ -74,17 +75,14 @@ for g = 1:height(BaseData)
         catch 
         end
         % Platoon
-        try
-            if BaseData.Plat(g)
-                TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
-                PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
-                if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
-                    PlatPct(3) = 0; PlatPct(4) = 0;
-                end
-                PDs(PDs.SPEED == 0,:) = [];
-                PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
+        if BaseData.Plat(g)
+            TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
+            PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
+            if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
+                PlatPct(3) = 0; PlatPct(4) = 0;
             end
-        catch
+            PDs(PDs.SPEED == 0,:) = [];
+            PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
         end
         
         % Separate for each year...
@@ -204,7 +202,7 @@ for g = 1:height(BaseData)
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
-                        elseif sum(Vehs > 39 & Vehs < 90) > 0
+                        elseif sum(Vehs == 41) > 0
                             m = 2;
                         else
                             m = 3;
@@ -236,7 +234,7 @@ for g = 1:height(BaseData)
                             MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
                         end
                         
-                        if m == 3
+                        if m == 2
                             k = 100; % Bump k up so that analysis doesn't continue!
                         end
                         
@@ -280,13 +278,14 @@ for g = 1:height(BaseData)
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
-    [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
+    [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     % Need to go back to original BaseData... no SITE switch
     BaseData = VBReadInputFile(FName);
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
-    OutInfo.ESIA = ESIA;
+    % ATTENTION!
+    OutInfo.ESIA = ESIA; %OutInfo.E41 = E41;
     OutInfo.ILData = ILData;
     OutInfo.SimStop = false;
     OutInfo.Max = Max;

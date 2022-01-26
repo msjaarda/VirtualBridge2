@@ -61,6 +61,9 @@ end
 if ~ismember('Detailed', BaseData.Properties.VariableNames)
     BaseData.Detailed(:) = false;
 end
+if ~ismember('Plat', BaseData.Properties.VariableNames)
+    BaseData.Plat(:) = false;
+end
 
 % Start with Folder
 % Folder is optional, but when not included (or when given as 0), must be '/'

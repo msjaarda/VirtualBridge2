@@ -67,11 +67,13 @@ for i = 1:length(OInfo)
             %VBResults.LaneTrDistr.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(char(OInfo(i).BaseData.Traffic)) = ' , ';
             % Similar to VBGetSiteSet
             if OInfo(i).BaseData.SITE == 11, Traffic = 'Uni2L'; Group = SiteGroups.('Uni2L');
+                Group(Group == 418) = [];
             elseif OInfo(i).BaseData.SITE == 111, Traffic = 'Uni3L'; Group = SiteGroups.('Uni3L');
             elseif OInfo(i).BaseData.SITE == 12, Traffic = 'Bi2L'; Group = SiteGroups.('Bi2L');
                 if OInfo(i).BaseData.StopSim, Group(Group == 441) = [];
                 end
             elseif OInfo(i).BaseData.SITE == 1122, Traffic = 'Bi4L'; Group = SiteGroups.('Bi4L');
+                Group(Group == 487) = [];
             elseif OInfo(i).BaseData.SITE == 110, Traffic = 'LSVAUni2L'; Group = SiteGroups.('LSVAUni2L');
             else
                 Traffic = strcat(Sites.SName(Sites.SITE == OInfo(i).BaseData.SITE),num2str(OInfo(i).BaseData.SITE)); Group = [];

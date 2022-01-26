@@ -43,26 +43,31 @@ ClassPAf = 100*(sum(PD.CLASS > 0)+height(YY))/height(PD);
 
 
 if Report
-% Original Number of Class+
-ClassPlusBe = sum(PD.CLASS > 40 & PD.CLASS < 90);
-fprintf('\nTotal Before: %i\n',ClassPlusBe)
-% After
-ClassPlusAf = ClassPlusBe + height(YY);
-fprintf('Total After:  %i (%% %0.1f)\n\n ',ClassPlusAf,100*(ClassPlusAf-ClassPlusBe)/ClassPlusBe)
-
-% Change Class (add an offset of 50)
-PD.CLASS(ABID > 0 & PD.CLASS == 0) = ABID(ABID > 0 & PD.CLASS == 0)+ 50;
-
-% New ++ Classes Histogram
-figure; histogram(PD.CLASS(PD.CLASS > 40 & PD.CLASS < 80)); ylabel('#')
-xlabel('Vehicle Class')
-% Weights of only classified
-figure; histogram(YY.GW_TOT/1000,40,'normalization','pdf','DisplayName','Newly Classified')
-set(gca,'ytick',[],'yticklabel',[],'ycolor','k'); ylabel('Normalized PDFs')
-xlabel('Weight (tonnes)')
-% Weights of all
-hold on; histogram(PD.GW_TOT(PD.GW_TOT > 6000)/1000,50,'normalization','pdf','DisplayName','All Vehicles')
-legend('location','best')
+    % Original Number of Class+
+    ClassPlusBe = sum(PD.CLASS > 40 & PD.CLASS < 90);
+    fprintf('\nTotal Before: %i\n',ClassPlusBe)
+    % After
+    ClassPlusAf = ClassPlusBe + height(YY);
+    fprintf('Total After:  %i (%% %0.1f)\n\n ',ClassPlusAf,100*(ClassPlusAf-ClassPlusBe)/ClassPlusBe)
+    
+    % Change Class (add an offset of 50)
+    PD.CLASS(ABID > 0 & PD.CLASS == 0 & PD.GW_TOT > 50000) = ABID(ABID > 0 & PD.CLASS == 0 & PD.GW_TOT > 50000)+ 50;
+    
+    % New ++ Classes Histogram
+    figure; histogram(PD.CLASS(PD.CLASS > 40 & PD.CLASS < 90)); ylabel('#')
+    xlabel('Vehicle Class')
+    % Weights of only classified
+    figure; histogram(YY.GW_TOT/1000,40,'normalization','pdf','DisplayName','Newly Classified')
+    set(gca,'ytick',[],'yticklabel',[],'ycolor','k'); ylabel('Normalized PDFs')
+    xlabel('Weight (tonnes)')
+    % Weights of all
+    hold on; histogram(PD.GW_TOT(PD.GW_TOT > 6000)/1000,50,'normalization','pdf','DisplayName','All Vehicles')
+    legend('location','best')
+    
+else
+    
+    PD.CLASS(ABID > 0 & PD.CLASS == 0 & PD.GW_TOT > 50000) = ABID(ABID > 0 & PD.CLASS == 0 & PD.GW_TOT > 50000)+ 50;
+    
 end
 % Save new var? Not yet...
 
