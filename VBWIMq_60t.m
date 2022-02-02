@@ -14,6 +14,9 @@ clear, clc, tic, format long g, rng('shuffle'), close all;
 FName = 'Input/VBWIMqInput60t.xlsx';
 BaseData = VBReadInputFile(FName);
 
+% Let's try to delete all the WIM records not around the 60t vehicles...
+% That way we specifically find just the 60t. Try this with 60t... see 115
+
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
 
@@ -107,13 +110,24 @@ for g = 1:height(BaseData)
             else
                 PDsy = PDs(year(PDs.DTS) == UYears(r),:);
             end
-                       
+            
+            % Modify to only include type 41 and surrounding vehicles
+            PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
+            % Add 20 vehicles + and -            
+            
+            if isempty(PDsy)
+                user = memory;
+                RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+                LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
+                continue
+            end
+            
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
 
             % Perform search for maximums for each day
-            parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
-            %for z = 1:max(PDsy.Group)
+            %parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
+            for z = 1:max(PDsy.Group)
                 
                 % Initialize
                 MaxEvents1 = []; MaxEvents1Stop = [];
@@ -150,6 +164,9 @@ for g = 1:height(BaseData)
                     k = 0; % Initialize k
                     while k < BaseData.NumAnalyses(g) && sum(AllTrAxSub,'all') > 0
                         
+                        % Now the issue is that I have to figure out how
+                        % much of MaxLE is from the ST... and remove
+                        
                         % Subject Influence Line to Truck Axle Stream
                         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxSub,ILData(t).v(:,1:length(Lanes)),BaseData.RunDyn(g));
                         
@@ -169,7 +186,8 @@ for g = 1:height(BaseData)
                         % Get Bridge Indices
                         BrIndsx = [BrStIndx:BrEndIndx]';
                         BrInds = [BrStInd:BrStInd+BrLengthInd - 1]';
-                        %AxOnBr = sum(AllTrAxt(StripInds,:),2);
+                        %AxOnBr = sum(AllTrAxSub(BrInds,:),2);
+                        %sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))))
                         
                         % Get Key Info to Save
                         TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),3);
@@ -198,6 +216,26 @@ for g = 1:height(BaseData)
                         % We use TrNums because they don't depend on Starti shift
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
+                        
+                        if sum(Vehs == 41) == 0
+                            AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
+                            k = k + 1;
+                            continue
+                        end
+                        % Get Modified MaxLE. first set alxes from 60t to 0
+                        % Find indices of AllTrAxSub... must used
+                        % TrLineUpOnBr cols 1 and 4 (but w/ x vs no x
+                        % offset? hmm
+                        B4 = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
+                        % Set Vehs == 41 axles to 0
+                        AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1),4))) = 0;
+                        % Calculate MaxLE again
+                        MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
+                        % First step is to find out how much of the time we
+                        % actually have an accompanying vehicle...
+%                         if length(TrNumsU) > 1
+%                             k = 100;
+%                         end
                         
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
@@ -234,9 +272,9 @@ for g = 1:height(BaseData)
                             MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
                         end
                         
-                        if m == 2
-                            k = 100; % Bump k up so that analysis doesn't continue!
-                        end
+%                         if m == 2
+%                             k = 100; % Bump k up so that analysis doesn't continue!
+%                         end
                         
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                         AllTrAxSub(BrInds,:) = 0;
@@ -253,7 +291,7 @@ for g = 1:height(BaseData)
             % Update progress bar
             user = memory;
             RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-            LenPrint = VBUpProgBar(u,st,g,1,length(UYears),1,RamUsed(end),r,LenPrint);
+            LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
             
         end % r, years
     end % w, SiteGroups
@@ -275,10 +313,10 @@ for g = 1:height(BaseData)
     
     % m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
     % qInvestInitial Inputs
-    BM = {'Daily', 'Weekly', 'Yearly'};             % j
-    ClassType = {'All', 'ClassOW', 'Class'};        % i
+    BM = {'Weekly', 'Yearly'};             % j
+    ClassType = {'ClassOW'};        % i
     DistTypes = {'Lognormal'};
-    [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData);
+    [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData); % TROUBLESHOOT
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     % Need to go back to original BaseData... no SITE switch
@@ -294,10 +332,10 @@ for g = 1:height(BaseData)
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{2};
-            [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
+            BlockM = BM{1};
+            [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit_60t(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-            [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
+            [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd_60t(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
         end
     end
     

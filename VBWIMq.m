@@ -255,7 +255,7 @@ for g = 1:height(BaseData)
             % Update progress bar
             user = memory;
             RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-            LenPrint = VBUpProgBar(u,st,g,1,length(UYears),1,RamUsed(end),r,LenPrint);
+            LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
             
         end % r, years
     end % w, SiteGroups
