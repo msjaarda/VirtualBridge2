@@ -18,16 +18,6 @@ ClassOnly = false;
 %shift = find(string(PDC.Properties.VariableNames) == "AX");
 shift = find(string(PDC.Properties.VariableNames) == "AWT01") -1;
 
-% if width(PDC) > 35
-%     if sum(strcmp('Head',PDC.Properties.VariableNames)) > 0
-%         shift = 13;
-%     else
-%         shift = 13 + 10;
-%     end
-% else
-%     shift = 13;
-% end
-
 if Plot == 1
     FaceAlpa = 0.7;
     FontSize = 10;

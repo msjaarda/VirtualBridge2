@@ -30,9 +30,11 @@ if Plot
     
     [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
     if strcmp(Dist,'Normal')
-        mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
+        %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
+        mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
     elseif strcmp(Dist,'Lognormal')
-        mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
+        %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
+        mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
     end
 
     y1 = ylim;
