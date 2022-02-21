@@ -4,7 +4,7 @@ function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,A
 %   BlockM  - string, 'Daily', 'Weekly', 'Monthly', 'Yearly', or 'Lifetime'
 %   Dist    - string, 'Nomral, 'Lognormal'
 
-% AS OF 16/2 MATT CHANGED THE FIT! TAIL WEIGHTING.... CONFIRM IT WORKS
+% Data = Max.Max for Matt [old code] or Data = Max for Lucas
 
 % --- Calculate Real Design Value Ed ---
 
@@ -29,14 +29,27 @@ end
 
 Beta = norminv(1-n*0.0000013);
 Alpha = 0.7;
+
+try
+    Types = Data.m;
+    Data = Data.Max;
+    m1 = Types == 1;
+    m2 = Types == 2;
+    m3 = Types == 3;
+    oldcode = false;
+catch
+    oldcode = true;
+end
+
+if oldcode
 Prop = 0.95;
 if strcmp(Dist,'Normal')
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
     pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
     Em = mean(Data);
     Stdev = std(Data);
 elseif strcmp(Dist,'Lognormal')
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
     muu = mdlx.Coefficients.Estimate(1);
     sig = mdlx.Coefficients.Estimate(2);
     pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));  
@@ -61,6 +74,61 @@ elseif strcmp(Dist,'Extreme Value')
     Ed = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
     Aq = 1;   
+end
+
+else
+Prop = 0.95;
+for i=1:3
+   DataTemp = eval(append('Data(m',int2str(i),')'));
+if strcmp(Dist,'Normal')
+    mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),sort(DataTemp),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
+    pd{i} = makedist('normal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));
+    Em(i) = mean(DataTemp);
+    Stdev(i) = std(DataTemp);
+elseif strcmp(Dist,'Lognormal')
+    mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),log(sort(DataTemp)),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
+    muu(i) = mdlx{i}.Coefficients.Estimate(1);
+    sig(i) = mdlx{i}.Coefficients.Estimate(2);
+    pd{i} = makedist('lognormal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));  
+    Em(i) = exp(muu(i)+sig(i)^2/2);
+    Stdev(i) = sqrt(exp(2*muu(i)+sig(i)^2)*(exp(sig(i)^2)-1));
+     if mdlx{i}.Rsquared.Ordinary*100<85 %check if the Rsquared is not to bad. If yes, check if its not due to the near zero values (remove them if needed).
+         if Em(i)>3
+             DataTempNZer = DataTemp(DataTemp>=0.8);
+             mdlxNZer = fitlm(norminv((1:length(DataTempNZer))/(length(DataTempNZer) + 1)),log(sort(DataTempNZer)),'linear','Weights',[0.1*ones(round(length(DataTempNZer)*Prop),1);1*ones(length(DataTempNZer)-round(length(DataTempNZer)*(Prop)),1)]);
+             if mdlxNZer.Rsquared.Ordinary*100>mdlx{i}.Rsquared.Ordinary*100
+                 DataTemp(DataTemp<=0.8) = [];
+                 mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),log(sort(DataTemp)),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
+                 muu(i) = mdlx{i}.Coefficients.Estimate(1);
+                 sig(i) = mdlx{i}.Coefficients.Estimate(2);
+                 pd{i} = makedist('lognormal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));
+                 Em(i) = exp(muu(i)+sig(i)^2/2);
+                 Stdev(i) = sqrt(exp(2*muu(i)+sig(i)^2)*(exp(sig(i)^2)-1));
+             end
+         end
+     end
+end
+
+COV(i) = Stdev(i)/Em(i);
+Delta2(i) = log(COV(i)^2+1);
+
+if strcmp(Dist,'Normal')
+    Ed(i) = Em(i)*(1+Alpha*Beta*COV(i));
+    % FYI ESIAT has the 1.5 in it already...
+    AQ(i) = Ed(i)/(ESIAT);
+    Aq(i) = ((Ed(i)/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+elseif strcmp(Dist,'Lognormal')
+    Ed(i) = Em(i)*exp(Alpha*Beta*sqrt(Delta2(i))-0.5*Delta2(i));
+    AQ(i) = Ed(i)/(ESIAT);
+    Aq(i) = ((Ed(i)/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+elseif strcmp(Dist,'Extreme Value')
+    Ed(i) = Em(i)*(1 + COV(i)*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
+    AQ(i) = Ed(i)/(ESIAT);
+    Aq(i) = 1;   
+end
+end
+Ed(4) = Ed(1)*sum(m1)/height(m1)+Ed(2)*sum(m2)/height(m2)+Ed(3)*sum(m3)/height(m3);
+    
 end
 
 end
