@@ -10,6 +10,8 @@
 % Initializing commands
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
+Lucas = 1;
+
 % Read Input File
 FName = 'Input/VBWIMqInput60t.xlsx';
 BaseData = VBReadInputFile(FName);
@@ -77,16 +79,7 @@ for g = 1:height(BaseData)
             end
         catch 
         end
-        % Platoon
-        if BaseData.Plat(g)
-            TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
-            PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
-            if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
-                PlatPct(3) = 0; PlatPct(4) = 0;
-            end
-            PDs(PDs.SPEED == 0,:) = [];
-            PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
-        end
+       
         
         % Separate for each year...
         if ismember('Year',BaseData.Properties.VariableNames)
@@ -139,6 +132,7 @@ for g = 1:height(BaseData)
                 
                 % Get Lanes
                 Lanes = unique(PDsy.LANE);
+                
                 AllTrAxGr = zeros(max(TrLineUpSub(:,1))-TrLineUpSub(1,1)+1,length(Lanes));
                 for i = 1:length(Lanes)
                     A = accumarray(TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),1)-TrLineUpSub(1,1)+1,TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),2));
@@ -228,7 +222,7 @@ for g = 1:height(BaseData)
                         % offset? hmm
                         B4 = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         % Set Vehs == 41 axles to 0
-                        AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1),4))) = 0;
+                        AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(Vehs == 41,1))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
                         % Calculate MaxLE again
                         MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         % First step is to find out how much of the time we
@@ -236,6 +230,9 @@ for g = 1:height(BaseData)
 %                         if length(TrNumsU) > 1
 %                             k = 100;
 %                         end
+                        if MaxLE < 0
+                        MaxLE = 0;
+                        end
                         
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
@@ -257,15 +254,9 @@ for g = 1:height(BaseData)
                         
 
                         % Save MaxEvents... save Times and Datenums and then convert
-                        if BaseData.Plat(g) % Also return platoon type
-                            if max(PDsy.Plat(TrNumsU)) > 0
-                                MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx mode(Vehs)];
-                            else
-                                MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx 0];
-                            end
-                        else
+                       
                             MaxEvents1 = [MaxEvents1; datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
-                        end
+                        
                         
                         % Rewrite line if DetailedVBWIM Desired
                         if BaseData.StopSim(g)
@@ -292,16 +283,13 @@ for g = 1:height(BaseData)
             user = memory;
             RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
             LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
-            
+                        
         end % r, years
     end % w, SiteGroups
   
     % Convert back to datetime
-    if BaseData.Plat(g)
-        MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'});
-    else
-        MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
-    end
+    MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
+    
     MaxEvents.DTS = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
     MaxEvents.Datenum = [];
     
@@ -326,18 +314,31 @@ for g = 1:height(BaseData)
     OutInfo.ESIA = ESIA; %OutInfo.E41 = E41;
     OutInfo.ILData = ILData;
     OutInfo.SimStop = false;
-    OutInfo.Max = Max;
+    % OutInfo.Max = Max; Need to be done after
     
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             Class = ClassType{i};
-            BlockM = BM{1};
+            BlockM = BM{2};
+            % Proportion of time when there is another truck on the bridge
+            PropTrucks = 1-height(Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max == 0,:))/height(Max(r).(Class).(BlockM));
+            OutInfo.PropTrucks.(Class).(BlockM)(r) = PropTrucks;
+            Max(r).(Class).(BlockM) = Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max > 0,:);
+            if height(Max(r).(Class).(BlockM))<= 30
+            OutInfo.x_values.(Class).(BlockM)(:,r) = 0;
+            OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = 0;
+            OutInfo.EdLN.(Class).(BlockM)(r) = 0;
+            OutInfo.AQ.(Class).(BlockM)(r) = 0;
+            else
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit_60t(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-            [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd_60t(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
-        end
+            [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd_60t(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
+            end
+         end
     end
+    
+    OutInfo.Max = Max;
     
     % Create folders where there are none
     CreateFolders(BaseData.Folder{g},BaseData.VWIM(g),BaseData.Apercu(g),BaseData.Save(g))

@@ -1,4 +1,4 @@
-function [Ed, AQ, Aq] = GetBlockMaxEd_60t(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,AQ2)
+function [Ed, AQ, Aq] = GetBlockMaxEd_60t(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,AQ2,PropTrucks)
 %GETBLOCKMAXEd Fits, and optionally plots, BlockMaximumData
 %   Data    - simply the block maximum data (max moment, shear, etc. during period)
 %   BlockM  - string, 'Daily', 'Weekly', 'Monthly', 'Yearly', or 'Lifetime'
@@ -25,7 +25,7 @@ end
 % Beta.Daily = 5.724;
 % Beta.Lifetime = 3.830;
 
-Beta = norminv(1-n*0.0000013);
+Beta = norminv(1-n*0.0000013/PropTrucks);
 Alpha = 0.7;
 
 Em = mean(Data);
