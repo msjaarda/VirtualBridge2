@@ -4,6 +4,8 @@ function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,A
 %   BlockM  - string, 'Daily', 'Weekly', 'Monthly', 'Yearly', or 'Lifetime'
 %   Dist    - string, 'Nomral, 'Lognormal'
 
+% AS OF 16/2 MATT CHANGED THE FIT! TAIL WEIGHTING.... CONFIRM IT WORKS
+
 % --- Calculate Real Design Value Ed ---
 
 if strcmp(BlockM,'Yearly')
@@ -27,9 +29,22 @@ end
 
 Beta = norminv(1-n*0.0000013);
 Alpha = 0.7;
+Prop = 0.95;
+if strcmp(Dist,'Normal')
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+    Em = mean(Data);
+    Stdev = std(Data);
+elseif strcmp(Dist,'Lognormal')
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    muu = mdlx.Coefficients.Estimate(1);
+    sig = mdlx.Coefficients.Estimate(2);
+    pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));  
+    Em = exp(muu+sig^2/2);
+    Stdev = sqrt(exp(2*muu+sig^2)*(exp(sig^2)-1));
+end
 
-Em = mean(Data);
-Stdev = std(Data);
+
 COV = Stdev/Em;
 Delta2 = log(COV^2+1);
 

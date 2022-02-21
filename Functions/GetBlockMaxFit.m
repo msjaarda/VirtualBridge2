@@ -4,7 +4,25 @@ function [pd,x_values,y_PDF_Fit,y_CDF_Fit] = GetBlockMaxFit(Data,Dist,Plot)
 %   Dist    - string, 'Nomral, 'Lognormal'
 %   Plot    - boolean
 
-pd = fitdist(Data,Dist);
+
+% MODIFY -- MAXECF DOESN'T WORK AT ALL... JUST AFFECTS % FIT REPORTED
+
+% AS OF 16/2 MATT CHANGED THE FIT! TAIL WEIGHTING.... CONFIRM IT WORKS
+
+% New fit
+Prop = 0.95;
+if strcmp(Dist,'Normal') || strcmp(Dist,'normal')
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+elseif strcmp(Dist,'Lognormal') || strcmp(Dist,'lognormal')
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(round(length(Data)*(1-Prop)),1)]);
+    pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));   
+end
+
+% Old fit
+%pd = fitdist(Data,Dist);
+
+
 Top = ceil(max(Data)/10)*10;
 Bot = floor(min(Data)/10)*10;
 TBDiff = Top-Bot;
@@ -28,19 +46,19 @@ if Plot
     
     % We can also put the fit type and R^2 value on the plot
     
-    [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
-    if strcmp(Dist,'Normal')
-        %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
-        mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-    elseif strcmp(Dist,'Lognormal')
-        %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
-        mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-    end
+%     [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
+%     if strcmp(Dist,'Normal')
+%         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
+%         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+%     elseif strcmp(Dist,'Lognormal')
+%         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
+%         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+%     end
 
     y1 = ylim;
     text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
     if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
 %         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
     end
     
