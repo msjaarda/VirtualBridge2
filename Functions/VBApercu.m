@@ -67,6 +67,14 @@ Q = TrLineUp(TrLineUp(:,1) >= BrStInd & TrLineUp(:,1) <= BrStInd+length(Infx)-1,
 % Define T, an excerpt of WIM/VWIM PDC with just vehicles on the bridge
 T = PDC(unique(Q(:,3)),:);
 
+if height(T) == 0
+posi = find(TrLineUp(:,1) <= BrStInd);
+posi = posi(end);
+T = PDC(TrLineUp(posi,3)+1,:);
+end
+% si T c'est zero alors utiliser BrStInd pour retrouver le dernier TrLineUp
+% et donc le dernier PDC puis faire PDC+1
+
 % Gather variables for the plots of each lane (vehicle corners and axle vals)
 for i = 1:NumLaneswTr
   
@@ -117,6 +125,7 @@ for i = 1:NumLaneswTr
         barp(:,i) = [sum(initial(i,:),2); sum(ac{i},2)];
         NoVeh(i) = 0;
     else
+        barp(1:Infx(end)/ILRes+1,i) = 0;
         ac{i} = 0; vc{i} = 0;
         NoVeh(i) = 1;
     end
@@ -132,7 +141,7 @@ sp(TotalLanes+1) = subplot(NumSubplots,1,TotalLanes+1);
 % Use handle, h, to assign colors later
 h = bar(0:ILRes:Infx(end),barp/9.81,1.2/ILRes,'grouped','EdgeColor','k');
 xlim([-0.5 Span+0.5]);
-ylim([0 ceil(max(max(barp/9.81))/5)*5])
+ylim([0 max(ceil(max(max(barp/9.81))/5)*5,1)])
 ylabel('Axle Loads (t)')
 set(gca,'xticklabel',[])
 

@@ -50,6 +50,8 @@ for r = 1:length(ILData)
                
             elseif strcmp(BlockM,'Weekly')
                 [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','week'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
+            elseif strcmp(BlockM,'Monthly')
+                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','month'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             else
                 [Gr, ~, ~, ~] = findgroups(year(MaxEventsSub.DTS),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             end

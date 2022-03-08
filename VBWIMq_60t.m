@@ -10,10 +10,8 @@
 % Initializing commands
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
-Lucas = 1;
-
 % Read Input File
-FName = 'Input/VBWIMqInput60t.xlsx';
+FName = 'Input/VBWIMqInput60tLucas.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -36,7 +34,7 @@ for g = 1:height(BaseData)
         % Modify BaseData.SITE(g) based on SiteSet
         BaseData.SITE(g) = Sites(w);
         % Update analysis data for current row of BaseData
-        [Num,Lane,ILData,~,~,E] = VBUpdateDataLM(BaseData(g,:));
+        [Num,Lane,ILData,~,~,E] = VBUpdateData(BaseData(g,:));
         ESIA = E.E41;
         
         % Get MaxLength for Spacesave
@@ -79,8 +77,14 @@ for g = 1:height(BaseData)
             end
         catch 
         end
-       
         
+        try
+            if BaseData.CraneClass(g)
+            [PDs] = CraneClassify(PDs);
+            end
+        catch
+        end
+               
         % Separate for each year...
         if ismember('Year',BaseData.Properties.VariableNames)
             UYears = BaseData.Year(g);
@@ -105,7 +109,8 @@ for g = 1:height(BaseData)
             end
             
             % Modify to only include type 41 and surrounding vehicles
-            PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
+            %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
+            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48,72,81,82],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 20 vehicles + and -            
             
             if isempty(PDsy)
@@ -211,7 +216,8 @@ for g = 1:height(BaseData)
                         MaxLETime = PDsy.DTS(TrNums(1));
                         Vehs = PDsy.CLASS(TrNumsU);
                         
-                        if sum(Vehs == 41) == 0
+                        %if sum(Vehs == 41) == 0
+                        if sum(sum(Vehs == [41,48,72,81,82])) == 0
                             AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
                             k = k + 1;
                             continue
@@ -222,9 +228,36 @@ for g = 1:height(BaseData)
                         % offset? hmm
                         B4 = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         % Set Vehs == 41 axles to 0
-                        AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(Vehs == 41,1))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
+                        MaxLEContr = [];
+                                                                                                                   
+                        for v = 1:length(TrNumsU)
+                            AllTrAxSubTemp = AllTrAxSub;
+                            AllTrAxSubTemp(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
+                            %Calculate MaxLE again
+                            MaxLEContr(v) = sum(sum(AllTrAxSubTemp(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
+                        end
+                        
+                        if length(Vehs)>1
+                            if sum(sum(Vehs == [41,48,72,81,82],2))>1
+                            Lucas = 1;
+                            end
+                        end
+                        
+                        %v = find(Vehs == 41);
+                        v = find(sum(Vehs == [41,48,72,81,82],2));
+                        %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
+                        if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
+                           [~,vposi] = max(B4-MaxLEContr(v)); % NEW for more than 41
+                           v = v(vposi); % NEW for more than 41
+                           AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
+                           MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
+                        else
+                            continue
+                        end
+                        
+                        %AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(Vehs == 41,1))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(Vehs == 41,1)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
                         % Calculate MaxLE again
-                        MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
+                        %MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         % First step is to find out how much of the time we
                         % actually have an accompanying vehicle...
 %                         if length(TrNumsU) > 1
@@ -233,7 +266,7 @@ for g = 1:height(BaseData)
                         if MaxLE < 0
                         MaxLE = 0;
                         end
-                        
+                                              
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
@@ -245,7 +278,14 @@ for g = 1:height(BaseData)
                         
                         if BaseData.Apercu(g) == 1 
                         %if MaxLE > 9000 && m == 3
-                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            if MaxLE > 0
+                            TrLineUpSubTemp = TrLineUpSub;
+                            %PosiRemTruck = TrNumsU.*(Vehs==41); PosiRemTruck(PosiRemTruck == 0) = []; PosiRemTruck = PosiRemTruck(1);
+                            PosiRemTruck = TrNumsU(v);
+                            TrLineUpSubTemp(find(TrLineUpSub(:,3) == PosiRemTruck),:) = [];
+                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSubTemp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,B4/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            end
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
                                 TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
@@ -301,7 +341,8 @@ for g = 1:height(BaseData)
     
     % m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
     % qInvestInitial Inputs
-    BM = {'Weekly', 'Yearly'};             % j
+    BM = {'Monthly', 'Yearly'};             % j
+    %BM = {'Monthly'};
     ClassType = {'ClassOW'};        % i
     DistTypes = {'Lognormal'};
     [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData); % TROUBLESHOOT
@@ -319,8 +360,9 @@ for g = 1:height(BaseData)
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
+            for j = 1:length(BM)
             Class = ClassType{i};
-            BlockM = BM{2};
+            BlockM = BM{j};
             % Proportion of time when there is another truck on the bridge
             PropTrucks = 1-height(Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max == 0,:))/height(Max(r).(Class).(BlockM));
             OutInfo.PropTrucks.(Class).(BlockM)(r) = PropTrucks;
@@ -328,12 +370,22 @@ for g = 1:height(BaseData)
             if height(Max(r).(Class).(BlockM))<= 30
             OutInfo.x_values.(Class).(BlockM)(:,r) = 0;
             OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = 0;
+                %{
+            if r==1
+                OutInfo.x_values.(Class).(BlockM)(:,r) = zeros(100,1);
+                OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = zeros(100,1);
+            else
+               OutInfo.x_values.(Class).(BlockM)(:,r) = 0;
+               OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = 0; 
+            end
+                %}
             OutInfo.EdLN.(Class).(BlockM)(r) = 0;
             OutInfo.AQ.(Class).(BlockM)(r) = 0;
             else
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit_60t(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd_60t(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
+            end
             end
          end
     end

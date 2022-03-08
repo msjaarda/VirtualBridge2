@@ -7,7 +7,7 @@
 clear, clc, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputLucasTest.xlsx');
+BaseData = VBReadInputFile('VBSimInputNumaImprLoads.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -164,7 +164,7 @@ for g = 1:height(BaseData)
         for r = 1:Num.InfCases
             [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
             [ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2(r)] = GetLogNormPPP(OutInfo.OverMax(:,r),false);
-            [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',E.Total(r),E.EQ(:,r),E.Eq(:,r),0.6,0.5);
+            [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',E.Total(r),E.EQ(:,r),E.Eq(:,r),0.6,0.5,1,1);
         end
         % Apply Model Factor to EdLN and AQ
         OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;

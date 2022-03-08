@@ -1,8 +1,13 @@
-function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,AQ2)
+function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,AQ2,PropTruck,FitType)
 %GETBLOCKMAXEd Fits, and optionally plots, BlockMaximumData
 %   Data    - simply the block maximum data (max moment, shear, etc. during period)
 %   BlockM  - string, 'Daily', 'Weekly', 'Monthly', 'Yearly', or 'Lifetime'
 %   Dist    - string, 'Nomral, 'Lognormal'
+%   PropTruck - double, proportion of special transport yearly maxima with
+%   accompaniment, = 1 if dont needed
+%   FitType - double, 1 : original fit method, 2 : tail fitting method, 3 :
+%   Alain's fitting method (fitting each class individually)
+
 
 % Data = Max.Max for Matt [old code] or Data = Max for Lucas
 
@@ -27,39 +32,39 @@ end
 % Beta.Daily = 5.724;
 % Beta.Lifetime = 3.830;
 
-Beta = norminv(1-n*0.0000013);
+Beta = norminv(1-n*0.0000013/PropTruck);
 Alpha = 0.7;
 
-try
-    Types = Data.m;
-    Data = Data.Max;
-    m1 = Types == 1;
-    m2 = Types == 2;
-    m3 = Types == 3;
-    oldcode = false;
-catch
-    oldcode = true;
-end
-
-if oldcode
+if FitType == 1 || FitType == 2 
 Prop = 0.95;
+if FitType == 2
 if strcmp(Dist,'Normal')
+    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
     mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
     pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
     Em = mean(Data);
     Stdev = std(Data);
+    COV = Stdev/Em;
+    Delta2 = log(COV^2+1);
 elseif strcmp(Dist,'Lognormal')
     mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
+    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
     muu = mdlx.Coefficients.Estimate(1);
     sig = mdlx.Coefficients.Estimate(2);
     pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));  
     Em = exp(muu+sig^2/2);
-    Stdev = sqrt(exp(2*muu+sig^2)*(exp(sig^2)-1));
+    %Stdev = sqrt(exp(2*muu+sig^2)*(exp(sig^2)-1));
+    %COV = Stdev/Em;
+    Delta2 = sig^2;
+end
+elseif FitType == 1
+    Em = mean(Data);
+    Stdev = std(Data);
+    COV = Stdev/Em;
+    Delta2 = log(COV^2+1);
 end
 
 
-COV = Stdev/Em;
-Delta2 = log(COV^2+1);
 
 if strcmp(Dist,'Normal')
     Ed = Em*(1+Alpha*Beta*COV);
@@ -76,7 +81,9 @@ elseif strcmp(Dist,'Extreme Value')
     Aq = 1;   
 end
 
-else
+elseif FitType == 3
+Types = Data.m; Data = Data.Max; m1 = Types == 1; m2 = Types == 2; m3 = Types == 3;
+
 Prop = 0.95;
 for i=1:3
    DataTemp = eval(append('Data(m',int2str(i),')'));

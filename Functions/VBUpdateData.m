@@ -179,15 +179,15 @@ for i = 1:Num.InfCases
         
         if j == 1
             PL = 300;
-            PLBR(1) = 210; % Bruhwiler values from 15 october 2019 document
-            PLBR(2) = 170;
-            PLBR(3) = 170;
+            PLBR(1) = 210; %140; % Bruhwiler values from 15 october 2019 document
+            PLBR(2) = 170; %110;
+            PLBR(3) = 170; %95;
             PL12 = 120; % 12 tonnes per axle (load model for 41, 48 and 72)
         elseif j == 2
             PL = 200;
             PLBR(1) = 0;
-            PLBR(2) = 130;
-            PLBR(3) = 125;
+            PLBR(2) = 150; %85;
+            PLBR(3) = 150; %70;
         else
             PL = 0;
             PLBR(1) = 0;
@@ -207,6 +207,7 @@ for i = 1:Num.InfCases
         Conc41 = zeros(round(7.2/BaseData.ILRes)+1,1);
         Conc48 = zeros(round(9.1/BaseData.ILRes)+1,1);
         Conc72 = zeros(round(14/BaseData.ILRes)+1,1);
+        ConcSPTR = zeros(round(12.5/BaseData.ILRes)+1,1); % combination of special transport with 15 meters gap
         
         if max(size(Conc)) == 1
             Conc(1) = PL*2;
@@ -231,11 +232,11 @@ for i = 1:Num.InfCases
         end
         
         if j == 1 %Load model for the 41 crane, du to resolution must add previous load if applied in the same spot
-           Conc41(1) = PL12*0;
-           Conc41(round(2.4/BaseData.ILRes)+1) = Conc41(round(2.4/BaseData.ILRes)+1) + PL12*0;
-           Conc41(round(4/BaseData.ILRes)+1) = Conc41(round(4/BaseData.ILRes)+1) + PL12*0;
-           Conc41(round(5.6/BaseData.ILRes)+1) = Conc41(round(5.6/BaseData.ILRes)+1) + PL12*0;
-           Conc41(end) = Conc41(end) + PL12*0;
+           Conc41(1) = PL12;
+           Conc41(round(2.4/BaseData.ILRes)+1) = Conc41(round(2.4/BaseData.ILRes)+1) + PL12;
+           Conc41(round(4/BaseData.ILRes)+1) = Conc41(round(4/BaseData.ILRes)+1) + PL12;
+           Conc41(round(5.6/BaseData.ILRes)+1) = Conc41(round(5.6/BaseData.ILRes)+1) + PL12;
+           Conc41(end) = Conc41(end) + PL12;
         else
            Conc41 = Conc;
         end
@@ -263,6 +264,17 @@ for i = 1:Num.InfCases
            Conc72 = Conc;
         end
         
+        if j == 1 %Load model for combination of all special transport, du to resolution must add previous load if applied in the same spot
+           ConcSPTR(1) = PL12;
+           ConcSPTR(round(3.2/BaseData.ILRes)+1) = ConcSPTR(round(3.2/BaseData.ILRes)+1) + PL12;
+           ConcSPTR(round(4.6/BaseData.ILRes)+1) = ConcSPTR(round(4.6/BaseData.ILRes)+1) + PL12;
+           ConcSPTR(round(9.7/BaseData.ILRes)+1) = ConcSPTR(round(9.8/BaseData.ILRes)+1) + PL12;
+           ConcSPTR(round(11.1/BaseData.ILRes)+1) = ConcSPTR(round(11.2/BaseData.ILRes)+1) + PL12;
+           ConcSPTR(end) = ConcSPTR(end) + PL12;
+        else
+           ConcSPTR = Conc;
+        end
+        
         MaxInfvCONV(j,i) = max(conv(Conc,yILv));
         [MaxInfvCONVBR1(j,i),MaxInfvCONVBR1Posi(j,i)] = max(conv(ConcBR1,yILv));
         [MaxInfvCONVBR2(j,i),MaxInfvCONVBR2Posi(j,i)] = max(conv(ConcBR2,yILv));
@@ -270,6 +282,7 @@ for i = 1:Num.InfCases
         [MaxInfvCONV41(j,i),MaxInfvCONV41Posi(j,i)] = max(conv(Conc41,yILv));
         [MaxInfvCONV48(j,i),MaxInfvCONV48Posi(j,i)] = max(conv(Conc48,yILv));
         [MaxInfvCONV72(j,i),MaxInfvCONV72Posi(j,i)] = max(conv(Conc72,yILv));
+        [MaxInfvCONVSPTR(j,i),MaxInfvCONVSPTRPosi(j,i)] = max(conv(ConcSPTR,yILv));
         
         % New convolution 25/7/21
         % Lets create a concentrated load matrix... then add padding
@@ -317,6 +330,7 @@ for i = 1:Num.InfCases
     IntInfv41(j,i) = IntInfv(j,i)-(j==1)*trapz(x(max(MaxInfvCONV41Posi(j,i)-round(8.9/BaseData.ILRes),1):min(MaxInfvCONV41Posi(j,i)+round(4.3/BaseData.ILRes),end)),A(max(MaxInfvCONV41Posi(j,i)-round(8.9/BaseData.ILRes),1):min(MaxInfvCONV41Posi(j,i)+round(4.3/BaseData.ILRes),end),j));
     IntInfv48(j,i) = IntInfv(j,i)-(j==1)*trapz(x(max(MaxInfvCONV48Posi(j,i)-round(11/BaseData.ILRes),1):min(MaxInfvCONV48Posi(j,i)+round(4.9/BaseData.ILRes),end)),A(max(MaxInfvCONV48Posi(j,i)-round(11/BaseData.ILRes),1):min(MaxInfvCONV48Posi(j,i)+round(4.9/BaseData.ILRes),end),j));
     IntInfv72(j,i) = IntInfv(j,i)-(j==1)*trapz(x(max(MaxInfvCONV72Posi(j,i)-round(15/BaseData.ILRes),1):min(MaxInfvCONV72Posi(j,i)+round(1.5/BaseData.ILRes),end)),A(max(MaxInfvCONV72Posi(j,i)-round(15/BaseData.ILRes),1):min(MaxInfvCONV72Posi(j,i)+round(1.5/BaseData.ILRes),end),j));
+    IntInfvSPTR(j,i) = IntInfv(j,i)-(j==1)*trapz(x(max(MaxInfvCONVSPTRPosi(j,i)-round(13.5/BaseData.ILRes),1):min(MaxInfvCONVSPTRPosi(j,i)+round(1.5/BaseData.ILRes),end)),A(max(MaxInfvCONVSPTRPosi(j,i)-round(13.5/BaseData.ILRes),1):min(MaxInfvCONVSPTRPosi(j,i)+round(1.5/BaseData.ILRes),end),j));
     end   
 %  IntInfv(:,i) = trapz(ILData(i).v);
 %     trapz(ILData(i).v);
@@ -354,8 +368,11 @@ for i = 1:Num.InfCases
     MaxvCONVBR2 = MaxInfvCONVBR2(:,i);
     MaxvCONVBR3 = MaxInfvCONVBR3(:,i);
     MaxvCONV41 = MaxInfvCONV41(:,i);
+    MaxvCONV41(1) = 0;
     MaxvCONV48 = MaxInfvCONV48(:,i);
     MaxvCONV72 = MaxInfvCONV72(:,i);
+    MaxvCONVSPTR = MaxInfvCONVSPTR(:,i);
+    MaxvCONVSPTR(1) = 0;
     % Maxv = MaxInfv(:,i); Old Lucas
     Intv = IntInfv(:,i);
     IntvBR1 = IntInfvBR1(:,i);
@@ -364,6 +381,7 @@ for i = 1:Num.InfCases
     Intv41 = IntInfv41(:,i);
     Intv48 = IntInfv48(:,i);
     Intv72 = IntInfv72(:,i);
+    IntvSPTR = IntInfvSPTR(:,i);
 %   E.Total(i) = 1.5*Alpha*(Maxv'*Qk*2+Intv'*qk*LaneWidth);
 %   E.EQ(:,i) = Maxv.*Qk*2;
     E.Total(i) = 1.5*Alpha*(sum(MaxvCONV)+Intv'*qk*LaneWidth);
@@ -392,6 +410,9 @@ for i = 1:Num.InfCases
     E.E72.Total(i)= 1.5*Alpha*(sum(MaxvCONV72)+Intv72'*qk05*LaneWidth);
     E.E72.EQ(:,i) = MaxvCONV72;
     E.E72.Eq(:,i) = Intv72.*qk05*LaneWidth;
+    E.ESPTR.Total(i)= 1.5*Alpha*(sum(MaxvCONVSPTR)+IntvSPTR'*qk05*LaneWidth);
+    E.ESPTR.EQ(:,i) = MaxvCONVSPTR;
+    E.ESPTR.Eq(:,i) = IntvSPTR.*qk05*LaneWidth;
     
 end
 
