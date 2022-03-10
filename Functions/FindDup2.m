@@ -44,7 +44,7 @@ clear PD1, clear PD2
 
 % See how many are the same SPEED and AX
 %LogSameSPEED = PDs1.SPEED == PDs2.SPEED;
-LogSameSPEED = abs(PDs1.SPEED - PDs2.SPEED) < 2;
+LogSameSPEED = abs(PDs1.SPEED - PDs2.SPEED) < 4;
 % Same AX and SPEED
 LogSameSPEEDnAX = PDs1.AX == PDs2.AX & LogSameSPEED;
 % Same AX different SPEED

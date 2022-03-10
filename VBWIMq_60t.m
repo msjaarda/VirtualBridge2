@@ -50,7 +50,7 @@ for g = 1:height(BaseData)
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
-        PDs(PDs.SPEED > 145,:) = [];
+        %PDs(PDs.SPEED > 145,:) = [];
         if BaseData.SITE(g) == 405 || BaseData.SITE(g) == 406
             PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
         end
@@ -58,7 +58,7 @@ for g = 1:height(BaseData)
             % Get Duplicates
             PDs = FindDup2(PDs,0,0);
             % Delete Duplicates - from L1
-            PDs(PDs.Dup & PDs.LANE == 1,:) = [];
+            PDs(PDs.Dup & PDs.LANE == 2,:) = [];
         end
         
         % Do Classified Plus Plus
@@ -110,9 +110,9 @@ for g = 1:height(BaseData)
             
             % Modify to only include type 41 and surrounding vehicles
             %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
-            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48,72,81,82],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
+            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 20 vehicles + and -   
-            PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48,72,81,82],2)),:) = [];
+            PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48],2)),:) = [];
             % Removing special transport from 2/3 lanes
             
             if isempty(PDsy)
@@ -219,7 +219,7 @@ for g = 1:height(BaseData)
                         Vehs = PDsy.CLASS(TrNumsU);
                         
                         %if sum(Vehs == 41) == 0
-                        if sum(sum(Vehs == [41,48,72,81,82])) == 0
+                        if sum(sum(Vehs == [41,48])) == 0
                             AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
                             k = k + 1;
                             continue
@@ -240,7 +240,7 @@ for g = 1:height(BaseData)
                         end
                                                                      
                         %v = find(Vehs == 41);
-                        v = find(sum(Vehs == [41,48,72,81,82],2));
+                        v = find(sum(Vehs == [41,48],2));
                         %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                         if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                            [~,vposi] = max(B4-MaxLEContr(v)); % NEW for more than 41
@@ -266,7 +266,7 @@ for g = 1:height(BaseData)
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
-                        elseif sum(Vehs == 41) > 0
+                        elseif sum(sum(Vehs == [41,48],2)) > 0
                             m = 2;
                         else
                             m = 3;
