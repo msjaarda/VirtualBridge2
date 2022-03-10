@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60tLucas.xlsx';
+FName = 'Input/VBWIMqInput60t.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -111,7 +111,9 @@ for g = 1:height(BaseData)
             % Modify to only include type 41 and surrounding vehicles
             %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48,72,81,82],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
-            % Add 20 vehicles + and -            
+            % Add 20 vehicles + and -   
+            PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48,72,81,82],2)),:) = [];
+            % Removing special transport from 2/3 lanes
             
             if isempty(PDsy)
                 user = memory;
@@ -236,13 +238,7 @@ for g = 1:height(BaseData)
                             %Calculate MaxLE again
                             MaxLEContr(v) = sum(sum(AllTrAxSubTemp(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         end
-                        
-                        if length(Vehs)>1
-                            if sum(sum(Vehs == [41,48,72,81,82],2))>1
-                            Lucas = 1;
-                            end
-                        end
-                        
+                                                                     
                         %v = find(Vehs == 41);
                         v = find(sum(Vehs == [41,48,72,81,82],2));
                         %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)

@@ -1,4 +1,4 @@
-function [pd,x_values,y_PDF_Fit,y_CDF_Fit,pdm,x_valuesm,y_PDF_Fitm,y_CDF_Fitm] = GetBlockMaxFit(Data,Dist,Plot)
+function [pd,x_values,y_PDF_Fit,y_CDF_Fit,pdm,x_valuesm,y_PDF_Fitm,y_CDF_Fitm] = GetBlockMaxFit(Data,Dist,Plot,PropTruck)
 %GETBLOCKMAXFIT Fits, and optionally plots, BlockMaximumData
 %   Data    - simply the block maximum data (max moment, shear, etc. during period)
 %   Dist    - string, 'Nomral, 'Lognormal'
@@ -18,6 +18,12 @@ catch
     oldcode = true;
 end
 
+%{%
+if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed 
+Data(end+1:round(length(Data)/PropTruck)) = 0;
+Dist = erase(Dist,'Zero');
+end
+%}
 
 if oldcode
 % MODIFY -- MAXECF DOESN'T WORK AT ALL... JUST AFFECTS % FIT REPORTED

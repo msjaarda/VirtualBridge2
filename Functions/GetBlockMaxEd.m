@@ -32,8 +32,15 @@ end
 % Beta.Daily = 5.724;
 % Beta.Lifetime = 3.830;
 
+
 Beta = norminv(1-n*0.0000013/PropTruck);
 Alpha = 0.7;
+
+if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed 
+Data(end+1:round(length(Data)/PropTruck)) = 0;
+Beta = norminv(1-n*0.0000013);
+Dist = erase(Dist,'Zero');
+end
 
 if FitType == 1 || FitType == 2 
 Prop = 0.95;
