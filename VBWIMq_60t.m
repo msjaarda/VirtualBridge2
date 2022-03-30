@@ -61,13 +61,6 @@ for g = 1:height(BaseData)
             PDs(PDs.Dup & PDs.LANE == 2,:) = [];
         end
         
-        % Do Classified Plus Plus
-        try
-            if BaseData.ClassPP(g)
-                [PDs] = VBClassifyPP(PDs,0);
-            end
-        catch
-        end
         % Get Only the ClassType Specified
         try
             if strcmp(BaseData.ClassType(g),'Class')
@@ -112,7 +105,7 @@ for g = 1:height(BaseData)
             %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 20 vehicles + and -   
-            PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48],2)),:) = [];
+            %PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48],2)),:) = [];
             % Removing special transport from 2/3 lanes
             
             if isempty(PDsy)
@@ -234,7 +227,7 @@ for g = 1:height(BaseData)
                                                                                                                    
                         for v = 1:length(TrNumsU)
                             AllTrAxSubTemp = AllTrAxSub;
-                            AllTrAxSubTemp(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
+                            AllTrAxSubTemp(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:length(Lanes)]',1)') = 0;
                             %Calculate MaxLE again
                             MaxLEContr(v) = sum(sum(AllTrAxSubTemp(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         end
@@ -245,7 +238,7 @@ for g = 1:height(BaseData)
                         if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                            [~,vposi] = max(B4-MaxLEContr(v)); % NEW for more than 41
                            v = v(vposi); % NEW for more than 41
-                           AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:height(Lanes)]',1)') = 0;
+                           AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:length(Lanes)]',1)') = 0;
                            MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
                         else
                             continue

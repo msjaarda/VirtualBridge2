@@ -7,7 +7,7 @@ if sum(PD.CS == 2 | PD.CS == 3 | PD.CS == 4 | PD.CS == 6) < 0.7*height(PD)
     PD(PD.CS == 2 | PD.CS == 3 | PD.CS == 4 | PD.CS == 6,:) = [];
 end
 % 
-          PDs(PDs.SPEED > 120,:) = [];
+          PD(PD.SPEED > 120,:) = [];
 %         if BaseData.SITE(g) == 405 || BaseData.SITE(g) == 406
 %             PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
 %         end

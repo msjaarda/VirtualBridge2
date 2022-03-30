@@ -323,7 +323,7 @@ for i = 1:Num.InfCases
     A = ILData(i).v;
     A(A<0) = 0;
     IntInfv(:,i) = trapz(x,A);
-    for j = 1:width(A)
+    for j = 1:size(A,2)
     IntInfvBR1(j,i) = IntInfv(j,i)-(j==1)*trapz(x(max(MaxInfvCONVBR1Posi(j,i)-round(2/BaseData.ILRes),1):min(MaxInfvCONVBR1Posi(j,i)+round(2/BaseData.ILRes),end)),A(max(MaxInfvCONVBR1Posi(j,i)-round(2/BaseData.ILRes),1):min(MaxInfvCONVBR1Posi(j,i)+round(2/BaseData.ILRes),end),j));
     IntInfvBR2(j,i) = IntInfv(j,i)-(j==1||j==2)*trapz(x(max(MaxInfvCONVBR2Posi(j,i)-round(3.2/BaseData.ILRes),1):min(MaxInfvCONVBR2Posi(j,i)+round(2/BaseData.ILRes),end)),A(max(MaxInfvCONVBR2Posi(j,i)-round(3.2/BaseData.ILRes),1):min(MaxInfvCONVBR2Posi(j,i)+round(2/BaseData.ILRes),end),j));
     IntInfvBR3(j,i) = IntInfv(j,i)-(j==1||j==2)*trapz(x(max(MaxInfvCONVBR3Posi(j,i)-round(4.4/BaseData.ILRes),1):min(MaxInfvCONVBR3Posi(j,i)+round(2/BaseData.ILRes),end)),A(max(MaxInfvCONVBR3Posi(j,i)-round(4.4/BaseData.ILRes),1):min(MaxInfvCONVBR3Posi(j,i)+round(2/BaseData.ILRes),end),j));
