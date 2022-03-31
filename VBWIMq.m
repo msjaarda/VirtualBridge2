@@ -46,10 +46,7 @@ for g = 1:height(BaseData)
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
-        PDs(PDs.SPEED > 145,:) = [];
-        if BaseData.SITE(g) == 405 || BaseData.SITE(g) == 406
-            PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
-        end
+
         if sum(BaseData.SITE(g)== SiteGroups.Bi4L) == 0 && sum(BaseData.SITE(g)== SiteGroups.Uni3L) == 0
             % Get Duplicates
             PDs = FindDup2(PDs,0,0);
@@ -57,13 +54,6 @@ for g = 1:height(BaseData)
             PDs(PDs.Dup & PDs.LANE == 1,:) = [];
         end
         
-        % Do Classified Plus Plus
-        try
-            if BaseData.ClassPP(g)
-                [PDs] = VBClassifyPP(PDs,0);
-            end
-        catch
-        end
         % Get Only the ClassType Specified
         try
             if strcmp(BaseData.ClassType(g),'Class')
