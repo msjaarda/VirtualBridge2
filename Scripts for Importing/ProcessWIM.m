@@ -145,8 +145,7 @@ for i = 1:length(SNames)
     
     % ---------- PRUNE DONE -------------------
     
-    PD = VBClassify(PD);
-    
+    PD = VBClassify(PD);    
 
     % Fix Ceneri - 408 is used for both directions before 23-Nov-2006
     % Call it 489
@@ -171,6 +170,8 @@ for i = 1:length(SNames)
         % Set Old station to 456 instead of 405 and 406
         PD.SITE(PD.DTS <= DChange) = 456;
     end
+    
+    
     % Fix SanBernardino 439/440 and Simplon, 441/442 to be at same SITE
     if strcmp(SName,'SanBernardino')
         % Delete sites 439 and 440 as they are very small
@@ -202,6 +203,11 @@ for i = 1:length(SNames)
         end
         
         PDs = PD(PD.SITE == SITE,:);
+        % Fix problem specific to 405 and 406 with PUN  NEVER BEEN DONE AFTER
+        % IMPORT YET!
+        if SITE == 405 || SITE == 406
+            PDs(PDs.LANE == 1 & PDs.GAPT > 99.8,:) = [];
+        end
         SiteDetails.StartDate(j) = min(PDs.DTS);
         SiteDetails.EndDate(j) = max(PDs.DTS);
         Diffs = diff(PDs.COUNTID);
@@ -222,10 +228,10 @@ for i = 1:length(SNames)
     % 3) Station based, PDs
     
     % Save 2)
-    save(strcat('WIM\',SName),'PD','-v7.3') 
-    PD = PD(:,[1:12 30 31]);
+    %save(strcat('WIM\',SName),'PD','-v7.3') 
+    %PD = PD(:,[1:12 30 31]);
     % Save 3)
-    save(strcat('WIM\',SName,'R'),'PD','-v7.3')
+    %save(strcat('WIM\',SName,'R'),'PD','-v7.3')
     
 end
 
