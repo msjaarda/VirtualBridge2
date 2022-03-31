@@ -67,14 +67,7 @@ for g = 1:height(BaseData)
             end
         catch 
         end
-        
-        try
-            if BaseData.CraneClass(g)
-            [PDs] = CraneClassify(PDs);
-            end
-        catch
-        end
-               
+                          
         % Separate for each year...
         if ismember('Year',BaseData.Properties.VariableNames)
             UYears = BaseData.Year(g);
