@@ -49,10 +49,18 @@ if isWIM
         PDCx.LnTrSpacing(LaneInds) = AA;
         % The following only makes sense in direction 1. We don't circshift
         % for the 2 direction... why not?
+        try
         if Lane.Dir(Lanes(i)) == 1
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
+        end
+        catch
+        if Lane.Dir(i) == 1
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
+        else
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
+        end
         end
 
     end
@@ -62,7 +70,10 @@ if isWIM
 end
 
 % Create wheelbase and axle load vectors
-WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
+%WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
+IndW = find(string(PDCx.Properties.VariableNames) == "W1_2");
+NumW = sum(cell2mat(regexp(string(PDCx.Properties.VariableNames), 'W\d_*')));
+WB = PDCx{:,IndW:IndW+NumW-1}/100;
 AX = PDCx{:,strncmp(PDCx.Properties.VariableNames,'AW',2)}/102;
 
 % Make wheelbase length cummulative
@@ -75,9 +86,15 @@ for i = 1:length(Lanes)
     LaneInds = PDCx.LANE == Lanes(i);
     
     % Change the sign of the WBL for those in direction 2
+    try
     if Lane.Dir(Lanes(i)) == 2
         WB(LaneInds,:) = -WB(LaneInds,:);
     end 
+    catch
+    if Lane.Dir(i) == 2
+        WB(LaneInds,:) = -WB(LaneInds,:);
+    end    
+    end
 end
 
 WB = [PDCx.SpCu PDCx.SpCu + WB];

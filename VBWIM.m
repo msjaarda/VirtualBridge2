@@ -24,6 +24,8 @@ for g = 1:height(BaseData)
     %PDx = 
     load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
     %PDs = PDx.PDs;
+    PDs = Stage2Prune(PDs);
+    PDs = PDs(year(PDs.DTS) < 2019,:);
     
     % Get Only the ClassType Specified
     try

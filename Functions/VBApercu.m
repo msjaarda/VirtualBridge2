@@ -42,7 +42,7 @@ Col{4} = [.99 .67 0]; Col{5} = Col{2}; Col{6} = Col{3};
 % Plot Influence Line - Open up subplot and choose the last subplot
 sp(NumSubplots) = subplot(NumSubplots,1,NumSubplots);
 % Note that trucks go the other way than is plotted... must flip ILs
-if size(Infv,2) == 1 | all(all(Infv == Infv(:,1),2))
+if size(Infv,2) == 1 || all(all(Infv == Infv(:,1),2))
     plot(Infx,flip(-Infv),'k','LineWidth',1.5)
 else
     for i = 1:size(Infv,2)

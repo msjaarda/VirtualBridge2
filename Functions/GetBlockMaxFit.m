@@ -1,7 +1,7 @@
-function [pd,x_values,y_PDF_Fit,y_CDF_Fit,pdm,x_valuesm,y_PDF_Fitm,y_CDF_Fitm] = GetBlockMaxFit(Data,Dist,Plot,PropTruck)
+function [pd,x_values,y_PDF_Fit,y_CDF_Fit,pdm,x_valuesm,y_PDF_Fitm,y_CDF_Fitm] = GetBlockMaxFit(Data,Dist,Plot,PropTruck,x_values)
 %GETBLOCKMAXFIT Fits, and optionally plots, BlockMaximumData
 %   Data    - simply the block maximum data (max moment, shear, etc. during period)
-%   Dist    - string, 'Nomral, 'Lognormal'
+%   Dist    - string, 'Normal, 'Lognormal'
 %   Plot    - boolean
 
 % Data = Max.Max for Matt [old code] Data = Max for Lucas
@@ -48,7 +48,15 @@ Top = ceil(max(Data)/10)*10;
 Bot = floor(min(Data)/10)*10;
 TBDiff = Top-Bot;
 
-x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+% Must add try catch to be compatible with versions before specifying
+% x_values was offered
+try
+if x_values == 0
+    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+end
+catch
+    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+end
 y_PDF_Fit = pdf(pd,x_values);
 y_CDF_Fit = cdf(pd,x_values);
 
