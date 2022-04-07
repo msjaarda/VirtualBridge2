@@ -35,7 +35,7 @@ for g = 1:height(BaseData)
         BaseData.SITE(g) = Sites(w);
         % Update analysis data for current row of BaseData
         [Num,Lane,ILData,~,~,E] = VBUpdateData(BaseData(g,:));
-        ESIA = E.E41;
+        ESIA = E.ESPTR;
         
         % Get MaxLength for Spacesave
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
@@ -91,12 +91,40 @@ for g = 1:height(BaseData)
                 PDsy = PDs(year(PDs.DTS) == UYears(r),:);
             end
             
+            % For 23 analyse
+            SampleSize = 1; % How many 23 compare to 41 and 48 we want to keep for analysis. 1 ==> same sample size as 41+48
+            Numb23 = sum(sum(PDsy.CLASS == [23],2)); % Number of 23 actually inside the traffic sample
+            NumbAna23 = sum(sum(PDsy.CLASS == [41,48],2)).*SampleSize; % Number of 23 that should be kept for the analysis.
+            Rand23 = [ones(Numb23-NumbAna23,1); zeros(NumbAna23,1)];
+            Rand23 = Rand23(randperm(length(Rand23)));
+            Rand23 = find(PDsy.CLASS==23).*Rand23;
+            Rand23(Rand23 == 0)= [];
+            PDsy.CLASS(Rand23) = 0; % Set non keeped 23 trucks as 0 trucks type
+            
             % Modify to only include type 41 and surrounding vehicles
-            %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
-            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [41,48],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
+            %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);                      
+            %PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [23],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 20 vehicles + and -   
+            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [23],2),[1 1 1 1 1 1 1],'same')),:);
+            % Add 6 vehicles + and -   
             %PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48],2)),:) = [];
             % Removing special transport from 2/3 lanes
+            
+            % For 23 analyse
+            % We need to amplify the axle loads of the 23 trucks to be sure
+            % that they will be always determinant. To do this we multiply the loads
+            % with "Multiplicater"
+            Multiplicater = 10;
+            PDsy.AWT01(PDsy.CLASS == [23]) = PDsy.AWT01(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT02(PDsy.CLASS == [23]) = PDsy.AWT02(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT03(PDsy.CLASS == [23]) = PDsy.AWT03(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT04(PDsy.CLASS == [23]) = PDsy.AWT04(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT05(PDsy.CLASS == [23]) = PDsy.AWT05(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT06(PDsy.CLASS == [23]) = PDsy.AWT06(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT07(PDsy.CLASS == [23]) = PDsy.AWT07(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT08(PDsy.CLASS == [23]) = PDsy.AWT08(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.AWT09(PDsy.CLASS == [23]) = PDsy.AWT09(PDsy.CLASS == [23])*Multiplicater;
+            PDsy.GW_TOT(PDsy.CLASS == [23]) = PDsy.GW_TOT(PDsy.CLASS == [23])*Multiplicater;
             
             if isempty(PDsy)
                 user = memory;
@@ -202,8 +230,8 @@ for g = 1:height(BaseData)
                         Vehs = PDsy.CLASS(TrNumsU);
                         
                         %if sum(Vehs == 41) == 0
-                        if sum(sum(Vehs == [41,48])) == 0
-                            AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-BrLengthInd,mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
+                        if sum(sum(Vehs == [23])) == 0
+                            AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-(TrLineUpSub(1,1)-1),mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
                             k = k + 1;
                             continue
                         end
@@ -223,7 +251,7 @@ for g = 1:height(BaseData)
                         end
                                                                      
                         %v = find(Vehs == 41);
-                        v = find(sum(Vehs == [41,48],2));
+                        v = find(sum(Vehs == [23],2));
                         %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                         if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                            [~,vposi] = max(B4-MaxLEContr(v)); % NEW for more than 41
@@ -249,7 +277,7 @@ for g = 1:height(BaseData)
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
-                        elseif sum(sum(Vehs == [41,48],2)) > 0
+                        elseif sum(sum(Vehs == [23],2)) > 0
                             m = 2;
                         else
                             m = 3;
@@ -395,7 +423,7 @@ for g = 1:height(BaseData)
                 %BlockM = BM{1};
                 [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
                 %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
+                [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
             end
         end
         
