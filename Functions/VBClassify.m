@@ -294,6 +294,9 @@ end
 
 try
 % Type 47) 84 tonne crane truck from Veicoli Standard Spreadsheet
+% Dubious!!! name above is wrong... it is 72t Crane trying to match a
+% liebherr, but shouldn't be a thing since we have this crane covered in
+% Type 48.
 UnClass = PD.CLASS == 0;
 RType = PD.TYPE == 132;
 Dist12 = PD.W1_2 < 320;
