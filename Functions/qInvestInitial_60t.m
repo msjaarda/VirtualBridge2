@@ -160,6 +160,7 @@ end
 
 function out = maxIndex(Z,BlockM)
     % For years, make sure # unique weeks > 25, for weeks the # days > 4
+    %{
     if strcmp(BlockM,'Yearly')
         % Make sure you have the right Z indext for DTS! 
         if years(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 0.6
@@ -176,7 +177,8 @@ function out = maxIndex(Z,BlockM)
             out = [ymax, Z(loc,:)];
         end
     else
+    %}
         [ymax, loc] = max(Z(:,2));
         out = [ymax, Z(loc,:)];
-    end
+    %end
 end

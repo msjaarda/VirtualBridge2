@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60t-test.xlsx';
+FName = 'Input/VBWIMqInput60t.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -24,11 +24,11 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
-    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; load('SiteGroups')
+    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; %load('VBGetSiteSet')
     LostTrucks(g) = 0;
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
-    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.StopSim(g));
+    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
         
     for w = 1:length(Sites)
         
@@ -431,7 +431,7 @@ for g = 1:height(BaseData)
     
     if BaseData.StopSim(g)
         MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
-        [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
+        [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEventsStop,ILData);
         
         TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
         OutInfo.Name = TName;
