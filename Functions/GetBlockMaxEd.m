@@ -7,6 +7,7 @@ function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,A
 %   accompaniment, = 1 if dont needed
 %   FitType - double, 1 : original fit method, 2 : tail fitting method, 3 :
 %   Alain's fitting method (fitting each class individually)
+%   If 'Zero' added then the zero values will be added
 
 
 % Data = Max.Max for Matt [old code] or Data = Max for Lucas

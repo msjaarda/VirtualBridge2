@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60t.xlsx';
+FName = 'Input/VBWIMqInput60t-test.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -25,6 +25,7 @@ for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
     MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; load('SiteGroups')
+    LostTrucks(g) = 0;
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
     Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.StopSim(g));
@@ -92,12 +93,16 @@ for g = 1:height(BaseData)
             end
             
             % For 23 analyse
-            SampleSize = 1; % How many 23 compare to 41 and 48 we want to keep for analysis. 1 ==> same sample size as 41+48
-            Numb23 = sum(sum(PDsy.CLASS == [23],2)); % Number of 23 actually inside the traffic sample
+            SampleSize = 1; % How many 23 compare to 41 and 48 we want to keep for analysis. 1 ==> same sample size as 41+48 *samplesize
+            Numb23 = sum(sum(PDsy.CLASS == [23] & PDsy.LANE == [1],2)); % Number of 23 actually inside the traffic sample
             NumbAna23 = sum(sum(PDsy.CLASS == [41,48],2)).*SampleSize; % Number of 23 that should be kept for the analysis.
+            if Numb23 < NumbAna23                
+            LostTrucks(g) = LostTrucks(g) + NumbAna23-Numb23;
+            NumbAna23 = Numb23;
+            end
             Rand23 = [ones(Numb23-NumbAna23,1); zeros(NumbAna23,1)];
             Rand23 = Rand23(randperm(length(Rand23)));
-            Rand23 = find(PDsy.CLASS==23).*Rand23;
+            Rand23 = find(PDsy.CLASS==23 & PDsy.LANE == [1]).*Rand23;
             Rand23(Rand23 == 0)= [];
             PDsy.CLASS(Rand23) = 0; % Set non keeped 23 trucks as 0 trucks type
             
@@ -105,7 +110,7 @@ for g = 1:height(BaseData)
             %PDsy = PDsy(logical(conv(PDsy.CLASS == 41,[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);                      
             %PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [23],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 20 vehicles + and -   
-            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [23],2),[1 1 1 1 1 1 1],'same')),:);
+            PDsy = PDsy(logical(conv(sum(PDsy.CLASS == [23] & PDsy.LANE == [1],2),[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1],'same')),:);
             % Add 6 vehicles + and -   
             %PDsy(((PDsy.LANE == 2 | PDsy.LANE == 3)&sum(PDsy.CLASS == [41,48],2)),:) = [];
             % Removing special transport from 2/3 lanes
@@ -114,17 +119,17 @@ for g = 1:height(BaseData)
             % We need to amplify the axle loads of the 23 trucks to be sure
             % that they will be always determinant. To do this we multiply the loads
             % with "Multiplicater"
-            Multiplicater = 10;
-            PDsy.AWT01(PDsy.CLASS == [23]) = PDsy.AWT01(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT02(PDsy.CLASS == [23]) = PDsy.AWT02(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT03(PDsy.CLASS == [23]) = PDsy.AWT03(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT04(PDsy.CLASS == [23]) = PDsy.AWT04(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT05(PDsy.CLASS == [23]) = PDsy.AWT05(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT06(PDsy.CLASS == [23]) = PDsy.AWT06(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT07(PDsy.CLASS == [23]) = PDsy.AWT07(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT08(PDsy.CLASS == [23]) = PDsy.AWT08(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.AWT09(PDsy.CLASS == [23]) = PDsy.AWT09(PDsy.CLASS == [23])*Multiplicater;
-            PDsy.GW_TOT(PDsy.CLASS == [23]) = PDsy.GW_TOT(PDsy.CLASS == [23])*Multiplicater;
+            Multiplicater = 100;
+            PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+            PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
             
             if isempty(PDsy)
                 user = memory;
@@ -158,7 +163,9 @@ for g = 1:height(BaseData)
                 end
                 
                 % Don't bother running if the segment is too small
-                if length(AllTrAxGr) < 2000/BaseData.ILRes(g), continue, end
+                if length(AllTrAxGr) < 450/BaseData.ILRes(g)
+                    continue
+                end % modified temp by lucas true value 2000
                 
                 % For each InfCase
                 for t = 1:Num.InfCases
@@ -215,7 +222,7 @@ for g = 1:height(BaseData)
                             
                             PDe = PDsy(TrNumsUE,:);
                             
-                            % Call VBWIMtoAllTrAx w/ mods... must give stationary point or truck
+                            % Call VBWIMtoAllT.rAx w/ mods... must give stationary point or truck
                             [PDe, AllTrAxStop, TrLineUpStop] = VBWIMtoAllTrAxStop(PDe,MaxLength,Lane,BaseData.ILRes(g),find(TrNumsUE == TrIdMax));
                             
                             % Round TrLineUp first row, move unrounded to fifth row
@@ -231,6 +238,11 @@ for g = 1:height(BaseData)
                         
                         %if sum(Vehs == 41) == 0
                         if sum(sum(Vehs == [23])) == 0
+                            if sum(PDsy.Group == z & PDsy.CLASS == 23) >= 1
+                            if sum(PDsy.Group == z & PDsy.LANE == 2) >= sum(PDsy.Group == z & PDsy.LANE == 1)
+                            lucas = 1;
+                            end
+                            end
                             AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-(TrLineUpSub(1,1)-1),mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
                             k = k + 1;
                             continue
@@ -334,16 +346,21 @@ for g = 1:height(BaseData)
         end % r, years
     end % w, SiteGroups
   
+    % If there was no determinent vehicules, initialise
+    if height(MaxEvents) == 0
+    MaxEvents = [datenum(MaxLETime), BaseData.SITE(g), MaxLE, t, m, k, BrStIndx];
+    end
+    
     % Convert back to datetime
     MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
     
-    MaxEvents.DTS = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
-    MaxEvents.Datenum = [];
+    MaxEvents.Datenum = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
+    MaxEvents = renamevars(MaxEvents,"Datenum","DTS");
     
     if BaseData.StopSim(g)
         MaxEventsStop = array2table(MaxEventsStop,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
-        MaxEventsStop.DTS = datetime(MaxEventsStop.Datenum,'ConvertFrom','datenum');
-        MaxEventsStop.Datenum = [];
+        MaxEventsStop.Datenum = datetime(MaxEventsStop.Datenum,'ConvertFrom','datenum');
+        MaxEventsStop = renamevars(MaxEventsStop,"Datenum","DTS");
     end
     
     % m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
@@ -375,8 +392,13 @@ for g = 1:height(BaseData)
             OutInfo.PropTrucks.(Class).(BlockM)(r) = PropTrucks;
             Max(r).(Class).(BlockM) = Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max > 0,:);
             if height(Max(r).(Class).(BlockM))<= 30
+                if r==1
+                    OutInfo.x_values.(Class).(BlockM)(:,r) = zeros(100,1);
+                    OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = zeros(100,1);
+                else
             OutInfo.x_values.(Class).(BlockM)(:,r) = 0;
             OutInfo.y_valuespdf.(Class).(BlockM)(:,r) = 0;
+                end
                 %{
             if r==1
                 OutInfo.x_values.(Class).(BlockM)(:,r) = zeros(100,1);
@@ -390,6 +412,7 @@ for g = 1:height(BaseData)
             OutInfo.AQ.(Class).(BlockM)(r) = 0;
             else
             [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit_60t(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
+            %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
             [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd_60t(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
             end

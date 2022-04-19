@@ -65,6 +65,10 @@ if isWIM
     end
     
     % If LnTrBtw is negative we delete entry
+    if PDCx.CLASS(PDCx.LnTrBtw < 1.5,:) == 23
+    %disp('Overlapping 23');
+    end
+    
     PDCx(PDCx.LnTrBtw < 1.5,:) = [];
 end
 
