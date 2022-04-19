@@ -50,13 +50,13 @@ if isWIM
         % The following only makes sense in direction 1. We don't circshift
         % for the 2 direction... why not?
         try
-        if Lane.Dir(Lanes(i)) == 1
+        if Lane.Details.Dir(Lanes(i)) == 1
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
         end
         catch
-        if Lane.Dir(i) == 1
+        if Lane.Details.Dir(i) == 1
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
@@ -87,11 +87,11 @@ for i = 1:length(Lanes)
     
     % Change the sign of the WBL for those in direction 2
     try
-    if Lane.Dir(Lanes(i)) == 2
+    if Lane.Details.Dir(Lanes(i)) == 2
         WB(LaneInds,:) = -WB(LaneInds,:);
     end 
     catch
-    if Lane.Dir(i) == 2
+    if Lane.Details.Dir(i) == 2
         WB(LaneInds,:) = -WB(LaneInds,:);
     end    
     end
@@ -132,7 +132,7 @@ TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
 
 % Make a separate axle stream vector for each lane, and last one for all
 % Put max() function in incase one lane has no representation in TrLineUp
-AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Dir),length(Lanes)));
+AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Details.Dir),length(Lanes)));
 
 for i = 1:length(Lanes)
     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));

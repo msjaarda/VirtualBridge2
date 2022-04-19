@@ -64,6 +64,12 @@ end
 if ~ismember('Plat', BaseData.Properties.VariableNames)
     BaseData.Plat(:) = false;
 end
+if ~ismember('Country', BaseData.Properties.VariableNames) % Anything that doesn't produce a match does nothing... can do "ALL COUNTRIES" for the sake of plots!
+    BaseData.Country(:) = "CH";
+end
+if ~ismember('LightVehs', BaseData.Properties.VariableNames) % 0 is not included, 1 is included, 2 is ONLY
+    BaseData.LightVehs(:) = false;
+end
 
 % Start with Folder
 % Folder is optional, but when not included (or when given as 0), must be '/'

@@ -196,13 +196,13 @@ for j = 1:TotalLanes
             else
                 text(Span,9,['NORTH ' char(8594)],'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
             end
-            text(Span,1.25,Lane.Sites.CANTON + " (" + Lane.Sites.HWY + ")",'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
+            text(Span,1.25,Lane.Sites.STATE + " (" + Lane.Sites.HWY + ")",'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
         end
     end
     % Write extra data on second subplot if we have Lane Details
     %if ALane(j) == 2 && isfield(Lane,'Details')
     if ALane(j) == 2 && isWIM
-        if Lane.Details.NSEW(j) == 2 | Lane.Details.NSEW(j) == 4
+        if Lane.Details.NSEW(j) == 2 || Lane.Details.NSEW(j) == 4
             text(0,1.25,char(8592) + " " + Lane.Details.DIR(j),'FontSize',9,'FontWeight','bold','HorizontalAlignment','left','Color','w')
             text(Span,1.25,Lane.Details.FROM(j) + " " + char(8594),'FontSize',9,'FontWeight','bold','HorizontalAlignment','right','Color','w')
         else
@@ -216,11 +216,11 @@ for j = 1:TotalLanes
         % Assign y scale for trucks
         Lo = 2; Hi = 8;
         % Adjust scale for middle lanes
-        if ALane(j) > 1 & TotalLanes > 2 & ALane(j) < TotalLanes
+        if ALane(j) > 1 && TotalLanes > 2 && ALane(j) < TotalLanes
             Lo = Lo + 0.20; Hi = Hi - 0.20;
         end
         % Adjust scale for Inf Length
-        if Span > 50;
+        if Span > 50
             Lo = min(Lo + (Span-50)/35,3.5); Hi = max(Hi - (Span-50)/35,6.5);
         end
         % Difference

@@ -56,14 +56,14 @@ for g = 1:height(BaseData)
                     Flo = VBGetFloDist(FolDist,FixVars,Flo);
                     
                     % Assemble Axle Loads and Axle Spacings vectors - populate Axle Weights (kN) and Inter-Axle Distances (m) within
-                    [Flo, LaneAxLineUp{q}, LaneVehLineUp{q}] = VBGetLaneLineUp(TrTyp,Lane.Dir,q,Flo,FixVars,k,v,BaseData(g,:),TrData);
+                    [Flo, LaneAxLineUp{q}, LaneVehLineUp{q}] = VBGetLaneLineUp(TrTyp,Lane.Details.Dir,q,Flo,FixVars,k,v,BaseData(g,:),TrData);
                     
                 end
                 
             end % END OF LANE SPECIFIC TRAFFIC GENERATION
             
             % Assemble lane specific data, flip for direction, sort by axle position
-            [AxLineUp, VehLineUp] = VBAssembleLineUps(LaneAxLineUp,LaneVehLineUp,BatchSize,Num.Lanes,BaseData(g,:),Lane.Dir,FixVars);
+            [AxLineUp, VehLineUp] = VBAssembleLineUps(LaneAxLineUp,LaneVehLineUp,BatchSize,Num.Lanes,BaseData(g,:),Lane.Details.Dir,FixVars);
             
             % Log Virtual WIM if necessary
             if BaseData.VWIM(g) == 1
@@ -176,6 +176,6 @@ end
 
 % Run Apercu to see critical case... does all IL given for the last row of BaseData
 if BaseData.Apercu(g) == 1
-    [T, OverMx, AllTrAxx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),E.Total,Lane,BaseData.ILRes(g));
+    [T, OverMx, AllTrAxx] = VBGetApercuv2(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),E.Total,Lane,BaseData.ILRes(g));
 end
 

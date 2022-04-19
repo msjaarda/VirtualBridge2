@@ -1,16 +1,16 @@
-function [PD] = Stage2Prune(PD)
+function [PDs] = Stage2Prune(PDs)
 %STAGE2PRUNE
 
-PD(PD.GW_TOT<6000,:) = [];
+PDs(PDs.GW_TOT<6000,:) = [];
 % Only do the disqualification if we actually have SW10 Classification
 try
-if sum(PD.CS == 2 | PD.CS == 3 | PD.CS == 4 | PD.CS == 6) < 0.7*height(PD)
-    PD(PD.CS == 2 | PD.CS == 3 | PD.CS == 4 | PD.CS == 6,:) = [];
+if sum(PDs.CS == 2 | PDs.CS == 3 | PDs.CS == 4 | PDs.CS == 6) < 0.7*height(PDs)
+    PDs(PDs.CS == 2 | PDs.CS == 3 | PDs.CS == 4 | PDs.CS == 6,:) = [];
 end
 catch
 end
 
-PD(PD.SPEED > 120,:) = [];
+PDs(PDs.SPEED > 130,:) = [];
 
 
 end

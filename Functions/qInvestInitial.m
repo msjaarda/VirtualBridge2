@@ -21,12 +21,12 @@ for r = 1:length(ILData)
         % Filter based on Class - MaxEvents is compromised after this (deleting entries)
         if strcmp(Class,'ClassOW')
             MaxEventsSub(MaxEventsSub.m == 1,:) = []; %#ok<*SAGROW>
-            Z(Z(:,4) == 1,:) = [];
+            Z(Z(:,5) == 1,:) = [];
         elseif strcmp(Class,'Class')
             MaxEventsSub(MaxEventsSub.m == 1,:) = [];
-            Z(Z(:,4) == 1,:) = [];
+            Z(Z(:,5) == 1,:) = [];
             MaxEventsSub(MaxEventsSub.m == 2,:) = [];
-            Z(Z(:,4) == 2,:) = [];
+            Z(Z(:,5) == 2,:) = [];
         end
         
         for j = 1:length(BM)
@@ -47,16 +47,19 @@ for r = 1:length(ILData)
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z),Z,Gr);
+            Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM),Z,Gr);
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
             %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
             try
-                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'DTS'};
+                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd'};
             catch % For platooning
-                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType', 'DTS'};
+                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'};
             end
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
+            
+            % Delete -1 values
+            Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max == -1,:) = [];
             
         end
     end
@@ -138,7 +141,25 @@ end
 
 end
 
-function out = maxIndex(Z)
-    [ymax, loc]=max(Z(:,2));
-    out=[ymax, Z(loc,:)];
+function out = maxIndex(Z,BlockM)
+    % For years, make sure # year is 0.6, for weeks the # days > 4
+    if strcmp(BlockM,'Yearly')
+        % Make sure you have the right Z indext for DTS! 
+        if years(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 0.6
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(Z(:,2));
+            out = [ymax, Z(loc,:)];
+        end
+    elseif strcmp(BlockM,'Weekly')
+        if days(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 4
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(Z(:,2));
+            out = [ymax, Z(loc,:)];
+        end
+    else
+        [ymax, loc] = max(Z(:,2));
+        out = [ymax, Z(loc,:)];
+    end
 end

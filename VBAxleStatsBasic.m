@@ -13,15 +13,16 @@ clear, clc, tic, close all
 
 % Inputs
 Grav = 9.81;
-TAxSingle = false;
-TAxTandem = false;
+TAxSingle = true;
+TAxTandem = true;
 TAxTridem = true;
 
-Country = 'SWISS';
-%Country = 'GER';
-%Country = 'AUST';
-%Country = 'USA';
-% Can put another name here instead if a country name, then set Sitesx
+%Country = 'CH';
+%Country = 'DE';
+%Country = 'AT';
+Country = 'US';
+%Country = '';
+% Can put another name here instead if a country name, then set Sites
 
 % Former
 %Sites = [402 405:409 415:416];
@@ -30,9 +31,11 @@ Country = 'SWISS';
 % Trial
 %Sitesx = [177];
 % ALL from that Country
-Sitesx = 0;
+Sites = 0;
 
-load('C:\Users\mjsja\Desktop\SwissTraffic2\Misc\Sites.mat')
+% Get SiteSet
+Sites = VBGetSiteSet(Sites,1,1,Country);
+
 % Consider, for Swiss, incorporating Calibration info
 
 % Initialize
@@ -43,18 +46,10 @@ AxTandem = cell2table(cell(0,6),'VariableNames',VNTandem);
 VNTridem = {'AWT1kN','AWT2kN','AWT3kN','W1_2','W2_3','SITE','CLASS','DTS'};
 AxTridem = cell2table(cell(0,8),'VariableNames',VNTridem);
 
-% Get List of Sites
-if Sitesx == 0
-    % Take all Core for that Country
-    Sitesx = Sites.SITE(Sites.(Country) == 1 & Sites.Core == 1);
-else
-    Country = '';
-end
-
 % Get Axle Groups
-for i = 1:length(Sitesx)
+for i = 1:length(Sites)
     % Get individual SITE
-    SITE = Sitesx(i);
+    SITE = Sites(i);
     % Load WIM File
     load(['C:\Users\mjsja\Desktop\SwissTraffic2\WIM\' num2str(SITE) '.mat'])
     %PDs.DTS = datenum(PDs.DTS);
@@ -149,7 +144,7 @@ for i = 1:length(Sitesx)
         AxTridem = [];
     end
     
-    fprintf('\nSITE: %i (%i of %i)',SITE, i, length(Sitesx))
+    fprintf('\nSITE: %i (%i of %i)',SITE, i, length(Sites))
     
 end
 
@@ -208,11 +203,14 @@ if TAxSingle
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Single.(Class).(BlockM) = splitapply(@(Z)maxIndexSingle(Z),Z,Gr);
+            MaxAx.Single.(Class).(BlockM) = splitapply(@(Z)maxIndexSingle(Z,BlockM),Z,Gr);
             % Transform back into table form
             MaxAx.Single.(Class).(BlockM) = array2table(MaxAx.Single.(Class).(BlockM));
             MaxAx.Single.(Class).(BlockM).Properties.VariableNames = VNSingle;
             MaxAx.Single.(Class).(BlockM).DTS = datetime(MaxAx.Single.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
+            
+            % Delete -1 values
+            MaxAx.Single.(Class).(BlockM)(MaxAx.Single.(Class).(BlockM).Max == -1,:) = [];
             
         end
     end
@@ -255,12 +253,15 @@ if TAxTandem
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Tandem.(Class).(BlockM) = splitapply(@(Z)maxIndexTandem(Z),Z,Gr);
+            MaxAx.Tandem.(Class).(BlockM) = splitapply(@(Z)maxIndexTandem(Z,BlockM),Z,Gr);
             % Transform back into table form
             MaxAx.Tandem.(Class).(BlockM) = array2table(MaxAx.Tandem.(Class).(BlockM));
             MaxAx.Tandem.(Class).(BlockM).Properties.VariableNames = VNTandem;
             MaxAx.Tandem.(Class).(BlockM).W1_2M = MaxAx.Tandem.(Class).(BlockM).W1_2M;
             MaxAx.Tandem.(Class).(BlockM).DTS = datetime(MaxAx.Tandem.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
+            
+            % Delete -1 values
+            MaxAx.Tandem.(Class).(BlockM)(MaxAx.Tandem.(Class).(BlockM).Max == -1,:) = [];
             
         end
     end
@@ -303,13 +304,14 @@ if TAxTridem
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z),Z,Gr);
+            MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z,BlockM),Z,Gr);
             % Transform back into table form
             MaxAx.Tridem.(Class).(BlockM) = array2table(MaxAx.Tridem.(Class).(BlockM));
             MaxAx.Tridem.(Class).(BlockM).Properties.VariableNames = VNTridem;
-            MaxAx.Tridem.(Class).(BlockM).W1_2M = MaxAx.Tridem.(Class).(BlockM).W1_2M;
-            MaxAx.Tridem.(Class).(BlockM).W2_3M = MaxAx.Tridem.(Class).(BlockM).W2_3M;
             MaxAx.Tridem.(Class).(BlockM).DTS = datetime(MaxAx.Tridem.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
+            
+            % Delete -1 values
+            MaxAx.Tridem.(Class).(BlockM)(MaxAx.Tridem.(Class).(BlockM).Max == -1,:) = [];
             
         end
     end
@@ -324,24 +326,73 @@ end
 % Optional Saving
 % Load MaxAx
 load('Misc/BMAxles.mat')
-%BMAxles.(Country).MaxAx = MaxAx;
+BMAxles.(Country).MaxAx = MaxAx;
 %BMAxles.(Country).MaxAx.Tridem = MaxAx.Tridem;
 
 %save('Misc/BMAxles.mat','BMAxles')
 
 fprintf('\nTotal time: %.2f seconds\n\n',toc)
 
-function out = maxIndexSingle(Z)
-    [ymax, loc]=max(sum([Z(:,1)],2));
-    out=[ymax, Z(loc,:)];
+function out = maxIndexSingle(Z,BlockM)
+    if strcmp(BlockM,'Yearly')
+        if years(max(datetime(Z(:,4),'ConvertFrom','datenum')) - min(datetime(Z(:,4),'ConvertFrom','datenum'))) < 0.6
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum(Z(:,1),2));
+            out = [ymax, Z(loc,:)];
+        end
+    elseif strcmp(BlockM,'Weekly')
+        if days(max(datetime(Z(:,4),'ConvertFrom','datenum')) - min(datetime(Z(:,4),'ConvertFrom','datenum'))) < 4
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum(Z(:,1),2));
+            out = [ymax, Z(loc,:)];
+        end
+    else
+        [ymax, loc] = max(sum(Z(:,1),2));
+        out = [ymax, Z(loc,:)];
+    end
 end
 
-function out = maxIndexTandem(Z)
-    [ymax, loc]=max(sum([Z(:,1) Z(:,2)],2));
-    out=[ymax, Z(loc,:)];
+function out = maxIndexTandem(Z,BlockM)
+    if strcmp(BlockM,'Yearly')
+        if years(max(datetime(Z(:,6),'ConvertFrom','datenum')) - min(datetime(Z(:,6),'ConvertFrom','datenum'))) < 0.6
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
+            out = [ymax, Z(loc,:)];
+        end
+    elseif strcmp(BlockM,'Weekly')
+        if days(max(datetime(Z(:,6),'ConvertFrom','datenum')) - min(datetime(Z(:,6),'ConvertFrom','datenum'))) < 4
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
+            out = [ymax, Z(loc,:)];
+        end
+    else
+        [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
+        out = [ymax, Z(loc,:)];
+    end
 end
 
-function out = maxIndexTridem(Z)
-    [ymax, loc]=max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
-    out=[ymax, Z(loc,:)];
+function out = maxIndexTridem(Z,BlockM)
+% For years, make sure # unique weeks > 25, for weeks the # days > 4
+    if strcmp(BlockM,'Yearly')
+        if years(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < 0.6
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
+            out = [ymax, Z(loc,:)];
+        end
+    elseif strcmp(BlockM,'Weekly')
+        if days(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < 4
+            out = [-1, Z(1,:)];
+        else
+            [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
+            out = [ymax, Z(loc,:)];
+        end        
+    else
+        [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
+        out = [ymax, Z(loc,:)];
+    end
 end

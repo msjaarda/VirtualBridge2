@@ -1,27 +1,41 @@
-function [Sites] = VBGetSiteSet(SITE,StopSim)
-%VBGetSiteSet Summary of this function goes here
-%   Detailed explanation goes here
+function [Sitesx] = VBGetSiteSet(SITE,LightVehs,Core,Country)
+%VBGetSiteSet
 
+% We have eliminated SiteGroups.mat (placed it in Legacy)
+% Therefore, now we used simply Sites.mat
 
-    load('SiteGroups.mat')
-    if SITE == 11
-        Sites = SiteGroups.('Uni2L');
-    elseif SITE == 111
-        Sites = SiteGroups.('Uni3L');
-    elseif SITE == 12
-        Sites = SiteGroups.('Bi2L');
-        % Don't use Simplong for StopSim
-        if StopSim
-            Sites(Sites == 441) = [];
-        end
-    elseif SITE == 1122
-        Sites = SiteGroups.('Bi4L');
-    elseif SITE == 110
-        Sites = SiteGroups.('LSVAUni2L');
-    else
-        Sites = SITE;
+% Country shall be alpha2 code (CH, DE, AT, US)
+
+% FOR LightVehs
+% 0 is NOT INCLUDED, 1 IS INCLUDED, 2 IS EXCLUSIVELY INCLUDED
+
+% Can give Country or SITE == 0... if so, it does not filter
+
+% Light gives you the option to ONLY (2), include (1), or disclude (not given or 0) light
+
+load('Sites.mat')
+SitesM = Sites;
+if all(ismember(SITE,Sites.SITE))
+    Sitesx = SITE;
+else
+    if SITE ~= 0
+        % Take only layouts
+        Sites = Sites(Sites.Layout == SITE,:);
     end
-    
+    if LightVehs == 0
+        Sites = Sites(Sites.Light ~= 1,:);
+    elseif LightVehs == 2
+        Sites = Sites(Sites.Light == 1,:);
+    end
+    if Core == 1
+        Sites = Sites(Sites.Core == 1,:);
+    end
+    if height(SitesM(strcmp(SitesM.COUNTRY,Country),:)) > 1
+        Sites = Sites(strcmp(Sites.COUNTRY,Country),:);
+    end
+    Sitesx = Sites.SITE;
+
+end   
     
 end
 
