@@ -21,15 +21,16 @@ if BaseData.Parallel(1) > 0, gcp; clc; end
 for g = 1:height(BaseData)
     
     % Initialize variables and start row counter
-    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; load('SiteGroups')
+    MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = [];
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
-    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
+    Sitesx = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
+    load('Sites.mat')
         
-    for w = 1:length(Sites)
+    for w = 1:length(Sitesx)
         
         % Modify BaseData.SITE(g) based on SiteSet
-        BaseData.SITE(g) = Sites(w);
+        BaseData.SITE(g) = Sitesx(w);
         % Update analysis data for current row of BaseData
         [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
         
@@ -37,17 +38,13 @@ for g = 1:height(BaseData)
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
         
         % Load File
-        if BaseData.LSVA(g)
-            load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
-        else
-            load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
-        end
+        load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
         
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
 
-        if sum(BaseData.SITE(g)== SiteGroups.Bi4L) == 0 && sum(BaseData.SITE(g)== SiteGroups.Uni3L) == 0
+        if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11
             % Get Duplicates
             PDs = FindDup2(PDs,0,0);
             % Delete Duplicates - from L1

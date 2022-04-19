@@ -28,12 +28,13 @@ for g = 1:height(BaseData)
     LostTrucks(g) = 0;
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
-    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
+    Sitesx = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
+    load('Sites.mat')
         
-    for w = 1:length(Sites)
+    for w = 1:length(Sitesx)
         
         % Modify BaseData.SITE(g) based on SiteSet
-        BaseData.SITE(g) = Sites(w);
+        BaseData.SITE(g) = Sitesx(w);
         % Update analysis data for current row of BaseData
         [Num,Lane,ILData,~,~,E] = VBUpdateData(BaseData(g,:));
         ESIA = E.ESPTR;
@@ -42,21 +43,17 @@ for g = 1:height(BaseData)
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
         
         % Load File
-        if BaseData.LSVA(g)
-            load(['WIMLSVA/',num2str(BaseData.SITE(g)),'.mat']);
-        else
-            load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
-        end
+        load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
         
         if BaseData.Stage2P(g)
             PDs = Stage2Prune(PDs);
         end
-        
-        if sum(BaseData.SITE(g)== SiteGroups.Bi4L) == 0 && sum(BaseData.SITE(g)== SiteGroups.Uni3L) == 0
+
+        if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11
             % Get Duplicates
             PDs = FindDup2(PDs,0,0);
             % Delete Duplicates - from L1
-            PDs(PDs.Dup & PDs.LANE == 2,:) = [];
+            PDs(PDs.Dup & PDs.LANE == 1,:) = [];
         end
         
         % Get Only the ClassType Specified
