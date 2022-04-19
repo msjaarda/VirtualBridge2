@@ -25,7 +25,7 @@ for g = 1:height(BaseData)
     load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
     %PDs = PDx.PDs;
     PDs = Stage2Prune(PDs);
-    PDs = PDs(PDs.DTS < datetime(2018,10,1),:);
+    PDs = PDs(PDs.DTS > datetime(2017,1,1),:);
     
     % Get Only the ClassType Specified
     try
@@ -82,7 +82,7 @@ for g = 1:height(BaseData)
             % Optional Apercu
             if BaseData.Apercu(g) == 1
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
-                T = VBApercu(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
+                T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
                 %exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end
             

@@ -31,7 +31,7 @@ else % Lets try to form Lane.Sites and Lane.Details from Lane.Dir for the VBAper
     Lane.Dir =  cellfun(@str2num,split(BaseData.LaneDir{:},','));
     Lane.Sites = table();
     Lane.Sites.NumLanes = length(Lane.Dir);
-    Lane.Sites.CANTON = "";
+    Lane.Sites.STATE = "";
     Lane.Sites.HWY = "";
     Lane.Details = table();
     Lane.Details.LANE(1:Lane.Sites.NumLanes) = 1:Lane.Sites.NumLanes;

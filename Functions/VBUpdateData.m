@@ -15,14 +15,55 @@ if strcmp(BaseData.AnalysisType,"WIM")
     Lane.Sites = Sites(Sites.SITE == BaseData.SITE,:);
     Lane.Details = SiteLanes(SiteLanes.SITE == BaseData.SITE,:);
     Num.Lanes = Lane.Sites.NumLanes;
-    [A, B, Lane.Dir] = unique(Lane.Details.NSEW);
-    for i = 1:length(Lane.Dir)
-    if Lane.Details.NSEW(i) == 2 | Lane.Details.NSEW(i) == 4
-        Lane.Dir(i) = 1;
+
+    % Assign Lane.Details.ALANE here
+    % Start by doing all with NSEW == 2 or 4
+    IDs = Lane.Details.NSEW == 2 | Lane.Details.NSEW == 4;
+    if sum(IDs) > 0
+        Check = sortrows(Lane.Details(IDs,:),{'LANE'});
+        % If the first one is a Lane 1 we good
+        if Check.LANETYPE(1) == 1
+            Check.ALANE = [1:height(Check)]';
+        else
+            Check = sortrows(Lane.Details(IDs,:),{'LANE'},'descend');
+            Check.ALANE = [1:height(Check)]';
+        end
+        % Now check for other IDs
+        IDs2 = Lane.Details.NSEW == 1 | Lane.Details.NSEW == 3;
+        if sum(IDs2) > 0
+            Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'});
+            % If the first one is a Lane 1 we good
+            if Check2.LANETYPE(1) == 1
+                Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+            else
+                Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'},'descend');
+                Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+            end
+        else
+            Check2 = [];
+        end
     else
-        Lane.Dir(i) = 2;
+        Check = [];
+        Check2 = sortrows(Lane.Details,{'LANE'});
+        % If the first one is a Lane 1 we good
+        if Check2.LANETYPE(1) == 1
+            Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+        else
+            Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'},'descend');
+            Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+        end
     end
+    Lane.Details = [Check; Check2];
+    
+    %[~, ~, Lane.Dir] = unique(Lane.Details.NSEW);
+    for i = 1:height(Lane.Details)
+        if Lane.Details.NSEW(i) == 2 || Lane.Details.NSEW(i) == 4
+            Lane.Details.Dir(i) = 1;
+        else
+            Lane.Details.Dir(i) = 2;
+        end
     end
+    
 else % Lets try to form Lane.Sites and Lane.Details from Lane.Dir for the VBApercu
     % Get Lane Truck Distribution, Lane.TrDistr, and Lane Directions, Lane.Dir
     % If optional, do try
@@ -31,7 +72,7 @@ else % Lets try to form Lane.Sites and Lane.Details from Lane.Dir for the VBAper
     Lane.Dir =  cellfun(@str2num,split(BaseData.LaneDir{:},','));
     Lane.Sites = table();
     Lane.Sites.NumLanes = length(Lane.Dir);
-    Lane.Sites.CANTON = "";
+    Lane.Sites.STATE = "";
     Lane.Sites.HWY = "";
     Lane.Details = table();
     Lane.Details.LANE(1:Lane.Sites.NumLanes) = 1:Lane.Sites.NumLanes;
@@ -44,7 +85,7 @@ end
 
 try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch end
 % Get Num.Lanes from the length of Lane.Dir
-Num.Lanes = length(Lane.Dir);
+Num.Lanes = length(Lane.Details.Dir);
 
 % FolDist can use qualitative measures:
 % "Jammed" or "Stopped" : 0 kph

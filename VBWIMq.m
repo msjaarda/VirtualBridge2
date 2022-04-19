@@ -24,7 +24,7 @@ for g = 1:height(BaseData)
     MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = []; load('SiteGroups')
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
-    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.StopSim(g));
+    Sites = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
         
     for w = 1:length(Sites)
         
@@ -202,10 +202,10 @@ for g = 1:height(BaseData)
                         
                         if BaseData.Apercu(g) == 1 
                         %if MaxLE > 9000 && m == 3
-                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            T = VBApercuv2(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
-                                TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                             end
                         end
                         
@@ -256,13 +256,14 @@ for g = 1:height(BaseData)
     else
         MaxEvents = array2table(MaxEvents,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
     end
-    MaxEvents.DTS = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
-    MaxEvents.Datenum = [];
+    MaxEvents.Datenum = datetime(MaxEvents.Datenum,'ConvertFrom','datenum');
+    % Must put DTS to the number 1 spot (see inside of qInvestInitial
+    MaxEvents = renamevars(MaxEvents,"Datenum","DTS");
     
     if BaseData.StopSim(g)
         MaxEventsStop = array2table(MaxEventsStop,'VariableNames',{'Datenum', 'SITE', 'MaxLE', 'InfCase', 'm', 'DayRank', 'BrStInd'});
-        MaxEventsStop.DTS = datetime(MaxEventsStop.Datenum,'ConvertFrom','datenum');
-        MaxEventsStop.Datenum = [];
+        MaxEventsStop.Datenum = datetime(MaxEventsStop.Datenum,'ConvertFrom','datenum');
+        MaxEventsStop = renamevars(MaxEventsStop,"Datenum","DTS");
     end
     
     % m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'

@@ -1,14 +1,14 @@
 function [AQ1,Summary] = AlphaQ1Calc(Country,Type,FitPlots,AdvPlots,DispTab)
 % ALPHAQCALC
 % Calculates AlphaQ1 using:
-% Country (or BMAxles Group Name) such as "SWISS", "GER", or "AUST"
+% Country (or BMAxles Group Name) such as "CH", "DE", or "AT"
 % FitPlots/AdvPlots/DispTab Booleans 
 % Returns AQ1 (value for Weekly BlockMax, with 1) All 2) Class+ 3) Class
 
 % Make work for Single, Tridem...
 
 % Load
-load('Misc/BMAxles.mat')
+load('Misc/BMAxles2.mat')
 Max = BMAxles.(Country).MaxAx.(Type);
 % Set Divisor
 if strcmp(Type,"Single")
@@ -34,6 +34,9 @@ DistTypes = {'Normal', 'Lognormal'};
 
 % Set x values to be use globally
 x_values = 0:1:800;
+
+% Initialize Fig Positions
+Ri = 0; Up = 0;
 
 % Fit Block Maxima to Normal Curve
 for i = 1:length(ClassType)
@@ -62,7 +65,7 @@ x = X(1:end-1) + diff(X);
 % FIGURE OF ALL DISTS
 if FitPlots
     
-figure('Position',[0 0 1500 400]);
+figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
     
 for i = 1:length(ClassType)
     Class = ClassType{i};
@@ -95,7 +98,7 @@ for i = 1:length(ClassType)
 end
 
 % FIGURE OF ALL DISTS SEPARATED
-figure('Position',[0 0 1500 400]);
+figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits Separated'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
 
 % X Stuff
 Step = 2.5;
@@ -142,7 +145,7 @@ end
 % PROBABILITY PAPER PLOT
 
 if FitPlots
-    figure('Position',[0 0 1500 400]);
+    figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Probability Paper'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
 end
 
 for i = 1:length(ClassType)
@@ -150,7 +153,6 @@ for i = 1:length(ClassType)
     
     for j = 1:length(BM)
         BlockM = BM{j};
-        
         
         Data = Max.(Class).(BlockM).Max/Div;
         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
@@ -175,11 +177,7 @@ for i = 1:length(ClassType)
     end
 end
 
-% Give one more figure which shoes Weekly Class with detailed annotations
-if FitPlots
 
-
-end
 
 % TABLE GENERATION
 
@@ -201,11 +199,55 @@ for i = 1:length(ClassType)
         Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQN; AQLN];
         
         if strcmp(BlockM,'Weekly')
-            AQ1(i) = AQLN;
+            AQ1(i) = AQLN; Ed(i) = EdLN;
         end
         
     end
 end
+
+% Give one more figure which shoes Weekly Class with detailed annotations
+
+if FitPlots
+    Ri = 300; Up = 200;
+    figure('Position',[Ri Up 600 450],'Name',[Country ' ' Type ' Extreme Value'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50; 
+    j = 2; i = 3; k = 2;
+    BlockM = BM{2};
+    Class = ClassType{1};
+    Dist = DistTypes{k}; Data = Max.(Class).(BlockM).Max/Div;
+    
+    y = histcounts(Max.(Class).(BlockM).Max/Div,'BinEdges',X,'normalization','pdf');
+    bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
+    hold on
+    plot(x_values,y_values.(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
+    
+
+    % Set Plot Details
+    a = ylim;
+    ylim([a(1) a(2)*1.5]); a = ylim;
+    box on
+    set(gca,'ytick',[],'yticklabel',[])
+    ylabel('Normalized Histogram (NTS)')
+    xlabel(['Total ' Type ' Load (kN) /' num2str(Div)])
+    title(['Maximum ' Type ' Axles ' BlockM])
+    legend('location','northeast')
+    xlim([LimitL+75 LimitR-70])
+    
+    % Make two lines, one at Em and one at Ed > show that with 0.7BCOV
+    line([mean(Data),mean(Data)],[0,a(2)*0.7],'Color','b','LineStyle','-','HandleVisibility','off')
+    text(mean(Data),a(2)*0.83,'Mean Value','HorizontalAlignment','center')
+    text(mean(Data),a(2)*0.77,'E_m','HorizontalAlignment','center')
+    line([Ed(i),Ed(i)],[0,a(2)*0.35],'Color','b','LineStyle','-','HandleVisibility','off')
+    text(Ed(i),a(2)*0.48,'Design Value','HorizontalAlignment','center')
+    text(Ed(i),a(2)*0.42,'E_d','HorizontalAlignment','center')
+    line([mean(Data),Ed(i)],[a(2)*0.30,a(2)*0.30],'Color','r','LineStyle','--','HandleVisibility','off')
+    line([Ed(i)-3,Ed(i)],[a(2)*0.31,a(2)*0.30],'Color','r','LineStyle','--','HandleVisibility','off')
+    line([Ed(i)-3,Ed(i)],[a(2)*0.29,a(2)*0.30],'Color','r','LineStyle','--','HandleVisibility','off')
+    %annotation('textarrow',[(mean(Data)-LimitL)/(LimitR-70-LimitL-75),(Ed(i)-LimitL-150)/(LimitR-70-LimitL-75)],[0.30, 0.30],'String',' Increase ','FontSize',13,'Linewidth',2)
+    text(mean([mean(Data),Ed(i)]),a(2)*0.34,'{\it increase}','HorizontalAlignment','center')
+    text(mean([mean(Data),Ed(i)]),a(2)*0.26,'\alpha\beta\nu','HorizontalAlignment','center','Interpreter','tex')
+    
+end
+
 
 if DispTab
     format bank
@@ -216,28 +258,29 @@ end
 if AdvPlots
     
     % What vehicles were involved?
-    [TrTyps,TN] = VBTypes2Names;
+    %[TrTyps,TN] = VBTypes2Names;
+    VType = VBVTypes;
     
     % For each ClassType (or in this case just All and Class)
     for i = 1:length(ClassType)
         Class = ClassType{i};
         
-        figure('Position',[0 0 1500 400]);
+        figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' ' Class ' Responsible'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
         hold on
         
         % Select Daily, Weekly, or Yearly
         for j = 1:length(BM)
             BlockM = BM{j};
             
-            [N, Cats] = histcounts(categorical(Max.(Class).(BlockM).CLASS),categorical(TrTyps));
+            N = histcounts(categorical(Max.(Class).(BlockM).CLASS),categorical(VType.CLASS));
             
-            Label = cell(length(TN),1);
+            Label = cell(height(VType),1);
             Perc = 100*N/sum(N);
             PercS = string(round(Perc,1))';
             
-            for p = 1:length(TN)
+            for p = 1:length(VType.Name)
                 if Perc(p) > 2
-                    Label{p} = [TN{p} ' - ' PercS{p} '%'];  else;  Label{p} = '';
+                    Label{p} = strcat(VType.Name(p), ' - ', PercS{p}, '%');  else;  Label{p} = '';
                 end
             end
             
@@ -247,6 +290,7 @@ if AdvPlots
             title([ClassT{i} ' ' BlockM],'fontweight','bold','fontsize',10);
             h = pie(N,Label);
             newColors = linspecer(numel(N));
+            newColors(1,:) = [1 1 1];
             % Isolate the patch handles
             patchHand = findobj(h, 'Type', 'Patch');
             % Set the color of all patches using the nx3 newColors matrix
@@ -260,7 +304,7 @@ if AdvPlots
     % Axle Spacing
     
     if strcmp(Type,"Tandem")
-    figure('Position',[0 0 1500 400]);
+    figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Axle Spacing'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
     
     % X Stuff
     Step = 0.025;
