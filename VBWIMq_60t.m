@@ -264,6 +264,8 @@ for g = 1:height(BaseData)
                         %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                         if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                            [~,vposi] = max(B4-MaxLEContr(v)); % NEW for more than 41
+                           % values for the 23 must be rescaled with Multiplicater
+                           AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:length(Lanes)]',1)') = AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:length(Lanes)]',1)')/Multiplicater;
                            v = v(vposi); % NEW for more than 41
                            AllTrAxSub(TrLineUpOnBr(logical(sum(TrLineUpOnBr(:,3) == (TrNumsU(v))',2)),1)-(TrLineUpSub(1,1)-1),sum((Lanes == (TrLineUpOnBr(logical(sum((TrLineUpOnBr(:,3) == TrNumsU(v)'),2)),4))').*[1:length(Lanes)]',1)') = 0;
                            MaxLE = sum(sum(AllTrAxSub(BrInds,:).*flip(ILData(t).v(:,1:length(Lanes)))));
@@ -281,6 +283,14 @@ for g = 1:height(BaseData)
 %                         end
                         if MaxLE < 0
                         MaxLE = 0;
+                        end
+                        
+                        if MaxLE > 0
+                           Lucas = (MaxLE)/B4*100;
+                           Matt = 1;
+                           if Lucas > 1
+                              Matt = 2; 
+                           end
                         end
                                               
                         % Get ClassT (in m form for now)
