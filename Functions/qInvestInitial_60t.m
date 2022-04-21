@@ -178,7 +178,7 @@ function out = maxIndex(Z,BlockM)
         end
     else
     %}
-        [ymax, loc] = max(Z(:,2));
+        [ymax, loc] = max(Z(:,3));
         out = [ymax, Z(loc,:)];
     %end
 end

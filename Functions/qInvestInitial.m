@@ -50,11 +50,15 @@ for r = 1:length(ILData)
             Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM),Z,Gr);
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
-            %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
+            %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
             try
                 Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd'};
-            catch % For platooning
-                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'};
+            catch % For platooning and Q1Q2
+                try
+                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'};
+                catch
+                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
+                end
             end
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
@@ -148,18 +152,18 @@ function out = maxIndex(Z,BlockM)
         if years(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 0.6
             out = [-1, Z(1,:)];
         else
-            [ymax, loc] = max(Z(:,2));
+            [ymax, loc] = max(Z(:,3));
             out = [ymax, Z(loc,:)];
         end
     elseif strcmp(BlockM,'Weekly')
         if days(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 4
             out = [-1, Z(1,:)];
         else
-            [ymax, loc] = max(Z(:,2));
+            [ymax, loc] = max(Z(:,3));
             out = [ymax, Z(loc,:)];
         end
     else
-        [ymax, loc] = max(Z(:,2));
+        [ymax, loc] = max(Z(:,3));
         out = [ymax, Z(loc,:)];
     end
 end
