@@ -57,7 +57,7 @@ for r = 1:length(ILData)
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM),Z,Gr);
+            Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z),Z,Gr);
             % Transform back into table form
             Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
             %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'DTS', 'm'};
@@ -68,8 +68,6 @@ for r = 1:length(ILData)
             end
             Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
-            % Delete -1 values
-            Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max == -1,:) = [];
             
         end
     end
@@ -158,27 +156,7 @@ end
 end
 
 
-function out = maxIndex(Z,BlockM)
-    % For years, make sure # unique weeks > 25, for weeks the # days > 4
-    %{
-    if strcmp(BlockM,'Yearly')
-        % Make sure you have the right Z indext for DTS! 
-        if years(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 0.6
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(Z(:,2));
-            out = [ymax, Z(loc,:)];
-        end
-    elseif strcmp(BlockM,'Weekly')
-        if days(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 4
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(Z(:,2));
-            out = [ymax, Z(loc,:)];
-        end
-    else
-    %}
+function out = maxIndex(Z)
         [ymax, loc] = max(Z(:,3));
         out = [ymax, Z(loc,:)];
-    %end
 end

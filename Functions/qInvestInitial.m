@@ -57,13 +57,12 @@ for r = 1:length(ILData)
                 try
                     Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'};
                 catch
-                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
+                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
                 end
             end
-            Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
-            
             % Delete -1 values
-            Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).Max == -1,:) = [];
+            Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).R == -1,:) = [];
+            Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
             
         end
     end

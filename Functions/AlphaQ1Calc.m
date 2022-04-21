@@ -65,7 +65,7 @@ x = X(1:end-1) + diff(X);
 % FIGURE OF ALL DISTS
 if FitPlots
     
-figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
+figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits'],'NumberTitle','off'); Ri = Ri+25; Up = Ri+25;
     
 for i = 1:length(ClassType)
     Class = ClassType{i};
@@ -98,7 +98,7 @@ for i = 1:length(ClassType)
 end
 
 % FIGURE OF ALL DISTS SEPARATED
-figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits Separated'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
+figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Fits Separated'],'NumberTitle','off'); Ri = Ri+25; Up = Ri+25;
 
 % X Stuff
 Step = 2.5;
@@ -145,7 +145,7 @@ end
 % PROBABILITY PAPER PLOT
 
 if FitPlots
-    figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Probability Paper'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
+    figure('Position',[Ri Up 1200 400],'Name',[Country ' ' Type ' Probability Paper'],'NumberTitle','off'); Ri = Ri+25; Up = Ri+25;
 end
 
 for i = 1:length(ClassType)
@@ -201,7 +201,6 @@ for i = 1:length(ClassType)
         if strcmp(BlockM,'Weekly')
             AQ1(i) = AQLN; Ed(i) = EdLN;
         end
-        
     end
 end
 
