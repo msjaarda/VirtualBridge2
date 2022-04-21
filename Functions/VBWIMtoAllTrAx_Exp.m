@@ -26,7 +26,7 @@ if isWIM
     end
     
     % Cummulative distance in axle stream
-    PDCx.SpCu = cumsum(PDCx.Dist);
+    PDCx.SpCu = cumsum(PDCx.Dist) + 30; % add 30 to avoid negative values
     
 end
 

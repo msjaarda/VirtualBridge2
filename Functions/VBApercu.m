@@ -112,7 +112,7 @@ for i = 1:NumLaneswTr
             
             Temp = TrLineUp(TrLineUp(:,3) == a(j),5);
             %Temp = sort(Temp,'descend');
-            if Lane.Dir(i) == 1
+            if Lane.Details.Dir(i) == 1
                 Temp = sort(Temp,'ascend');
                 vc{i}(j,1) = Temp(1)-ILRes*BrStInd-1;
                 vc{i}(j,2) = Temp(end)-ILRes*BrStInd+1;
@@ -232,7 +232,7 @@ for j = 1:TotalLanes
             EdgCol = 'k';
             % Truck Outline
             fill([vc{j}(i,1) vc{j}(i,1) vc{j}(i,2) vc{j}(i,2)],[Lo Hi Hi Lo],Col{j},'EdgeColor',EdgCol,'LineWidth',1.5);
-            if Lane.Dir(j) == 1
+            if Lane.Details.Dir(j) == 1
                 % Back Bumper
                 fill([vc{j}(i,2)-0.1 vc{j}(i,2)-0.1 vc{j}(i,2)+0.1 vc{j}(i,2)+0.1],[Lo+0.5 Hi-0.5 Hi-0.5 Lo+0.5],'w','EdgeColor',EdgCol,'LineWidth',1.5);
                 % Front of Truck
