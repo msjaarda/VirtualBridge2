@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60t.xlsx';
+FName = 'Input/VBWIMqInput60t_test.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -308,9 +308,24 @@ for g = 1:height(BaseData)
                             TrLineUpSubTemp = TrLineUpSub;
                             %PosiRemTruck = TrNumsU.*(Vehs==41); PosiRemTruck(PosiRemTruck == 0) = []; PosiRemTruck = PosiRemTruck(1);
                             PosiRemTruck = TrNumsU(v);
+                            % return 23 loads to original using Multiplicater
+                            TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2) = TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2)/Multiplicater;
                             TrLineUpSubTemp(find(TrLineUpSub(:,3) == PosiRemTruck),:) = [];
                             T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSubTemp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
-                            VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,B4/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            
+                            PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+                            PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
+
+                            VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,B4/ESIA.Total(t)/Multiplicater,1,Lane,BaseData.ILRes(g));
+                            
                             end
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)

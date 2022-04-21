@@ -45,6 +45,12 @@ elseif contains(Dist,'Zero')
 Dist = erase(Dist,'Zero');    
 end
 
+if contains(Dist,'Plot')
+Plotter = 1;
+else
+Plotter = 0;
+end
+
 if FitType == 1 || FitType == 2 
 Prop = 0.95;
 if FitType == 2
@@ -90,6 +96,40 @@ elseif strcmp(Dist,'Extreme Value')
     AQ = Ed/(ESIAT);
     Aq = 1;   
 end
+
+%Plot
+    
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+    %pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+    pd = makedist('normal',Em,Stdev);
+    %pd = fitdist(Data,'normal');
+    Top = ceil(max(Data)/10)*10;
+    Bot = floor(min(Data)/10)*10;
+    TBDiff = Top-Bot;
+    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+    y_PDF_Fit = pdf(pd,x_values);
+    % X is for the plot
+    X = x_values;
+    % x is for the bar
+    x = X(1:end-1) + diff(X);
+    y = histcounts(Data,'BinEdges',X,'normalization','pdf');       
+    % Scale factor
+    yscale = 1; %max(y)/max(y_PDF_Fit);
+    
+    figure
+    bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
+    hold on
+    plot(X,y_PDF_Fit*yscale,'r--','LineWidth',1)
+    
+    y1 = ylim;
+    text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
+    if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
+%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+    end
+    set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
+    ylabel('Normalized Histograms (NTS)')
+    xlabel('Bridge Action Effect')
 
 elseif FitType == 3
 Types = Data.m; Data = Data.Max; m1 = Types == 1; m2 = Types == 2; m3 = Types == 3;
