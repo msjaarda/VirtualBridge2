@@ -223,9 +223,9 @@ for g = 1:height(BaseData)
                             MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
                         end
                         
-                        if m == 3
-                            k = 100; % Bump k up so that analysis doesn't continue!
-                        end
+%                         if m == 3
+%                             k = 100; % Bump k up so that analysis doesn't continue!
+%                         end
                         
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                         AllTrAxSub(BrInds,:) = 0;
@@ -268,8 +268,10 @@ for g = 1:height(BaseData)
     BM = {'Daily', 'Weekly', 'Yearly'};             % j
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
+    % MOVET O LUCAS SCRIPT
     [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
-    
+    %[MaxAM,~,~,~] = qInvestInitialAM(BM,ClassType,DistTypes,MaxEvents,ILData);
+        
     TName = datestr(now,'mmmdd-yy HHMMSS');
     % Need to go back to original BaseData... no SITE switch
     BaseData = VBReadInputFile(FName);
@@ -278,7 +280,9 @@ for g = 1:height(BaseData)
     OutInfo.ILData = ILData;
     OutInfo.SimStop = false;
     OutInfo.Max = Max;
+    OutInfo.MaxEvents = MaxEvents;
     
+    % MOVE TO LUCAS SCRIPT
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
@@ -305,6 +309,7 @@ for g = 1:height(BaseData)
         OutInfo.Name = TName;
         OutInfo.SimStop = true;
         OutInfo.Max = Max;
+        OutInfo.MaxEvents = MaxEventsStop;
         
         % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
         for r = 1:Num.InfCases
