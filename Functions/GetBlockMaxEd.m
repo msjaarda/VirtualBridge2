@@ -47,6 +47,7 @@ end
 
 if contains(Dist,'Plot')
 Plotter = 1;
+Dist = erase(Dist,'Plot');
 else
 Plotter = 0;
 end
@@ -87,10 +88,12 @@ if strcmp(Dist,'Normal')
     % FYI ESIAT has the 1.5 in it already...
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+    pd = makedist('normal',Em,Stdev);
 elseif strcmp(Dist,'Lognormal')
     Ed = Em*exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+    pd = makedist('lognormal',mean(log(Data)),std(log(Data)));
 elseif strcmp(Dist,'Extreme Value')
     Ed = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
@@ -98,11 +101,7 @@ elseif strcmp(Dist,'Extreme Value')
 end
 
 %Plot
-    
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-    %pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
-    pd = makedist('normal',Em,Stdev);
-    %pd = fitdist(Data,'normal');
+if Plotter
     Top = ceil(max(Data)/10)*10;
     Bot = floor(min(Data)/10)*10;
     TBDiff = Top-Bot;
@@ -130,6 +129,7 @@ end
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
     ylabel('Normalized Histograms (NTS)')
     xlabel('Bridge Action Effect')
+end
 
 elseif FitType == 3
 Types = Data.m; Data = Data.Max; m1 = Types == 1; m2 = Types == 2; m3 = Types == 3;
