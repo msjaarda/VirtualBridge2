@@ -1,5 +1,5 @@
 % ------------------------------------------------------------------------
-%                             VBAxleStatsBasic
+%                             VBAxleStats
 % ------------------------------------------------------------------------
 % Assemble Simple, Tandem, and Tridem Axles, using geometry, to gain
 % information on maximum axle loads (especially Q1)
@@ -304,6 +304,9 @@ if TAxTridem
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
+            FunM = @(Z)maxIndexTridem(Z,BlockM);
+            %funM = @(Z) maxIndexTridem(Z) + BlockM;
+            MaxAx.Tridem.(Class).(BlockM) = splitapply(FunM,Z,Gr);
             MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z,BlockM),Z,Gr);
             % Transform back into table form
             MaxAx.Tridem.(Class).(BlockM) = array2table(MaxAx.Tridem.(Class).(BlockM));
@@ -321,6 +324,21 @@ end
 % MIGHT NEED TO ADD A FILTER TO REMVOE OUTLIERS ON THE LOW SIDE...
 % HAPPENS WHEN YEARLY BLOCKMAX COMES FROM STATION WITH ONLY 2 DAYS FOR EX.
 % NOW I HAVE GONE AND DELETED ONE BY HAND (80 for tridem SWISS yearly)
+
+% Anonymous functions will look for variables in the workspace... that is
+% why BlockM still goes.
+
+% Two functions are being called by splitapply kinda.
+
+% function out = function_handle(Z)
+%     out = maxIndexTridem(Z)
+% end
+% 
+% function out = @(Z)
+%     BlockM = "Yearly";
+%     out = maxIndexTridem(Z,BlockM);
+% end
+
 
 
 % Optional Saving
