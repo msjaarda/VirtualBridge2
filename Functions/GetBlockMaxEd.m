@@ -88,12 +88,18 @@ if strcmp(Dist,'Normal')
     % FYI ESIAT has the 1.5 in it already...
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+    if FitType == 1
     pd = makedist('normal',Em,Stdev);
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+    end
 elseif strcmp(Dist,'Lognormal')
     Ed = Em*exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
+    if FitType == 1
     pd = makedist('lognormal',mean(log(Data)),std(log(Data)));
+    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+    end
 elseif strcmp(Dist,'Extreme Value')
     Ed = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
@@ -112,23 +118,31 @@ if Plotter
     % x is for the bar
     x = X(1:end-1) + diff(X);
     y = histcounts(Data,'BinEdges',X,'normalization','pdf');       
-    % Scale factor
-    yscale = 1; %max(y)/max(y_PDF_Fit);
-    
+            
     figure
     bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
     hold on
-    plot(X,y_PDF_Fit*yscale,'r--','LineWidth',1)
-    
+    plot(X,y_PDF_Fit,'r--','LineWidth',1)
+        
     y1 = ylim;
-    text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
+    plot([Ed Ed],[0 y1(1)+(y1(2)-y1(1))*.20],'k--','LineWidth',1)
+    text(X(70),y1(1)+(y1(2)-y1(1))*.80,sprintf('Block:       %s',BlockM),"Color",'k')
+    text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:         %s',Dist),"Color",'k')
+    Rsquared = sum((y_PDF_Fit(2:end)-mean(y)).^2)/sum((y-mean(y)).^2);
     if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
-%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:           %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
+%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp! 
     end
+    text(X(70),y1(1)+(y1(2)-y1(1))*.65,sprintf('TailFit:      %s',mat2str(FitType == 2)),"Color",'k')
+    text(X(70),y1(1)+(y1(2)-y1(1))*.60,sprintf('NoZeros:  %s',mat2str(contains(Dist,'Zero') && PropTruck ~= 0)),"Color",'k')
+    text(Ed,y1(1)+(y1(2)-y1(1))*.25,sprintf('Ed = %.1f',Ed),"Color",'k','HorizontalAlignment','center')
+    text(X(5),y1(1)+(y1(2)-y1(1))*.85,sprintf('%.1f%% Accompaniment Rate',100*PropTruck),"Color",'k')
+    text(X(5),y1(1)+(y1(2)-y1(1))*.80,sprintf('%i Total Events',length(Data)),"Color",'k')
+
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
     ylabel('Normalized Histograms (NTS)')
     xlabel('Bridge Action Effect')
+
 end
 
 elseif FitType == 3

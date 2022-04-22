@@ -401,6 +401,7 @@ for g = 1:height(BaseData)
     OutInfo.ESIA = ESIA; %OutInfo.E41 = E41;
     OutInfo.ILData = ILData;
     OutInfo.SimStop = false;
+     OutInfo.MaxEvents = MaxEvents;
     % OutInfo.Max = Max; Need to be done after
     
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
