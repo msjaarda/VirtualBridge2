@@ -235,11 +235,11 @@ for g = 1:height(BaseData)
                         
                         %if sum(Vehs == 41) == 0
                         if sum(sum(Vehs == [23])) == 0
-                            if sum(PDsy.Group == z & PDsy.CLASS == 23) >= 1
-                            if sum(PDsy.Group == z & PDsy.LANE == 2) >= sum(PDsy.Group == z & PDsy.LANE == 1)
-                            lucas = 1;
-                            end
-                            end
+                            %if sum(PDsy.Group == z & PDsy.CLASS == 23) >= 1
+                            %if sum(PDsy.Group == z & PDsy.LANE == 2) >= sum(PDsy.Group == z & PDsy.LANE == 1)
+                            %Lucas = 1;
+                            %end
+                            %end
                             AllTrAxSub(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),1)-(TrLineUpSub(1,1)-1),mean(TrLineUpOnBr(TrLineUpOnBr(:,3) == TrNumsU(1,1),4))) = 0;
                             k = k + 1;
                             continue
@@ -260,6 +260,10 @@ for g = 1:height(BaseData)
                         end
                                                                      
                         %v = find(Vehs == 41);
+                        %if sum(sum(Vehs == [23],2)) > 1
+                        %Lucas = 1;
+                        %end
+                        
                         v = find(sum(Vehs == [23],2));
                         %if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
                         if max(B4-MaxLEContr(v)) == max(B4-MaxLEContr)
@@ -284,15 +288,7 @@ for g = 1:height(BaseData)
                         if MaxLE < 0
                         MaxLE = 0;
                         end
-                        
-                        if MaxLE > 0
-                           Lucas = (MaxLE)/B4*100;
-                           Matt = 1;
-                           if Lucas > 1
-                              Matt = 2; 
-                           end
-                        end
-                                              
+                                                           
                         % Get ClassT (in m form for now)
                         if min(Vehs) == 0
                             m = 1;
@@ -326,6 +322,18 @@ for g = 1:height(BaseData)
 
                             VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,B4/ESIA.Total(t)/Multiplicater,1,Lane,BaseData.ILRes(g));
                             
+                            %return original values
+                            TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2) = TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2)*Multiplicater;
+                            PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT03(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT04(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT05(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT06(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT07(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT08(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
+                            PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1])*Multiplicater;
                             end
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
