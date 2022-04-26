@@ -36,12 +36,12 @@ for r = 1:length(ILData)
             Max(r).(Class).(BlockM) = [];
             
             if strcmp(BlockM,'Daily')
-                
                 % Make groups out of unique locations and days
                 [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','day'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
-               
             elseif strcmp(BlockM,'Weekly')
                 [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','week'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
+            elseif strcmp(BlockM,'Monthly')
+                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','month'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             else
                 [Gr, ~, ~, ~] = findgroups(year(MaxEventsSub.DTS),MaxEventsSub.SITE,MaxEventsSub.InfCase);
             end
@@ -145,24 +145,21 @@ end
 end
 
 function out = maxIndex(Z,BlockM)
-    % For years, make sure # year is 0.6, for weeks the # days > 4
     if strcmp(BlockM,'Yearly')
-        % Make sure you have the right Z indext for DTS! 
-        if years(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 0.6
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(Z(:,3));
-            out = [ymax, Z(loc,:)];
-        end
+        LimD = 0.6*365;
     elseif strcmp(BlockM,'Weekly')
-        if days(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < 4
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(Z(:,3));
-            out = [ymax, Z(loc,:)];
-        end
+        LimD = 4;
+    elseif strcmp(BlockM,'Monthly')
+        LimD = 18;
+    else
+        LimD = 0;
+    end
+    
+    if days(max(datetime(Z(:,1),'ConvertFrom','datenum')) - min(datetime(Z(:,1),'ConvertFrom','datenum'))) < LimD
+        out = [-1, Z(1,:)];
     else
         [ymax, loc] = max(Z(:,3));
         out = [ymax, Z(loc,:)];
     end
+    
 end

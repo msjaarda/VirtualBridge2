@@ -8,7 +8,7 @@
 % VBWIMq         >> qMaxEvents    >> q    Investigation
 
 % Initializing commands
-clear, clc, tic, format long g, rng('shuffle'), close all;
+clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
 FName = 'Input/VBWIMqInput60t.xlsx';
@@ -25,8 +25,8 @@ for g = 1:height(BaseData)
     
     % Recognize if BaseData.SITE(g) is actually a 'set'
     Sitesx = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
-    load('Sites.mat')
-        
+    
+    % For each Site    
     for w = 1:length(Sitesx)
         
         % Modify BaseData.SITE(g) based on SiteSet
@@ -52,27 +52,22 @@ for g = 1:height(BaseData)
         end
         
         % Get Only the ClassType Specified
-        try
-            if strcmp(BaseData.ClassType(g),'Class')
-                PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 90 | PDs.CLASS < 40),:);
-            elseif strcmp(BaseData.ClassType(g),'ClassOW')
-                PDs = PDs(PDs.CLASS > 0,:);
-            end
-        catch 
+        if strcmp(BaseData.ClassType(g),'Class')
+            PDs = PDs(PDs.CLASS > 0 & (PDs.CLASS > 90 | PDs.CLASS < 40),:);
+        elseif strcmp(BaseData.ClassType(g),'ClassOW')
+            PDs = PDs(PDs.CLASS > 0,:);
         end
         % Platoon
-        try
-            if BaseData.Plat(g)
-                TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
-                PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
-                if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
-                    PlatPct(3) = 0; PlatPct(4) = 0;
-                end
-                PDs(PDs.SPEED == 0,:) = [];
-                PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
+        if BaseData.Plat(g)
+            TrTyps =  [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238];
+            PlatPct = BaseData.PlatRate(g)*ones(length(TrTyps),1);
+            if strcmp(BaseData.Folder(g),'/PlatooningNo2322')
+                PlatPct(3) = 0; PlatPct(4) = 0;
             end
-        catch
+            PDs(PDs.SPEED == 0,:) = [];
+            PDs = SwapforPlatoonsWIM(PDs,BaseData.PlatSize(g),BaseData.PlatFolDist(g),TrTyps,PlatPct);
         end
+
         
         % Separate for each year...
         if ismember('Year',BaseData.Properties.VariableNames)
@@ -86,7 +81,7 @@ for g = 1:height(BaseData)
         end
         
         % Start Progress Bar
-        u = StartProgBar(length(UYears), 1, g, height(BaseData)); tic; st = now;
+        u = StartProgBar(length(UYears), 1, str2num([num2str(g) '.' num2str(w)]), str2num([num2str(height(BaseData)) '.' num2str(length(Sitesx))])); tic; st = now;
         
         for r = 1:length(UYears)
             
@@ -99,6 +94,8 @@ for g = 1:height(BaseData)
                        
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+            % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
+            %TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TruckNum','LaneID','mStation','Group'});
 
             % Perform search for maximums for each day
             parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
@@ -114,9 +111,11 @@ for g = 1:height(BaseData)
                 
                 % Get Lanes
                 Lanes = unique(PDsy.LANE);
-                AllTrAxGr = zeros(max(TrLineUpSub(:,1))-TrLineUpSub(1,1)+1,length(Lanes));
+                %AllTrAxGr = zeros(max(TrLineUpSub(:,1))-TrLineUpSub(1,1)+1,length(Lanes));
+                AllTrAxGr = zeros(max(TrLineUpSub.ATAIndex)-TrLineUpSub.ATAIndex(1)+1,length(Lanes));
                 for i = 1:length(Lanes)
-                    A = accumarray(TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),1)-TrLineUpSub(1,1)+1,TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),2));
+                    %A = accumarray(TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),1)-TrLineUpSub(1,1)+1,TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),2));
+                    A = accumarray(TrLineUpSub.ATAIndex(TrLineUpSub.LandID == Lanes(i))-TrLineUpSub.ATAIndex(1)+1,TrLineUpSub.AxleValue(TrLineUpSub.LaneID == Lanes(i)));
                     AllTrAxGr(1:length(A),i) = A;
                 end
                 
@@ -151,8 +150,9 @@ for g = 1:height(BaseData)
                         if MaxLE == 0, k = k+1; continue, end
                         k = k+1; % Add to k
                         
-                        % Adjust BrStInd for Starti [now TrLineUpSub(1,1)]
-                        BrStIndx = BrStInd + TrLineUpSub(1,1) -1;
+                        % Adjust BrStInd for Starti [now TrLineUpSub(1,1) TrLineUpSub.ATAIndex(1)]
+                        %BrStIndx = BrStInd + TrLineUpSub(1,1) - 1;
+                        BrStIndx = BrStInd + TrLineUpSub.ATAIndex(1) - 1;
                         % Get BrEndIndx
                         BrEndIndx = BrStIndx + BrLengthInd - 1;
                         % Get Bridge Indices
@@ -161,10 +161,14 @@ for g = 1:height(BaseData)
                         %AxOnBr = sum(AllTrAxt(StripInds,:),2);
                         
                         % Get Key Info to Save
-                        TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),3);
-                        TrLineUpOnBr = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),:);
-                        [MaxM, MaxI] = max(TrLineUpOnBr(:,2));
-                        TrIdMax = TrLineUpOnBr(MaxI,3);
+                        %TrNums = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),3);
+                        TrNums = TrLineUpSub.TrNum(TrLineUpSub.ATAIndex >= min(BrIndsx) & TrLineUpSub.ATAIndex <= max(BrIndsx));
+                        %TrLineUpOnBr = TrLineUpSub(TrLineUpSub(:,1) >= min(BrIndsx) & TrLineUpSub(:,1) <= max(BrIndsx),:);
+                        TrLineUpOnBr = TrLineUpSub(TrLineUpSub.ATAIndex >= min(BrIndsx) & TrLineUpSub.ATAIndex <= max(BrIndsx),:);
+                        %[MaxM, MaxI] = max(TrLineUpOnBr(:,2));
+                        [MaxM, MaxI] = max(TrLineUpOnBr.AxleValue);
+                        %TrIdMax = TrLineUpOnBr(MaxI,3);
+                        TrIdMax = TrLineUpOnBr.TrNum(MaxI);
                         
                         TrNumsU = unique(TrNums);
                         
@@ -176,9 +180,11 @@ for g = 1:height(BaseData)
                             
                             % Call VBWIMtoAllTrAx w/ mods... must give stationary point or truck
                             [PDe, AllTrAxStop, TrLineUpStop] = VBWIMtoAllTrAxStop(PDe,MaxLength,Lane,BaseData.ILRes(g),find(TrNumsUE == TrIdMax));
+                            TrLineUpStop = array2table(TrLineUpStop,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID'});
                             
                             % Round TrLineUp first row, move unrounded to fifth row
-                            TrLineUpStop(:,5) = TrLineUpStop(:,1); TrLineUpStop(:,1) = round(TrLineUpStop(:,1)/BaseData.ILRes(g));
+                            %TrLineUpStop(:,5) = TrLineUpStop(:,1); TrLineUpStop(:,1) = round(TrLineUpStop(:,1)/BaseData.ILRes(g));
+                            TrLineUpStop.mStation = TrLineUpStop.ATAIndex; TrLineUpStop.ATAIndex = round(TrLineUpStop.ATAIndex/BaseData.ILRes(g));
                             % TrLineUpStop [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m) ]
                             
                             [MaxLEe,DLFe,BrStInde,Re] = VBGetMaxLE(AllTrAxStop,ILData(t).v,BaseData.RunDyn(g));
@@ -199,10 +205,10 @@ for g = 1:height(BaseData)
                         
                         if BaseData.Apercu(g) == 1 
                         %if MaxLE > 9000 && m == 3
-                            T = VBApercuv2(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            T = VBApercuv2(PDsy,'',ILData(t),BrStIndx,table2array(TrLineUpSub),MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
-                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,table2array(TrLineUpStop),MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
                             end
                         end
                         

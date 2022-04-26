@@ -11,7 +11,6 @@ warning('off','MATLAB:table:RowsAddedExistingVars')
 load('Cranes.mat')
 Tol = 0.10; % 10% in each direction length
 
-
 IndW = find(string(PD.Properties.VariableNames) == "W1_2");
 NumW = sum(cell2mat(regexp(string(PD.Properties.VariableNames), 'W\d_*')));
 WB = PD{:,IndW:IndW+NumW-1}; WB(PD{:,IndW:IndW+NumW-1} == 0) = NaN;

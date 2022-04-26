@@ -73,7 +73,10 @@ if isWIM
 end
 
 % Create wheelbase and axle load vectors
-WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
+IndW = find(string(PDCx.Properties.VariableNames) == "W1_2");
+NumW = sum(cell2mat(regexp(string(PDCx.Properties.VariableNames), 'W\d_*')));
+WB = PDCx{:,IndW:IndW+NumW-1}/100;
+%WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
 AX = PDCx{:,strncmp(PDCx.Properties.VariableNames,'AW',2)}/102;
 
 % Make wheelbase length cummulative

@@ -16,11 +16,13 @@ TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
 % Expand TrLineUp to include groups
 TrLineUp(:,6) = PDsy.Group(TrLineUp(:,3));
 % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
+TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID','mStation','Group'});
 
 % In order to prevent broadcast variables, and instead have sliced
 % variables, particularly for TrLineUp, and AllTrAx
 for z = 1:max(PDsy.Group)
-    TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
+    %TrLineUpGr{z} = TrLineUp(TrLineUp(:,6) == z,:);
+    TrLineUpGr{z} = TrLineUp(TrLineUp.Group == z,:);
 end
                    
             

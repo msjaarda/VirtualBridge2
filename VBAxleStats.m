@@ -168,6 +168,7 @@ VNTandem = {'Max','AWT1kN','AWT2kN','W1_2M','SITE','CLASS','DTS'};
 VNTridem = {'Max','AWT1kN','AWT2kN','AWT3kN','W1_2M','W2_3M','SITE','CLASS','DTS'};
 
 if TAxSingle
+    NumAx = 1;
     Z = table2array(AxSingle);
     AxSingle.DTS = datetime(AxSingle.DTS,'ConvertFrom','datenum');
     % Delete Cols for Speed
@@ -198,12 +199,14 @@ if TAxSingle
                 [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','day'),AxSingle.SITE);
             elseif strcmp(BlockM,'Weekly')
                 [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','week'),AxSingle.SITE);
+            elseif strcmp(BlockM,'Monthly')
+                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','month'),AxSingle.SITE);
             else
                 [Gr, GrIDYear, GrIDZST] = findgroups(year(AxSingle.DTS),AxSingle.SITE);
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Single.(Class).(BlockM) = splitapply(@(Z)maxIndexSingle(Z,BlockM),Z,Gr);
+            MaxAx.Single.(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM,NumAx),Z,Gr);
             % Transform back into table form
             MaxAx.Single.(Class).(BlockM) = array2table(MaxAx.Single.(Class).(BlockM));
             MaxAx.Single.(Class).(BlockM).Properties.VariableNames = VNSingle;
@@ -218,6 +221,7 @@ if TAxSingle
 end
 
 if TAxTandem
+    NumAx = 2;
     Z = table2array(AxTandem);
     AxTandem.DTS = datetime(AxTandem.DTS,'ConvertFrom','datenum');
     % Delete Cols for Speed
@@ -248,12 +252,14 @@ if TAxTandem
                 [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','day'),AxTandem.SITE);
             elseif strcmp(BlockM,'Weekly')
                 [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','week'),AxTandem.SITE);
+            elseif strcmp(BlockM,'Monthly')
+                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','month'),AxTandem.SITE);
             else
                 [Gr, GrIDYear, GrIDZST] = findgroups(year(AxTandem.DTS),AxTandem.SITE);
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Tandem.(Class).(BlockM) = splitapply(@(Z)maxIndexTandem(Z,BlockM),Z,Gr);
+            MaxAx.Tandem.(Class).(BlockM) = splitapply(@(Z)maxIndexTandem(Z,BlockM,NumAx),Z,Gr);
             % Transform back into table form
             MaxAx.Tandem.(Class).(BlockM) = array2table(MaxAx.Tandem.(Class).(BlockM));
             MaxAx.Tandem.(Class).(BlockM).Properties.VariableNames = VNTandem;
@@ -269,6 +275,7 @@ if TAxTandem
 end
 
 if TAxTridem
+    NumAx = 3;
     Z = table2array(AxTridem);
     AxTridem.DTS = datetime(AxTridem.DTS,'ConvertFrom','datenum');
     % Delete Cols for Speed
@@ -299,15 +306,14 @@ if TAxTridem
                 [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','day'),AxTridem.SITE);
             elseif strcmp(BlockM,'Weekly')
                 [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','week'),AxTridem.SITE);
+            elseif strcmp(BlockM,'Monthly')
+                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','month'),AxTridem.SITE);    
             else
                 [Gr, GrIDYear, GrIDZST] = findgroups(year(AxTridem.DTS),AxTridem.SITE);
             end
             
             % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            FunM = @(Z)maxIndexTridem(Z,BlockM);
-            %funM = @(Z) maxIndexTridem(Z) + BlockM;
-            MaxAx.Tridem.(Class).(BlockM) = splitapply(FunM,Z,Gr);
-            MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z,BlockM),Z,Gr);
+            MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z,BlockM,NumAx),Z,Gr);
             % Transform back into table form
             MaxAx.Tridem.(Class).(BlockM) = array2table(MaxAx.Tridem.(Class).(BlockM));
             MaxAx.Tridem.(Class).(BlockM).Properties.VariableNames = VNTridem;
@@ -321,9 +327,7 @@ if TAxTridem
     % Add to overall struct
 end
 
-% MIGHT NEED TO ADD A FILTER TO REMVOE OUTLIERS ON THE LOW SIDE...
-% HAPPENS WHEN YEARLY BLOCKMAX COMES FROM STATION WITH ONLY 2 DAYS FOR EX.
-% NOW I HAVE GONE AND DELETED ONE BY HAND (80 for tridem SWISS yearly)
+% Raph Explanation
 
 % Anonymous functions will look for variables in the workspace... that is
 % why BlockM still goes.
@@ -351,66 +355,22 @@ BMAxles.(Country).MaxAx = MaxAx;
 
 fprintf('\nTotal time: %.2f seconds\n\n',toc)
 
-function out = maxIndexSingle(Z,BlockM)
+function out = maxIndex(Z,BlockM,NumAx)
+    % For years, make sure # unique weeks > 25, for weeks the # days > 4
     if strcmp(BlockM,'Yearly')
-        if years(max(datetime(Z(:,4),'ConvertFrom','datenum')) - min(datetime(Z(:,4),'ConvertFrom','datenum'))) < 0.6
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum(Z(:,1),2));
-            out = [ymax, Z(loc,:)];
-        end
+        LimD = 0.6*365;
     elseif strcmp(BlockM,'Weekly')
-        if days(max(datetime(Z(:,4),'ConvertFrom','datenum')) - min(datetime(Z(:,4),'ConvertFrom','datenum'))) < 4
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum(Z(:,1),2));
-            out = [ymax, Z(loc,:)];
-        end
+        LimD = 4;
+    elseif strcmp(BlockM,'Monthly')
+        LimD = 18;
     else
-        [ymax, loc] = max(sum(Z(:,1),2));
-        out = [ymax, Z(loc,:)];
+        LimD = 0;
     end
-end
 
-function out = maxIndexTandem(Z,BlockM)
-    if strcmp(BlockM,'Yearly')
-        if years(max(datetime(Z(:,6),'ConvertFrom','datenum')) - min(datetime(Z(:,6),'ConvertFrom','datenum'))) < 0.6
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
-            out = [ymax, Z(loc,:)];
-        end
-    elseif strcmp(BlockM,'Weekly')
-        if days(max(datetime(Z(:,6),'ConvertFrom','datenum')) - min(datetime(Z(:,6),'ConvertFrom','datenum'))) < 4
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
-            out = [ymax, Z(loc,:)];
-        end
+    if days(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < LimD
+        out = [-1, Z(1,:)];
     else
-        [ymax, loc] = max(sum([Z(:,1) Z(:,2)],2));
-        out = [ymax, Z(loc,:)];
-    end
-end
-
-function out = maxIndexTridem(Z,BlockM)
-% For years, make sure # unique weeks > 25, for weeks the # days > 4
-    if strcmp(BlockM,'Yearly')
-        if years(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < 0.6
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
-            out = [ymax, Z(loc,:)];
-        end
-    elseif strcmp(BlockM,'Weekly')
-        if days(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < 4
-            out = [-1, Z(1,:)];
-        else
-            [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
-            out = [ymax, Z(loc,:)];
-        end        
-    else
-        [ymax, loc] = max(sum([Z(:,1) Z(:,2) Z(:,3)],2));
+        [ymax, loc] = max(sum([Z(:,1:NumAx)],2));
         out = [ymax, Z(loc,:)];
     end
 end

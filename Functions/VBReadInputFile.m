@@ -37,6 +37,10 @@ end
 if ~ismember('NumAnalyses', BaseData.Properties.VariableNames)
     BaseData.NumAnalyses(:) = 1;
 end
+
+if ~ismember('ClassType', BaseData.Properties.VariableNames)
+    BaseData.ClassType(:) = "All";
+end
 if ~ismember('VWIM', BaseData.Properties.VariableNames)
     BaseData.VWIM(:) = 0;
 end
@@ -49,6 +53,7 @@ end
 if ~ismember('Period', BaseData.Properties.VariableNames)
     BaseData.Period(:) = "Yearly";
 end
+% Can remove?
 if ~ismember('LSVA', BaseData.Properties.VariableNames)
     BaseData.LSVA(:) = false;
 end
@@ -58,6 +63,7 @@ end
 if ~ismember('StopSim', BaseData.Properties.VariableNames)
     BaseData.StopSim(:) = false;
 end
+% Can remove?
 if ~ismember('Detailed', BaseData.Properties.VariableNames)
     BaseData.Detailed(:) = false;
 end
