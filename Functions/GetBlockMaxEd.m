@@ -199,6 +199,45 @@ elseif strcmp(Dist,'Extreme Value')
 end
 end
 Ed(4) = Ed(1)*sum(m1)/height(m1)+Ed(2)*sum(m2)/height(m2)+Ed(3)*sum(m3)/height(m3);
+
+%Plot
+if Plotter
+    Top = ceil(max(Data)/10)*10;
+    Bot = floor(min(Data)/10)*10;
+    TBDiff = Top-Bot;
+    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+    y_PDF_Fit = pdf(pd,x_values);
+    % X is for the plot
+    X = x_values;
+    % x is for the bar
+    x = X(1:end-1) + diff(X);
+    y = histcounts(Data,'BinEdges',X,'normalization','pdf');       
+            
+    figure
+    bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
+    hold on
+    plot(X,y_PDF_Fit,'r--','LineWidth',1)
+        
+    y1 = ylim;
+    plot([Ed Ed],[0 y1(1)+(y1(2)-y1(1))*.20],'k--','LineWidth',1)
+    text(X(70),y1(1)+(y1(2)-y1(1))*.80,sprintf('Block:       %s',BlockM),"Color",'k')
+    text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:         %s',Dist),"Color",'k')
+    Rsquared = sum((y_PDF_Fit(2:end)-mean(y)).^2)/sum((y-mean(y)).^2);
+    if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:           %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
+%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp! 
+    end
+    text(X(70),y1(1)+(y1(2)-y1(1))*.65,sprintf('TailFit:      %s',mat2str(FitType == 2)),"Color",'k')
+    text(X(70),y1(1)+(y1(2)-y1(1))*.60,sprintf('NoZeros:  %s',mat2str(contains(Dist,'Zero') && PropTruck ~= 0)),"Color",'k')
+    text(Ed,y1(1)+(y1(2)-y1(1))*.25,sprintf('Ed = %.1f',Ed),"Color",'k','HorizontalAlignment','center')
+    text(X(5),y1(1)+(y1(2)-y1(1))*.85,sprintf('%.1f%% Accompaniment Rate',100*PropTruck),"Color",'k')
+    text(X(5),y1(1)+(y1(2)-y1(1))*.80,sprintf('%i Total Events',length(Data)),"Color",'k')
+
+    set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
+    ylabel('Normalized Histograms (NTS)')
+    xlabel('Bridge Action Effect')
+
+end
     
 end
 

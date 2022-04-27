@@ -95,7 +95,7 @@ for g = 1:height(BaseData)
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
             [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
             % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)  6: Group  ]
-            %TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TruckNum','LaneID','mStation','Group'});
+            %TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID','mStation','Group'});
 
             % Perform search for maximums for each day
             parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
@@ -115,7 +115,7 @@ for g = 1:height(BaseData)
                 AllTrAxGr = zeros(max(TrLineUpSub.ATAIndex)-TrLineUpSub.ATAIndex(1)+1,length(Lanes));
                 for i = 1:length(Lanes)
                     %A = accumarray(TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),1)-TrLineUpSub(1,1)+1,TrLineUpSub(TrLineUpSub(:,4)==Lanes(i),2));
-                    A = accumarray(TrLineUpSub.ATAIndex(TrLineUpSub.LandID == Lanes(i))-TrLineUpSub.ATAIndex(1)+1,TrLineUpSub.AxleValue(TrLineUpSub.LaneID == Lanes(i)));
+                    A = accumarray(TrLineUpSub.ATAIndex(TrLineUpSub.LaneID == Lanes(i))-TrLineUpSub.ATAIndex(1)+1,TrLineUpSub.AxleValue(TrLineUpSub.LaneID == Lanes(i)));
                     AllTrAxGr(1:length(A),i) = A;
                 end
                 
