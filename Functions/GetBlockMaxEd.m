@@ -4,9 +4,8 @@ function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,A
 %   BlockM  - string, 'Daily', 'Weekly', 'Monthly', 'Yearly', or 'Lifetime'
 %   Dist    - string, 'Nomral, 'Lognormal'
 %   PropTruck - double, proportion of special transport yearly maxima with
-%   accompaniment, = 1 if dont needed
-%   FitType - double, 1 : original fit method, 2 : tail fitting method, 3 :
-%   Alain's fitting method (fitting each class individually)
+%   accompaniment, = 1 if not needed
+%   FitType - double, 1 : original fit method, 2 : tail fitting method
 %   If 'Zero' added then the zero values will be added
 
 
@@ -28,52 +27,45 @@ else
     n = BlockM;
 end
     
-% Beta.Yearly = 4.700; % Here we use the Beta annual - so we should use annual max effects
-% Beta.Weekly = 5.444; % See Tail Fitting > Beta Conversion
-% Beta.Daily = 5.724;
-% Beta.Lifetime = 3.830;
-
-
 Beta = norminv(1-n*0.0000013/PropTruck);
 Alpha = 0.7;
 
-if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed 
-Data(end+1:round(length(Data)/PropTruck)) = 0;
-Beta = norminv(1-n*0.0000013);
-Dist = erase(Dist,'Zero');
+if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed
+    Data(end+1:round(length(Data)/PropTruck)) = 0;
+    Beta = norminv(1-n*0.0000013);
+    Dist = erase(Dist,'Zero');
 elseif contains(Dist,'Zero')
-Dist = erase(Dist,'Zero');    
+    Dist = erase(Dist,'Zero');
 end
 
 if contains(Dist,'Plot')
-Plotter = 1;
-Dist = erase(Dist,'Plot');
+    Plotter = 1;
+    Dist = erase(Dist,'Plot');
 else
-Plotter = 0;
+    Plotter = 0;
 end
 
-if FitType == 1 || FitType == 2 
 Prop = 0.95;
 if FitType == 2
-if strcmp(Dist,'Normal')
-    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
-    pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
-    Em = mean(Data);
-    Stdev = std(Data);
-    COV = Stdev/Em;
-    Delta2 = log(COV^2+1);
-elseif strcmp(Dist,'Lognormal')
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
-    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-    muu = mdlx.Coefficients.Estimate(1);
-    sig = mdlx.Coefficients.Estimate(2);
-    pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));  
-    Em = exp(muu+sig^2/2);
-    %Stdev = sqrt(exp(2*muu+sig^2)*(exp(sig^2)-1));
-    %COV = Stdev/Em;
-    Delta2 = sig^2;
-end
+    if strcmp(Dist,'Normal')
+        %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
+        pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+        Em = mean(Data);
+        Stdev = std(Data);
+        COV = Stdev/Em;
+        Delta2 = log(COV^2+1);
+    elseif strcmp(Dist,'Lognormal')
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
+        %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+        muu = mdlx.Coefficients.Estimate(1);
+        sig = mdlx.Coefficients.Estimate(2);
+        pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+        Em = exp(muu+sig^2/2);
+        %Stdev = sqrt(exp(2*muu+sig^2)*(exp(sig^2)-1));
+        %COV = Stdev/Em;
+        Delta2 = sig^2;
+    end
 elseif FitType == 1
     Em = mean(Data);
     Stdev = std(Data);
@@ -81,29 +73,27 @@ elseif FitType == 1
     Delta2 = log(COV^2+1);
 end
 
-
-
 if strcmp(Dist,'Normal')
     Ed = Em*(1+Alpha*Beta*COV);
     % FYI ESIAT has the 1.5 in it already...
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
     if FitType == 1
-    pd = makedist('normal',Em,Stdev);
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+        pd = makedist('normal',Em,Stdev);
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
     end
 elseif strcmp(Dist,'Lognormal')
     Ed = Em*exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
     Aq = ((Ed/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
     if FitType == 1
-    pd = makedist('lognormal',mean(log(Data)),std(log(Data)));
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+        pd = makedist('lognormal',mean(log(Data)),std(log(Data)));
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
     end
 elseif strcmp(Dist,'Extreme Value')
     Ed = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
     AQ = Ed/(ESIAT);
-    Aq = 1;   
+    Aq = 1;
 end
 
 %Plot
@@ -117,13 +107,13 @@ if Plotter
     X = x_values;
     % x is for the bar
     x = X(1:end-1) + diff(X);
-    y = histcounts(Data,'BinEdges',X,'normalization','pdf');       
-            
+    y = histcounts(Data,'BinEdges',X,'normalization','pdf');
+    
     figure
     bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
     hold on
     plot(X,y_PDF_Fit,'r--','LineWidth',1)
-        
+    
     y1 = ylim;
     plot([Ed Ed],[0 y1(1)+(y1(2)-y1(1))*.20],'k--','LineWidth',1)
     text(X(70),y1(1)+(y1(2)-y1(1))*.80,sprintf('Block:       %s',BlockM),"Color",'k')
@@ -131,74 +121,17 @@ if Plotter
     Rsquared = sum((y_PDF_Fit(2:end)-mean(y)).^2)/sum((y-mean(y)).^2);
     if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
         text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:           %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
-%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp! 
+        %         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
     end
     text(X(70),y1(1)+(y1(2)-y1(1))*.65,sprintf('TailFit:      %s',mat2str(FitType == 2)),"Color",'k')
     text(X(70),y1(1)+(y1(2)-y1(1))*.60,sprintf('NoZeros:  %s',mat2str(contains(Dist,'Zero') && PropTruck ~= 0)),"Color",'k')
     text(Ed,y1(1)+(y1(2)-y1(1))*.25,sprintf('Ed = %.1f',Ed),"Color",'k','HorizontalAlignment','center')
     text(X(5),y1(1)+(y1(2)-y1(1))*.85,sprintf('%.1f%% Accompaniment Rate',100*PropTruck),"Color",'k')
     text(X(5),y1(1)+(y1(2)-y1(1))*.80,sprintf('%i Total Events',length(Data)),"Color",'k')
-
+    
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
     ylabel('Normalized Histograms (NTS)')
     xlabel('Bridge Action Effect')
-
-end
-
-elseif FitType == 3
-Types = Data.m; Data = Data.Max; m1 = Types == 1; m2 = Types == 2; m3 = Types == 3;
-
-Prop = 0.95;
-for i=1:3
-   DataTemp = eval(append('Data(m',int2str(i),')'));
-if strcmp(Dist,'Normal')
-    mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),sort(DataTemp),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
-    pd{i} = makedist('normal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));
-    Em(i) = mean(DataTemp);
-    Stdev(i) = std(DataTemp);
-elseif strcmp(Dist,'Lognormal')
-    mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),log(sort(DataTemp)),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
-    muu(i) = mdlx{i}.Coefficients.Estimate(1);
-    sig(i) = mdlx{i}.Coefficients.Estimate(2);
-    pd{i} = makedist('lognormal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));  
-    Em(i) = exp(muu(i)+sig(i)^2/2);
-    Stdev(i) = sqrt(exp(2*muu(i)+sig(i)^2)*(exp(sig(i)^2)-1));
-     if mdlx{i}.Rsquared.Ordinary*100<85 %check if the Rsquared is not to bad. If yes, check if its not due to the near zero values (remove them if needed).
-         if Em(i)>3
-             DataTempNZer = DataTemp(DataTemp>=0.8);
-             mdlxNZer = fitlm(norminv((1:length(DataTempNZer))/(length(DataTempNZer) + 1)),log(sort(DataTempNZer)),'linear','Weights',[0.1*ones(round(length(DataTempNZer)*Prop),1);1*ones(length(DataTempNZer)-round(length(DataTempNZer)*(Prop)),1)]);
-             if mdlxNZer.Rsquared.Ordinary*100>mdlx{i}.Rsquared.Ordinary*100
-                 DataTemp(DataTemp<=0.8) = [];
-                 mdlx{i} = fitlm(norminv((1:length(DataTemp))/(length(DataTemp) + 1)),log(sort(DataTemp)),'linear','Weights',[0.1*ones(round(length(DataTemp)*Prop),1);1*ones(length(DataTemp)-round(length(DataTemp)*(Prop)),1)]);
-                 muu(i) = mdlx{i}.Coefficients.Estimate(1);
-                 sig(i) = mdlx{i}.Coefficients.Estimate(2);
-                 pd{i} = makedist('lognormal',mdlx{i}.Coefficients.Estimate(1),mdlx{i}.Coefficients.Estimate(2));
-                 Em(i) = exp(muu(i)+sig(i)^2/2);
-                 Stdev(i) = sqrt(exp(2*muu(i)+sig(i)^2)*(exp(sig(i)^2)-1));
-             end
-         end
-     end
-end
-
-COV(i) = Stdev(i)/Em(i);
-Delta2(i) = log(COV(i)^2+1);
-
-if strcmp(Dist,'Normal')
-    Ed(i) = Em(i)*(1+Alpha*Beta*COV(i));
-    % FYI ESIAT has the 1.5 in it already...
-    AQ(i) = Ed(i)/(ESIAT);
-    Aq(i) = ((Ed(i)/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
-elseif strcmp(Dist,'Lognormal')
-    Ed(i) = Em(i)*exp(Alpha*Beta*sqrt(Delta2(i))-0.5*Delta2(i));
-    AQ(i) = Ed(i)/(ESIAT);
-    Aq(i) = ((Ed(i)/1.5)-AQ1*ESIAEQ(1)-AQ2*ESIAEQ(2))/(sum(ESIAEq));
-elseif strcmp(Dist,'Extreme Value')
-    Ed(i) = Em(i)*(1 + COV(i)*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));    %            exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
-    AQ(i) = Ed(i)/(ESIAT);
-    Aq(i) = 1;   
-end
-end
-Ed(4) = Ed(1)*sum(m1)/height(m1)+Ed(2)*sum(m2)/height(m2)+Ed(3)*sum(m3)/height(m3);
     
 end
 

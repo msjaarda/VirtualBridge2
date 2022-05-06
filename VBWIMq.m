@@ -275,7 +275,8 @@ for g = 1:height(BaseData)
     ClassType = {'All', 'ClassOW', 'Class'};        % i
     DistTypes = {'Lognormal'};
     % MOVET O LUCAS SCRIPT
-    [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
+    %[Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEvents,ILData);
+    Max = GetBlockMax(MaxEvents,ClassType,BM);
     %[MaxAM,~,~,~] = qInvestInitialAM(BM,ClassType,DistTypes,MaxEvents,ILData);
         
     TName = datestr(now,'mmmdd-yy HHMMSS');
@@ -309,7 +310,8 @@ for g = 1:height(BaseData)
     
     if BaseData.StopSim(g)
         MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
-        [Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
+        %[Max,~,~,~] = qInvestInitial(BM,ClassType,DistTypes,MaxEventsStop,ILData);
+        Max = GetBlockMax(MaxEventsStop,ClassType,BM);
         
         TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
         OutInfo.Name = TName;

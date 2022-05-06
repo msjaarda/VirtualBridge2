@@ -2,72 +2,7 @@ function [Max,pd,x_values,y_values] = qInvestInitial(BM,ClassType,DistTypes,MaxE
 %qINVESTINITIAL Steps 2, 3, and 4 of former qInvestigation
 
 % --- Step 3: Build Structure with Block Maxima ---
-% Convert ClassT to m (number) form m = 1 is All, m = 2 is ClassOW, m = 3 is Class
-% Reminder, m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
-
-% For each Influence case
-for r = 1:length(ILData)
-    
-    % Reset MaxEvents and select r
-    MaxEventsSub = MaxEvents(MaxEvents.InfCase == r,:);
-    % Transform AxTandem into Array (necessary for splitapply)
-    Z = MaxEventsSub;
-    Z.DTS = datenum(Z.DTS);
-    Z = table2array(Z);
-    
-    for i = 1:length(ClassType)
-        Class = ClassType{i};
-        
-        % Filter based on Class - MaxEvents is compromised after this (deleting entries)
-        if strcmp(Class,'ClassOW')
-            MaxEventsSub(MaxEventsSub.m == 1,:) = []; %#ok<*SAGROW>
-            Z(Z(:,5) == 1,:) = [];
-        elseif strcmp(Class,'Class')
-            MaxEventsSub(MaxEventsSub.m == 1,:) = [];
-            Z(Z(:,5) == 1,:) = [];
-            MaxEventsSub(MaxEventsSub.m == 2,:) = [];
-            Z(Z(:,5) == 2,:) = [];
-        end
-        
-        for j = 1:length(BM)
-            BlockM = BM{j};
-            
-            % Initialize
-            Max(r).(Class).(BlockM) = [];
-            
-            if strcmp(BlockM,'Daily')
-                % Make groups out of unique locations and days
-                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','day'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
-            elseif strcmp(BlockM,'Weekly')
-                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','week'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
-            elseif strcmp(BlockM,'Monthly')
-                [Gr, ~, ~, ~] = findgroups(dateshift(MaxEventsSub.DTS,'start','month'),MaxEventsSub.SITE,MaxEventsSub.InfCase);
-            else
-                [Gr, ~, ~, ~] = findgroups(year(MaxEventsSub.DTS),MaxEventsSub.SITE,MaxEventsSub.InfCase);
-            end
-            
-            % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            Max(r).(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM),Z,Gr);
-            % Transform back into table form
-            Max(r).(Class).(BlockM) = array2table(Max(r).(Class).(BlockM));
-            %Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
-            try
-                Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd'};
-            catch % For platooning and Q1Q2
-                try
-                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'BrStInd', 'PlatType'};
-                catch
-                    Max(r).(Class).(BlockM).Properties.VariableNames = {'R', 'DTS', 'SITE', 'Max', 'InfCase', 'm', 'DayRank', 'L1Veh', 'L2Veh', 'L1Load', 'L2Load', 'L1Ax', 'L2Ax', 'L1Sp', 'L2Sp', 'Layout'};
-                end
-            end
-            % Delete -1 values
-            Max(r).(Class).(BlockM)(Max(r).(Class).(BlockM).R == -1,:) = [];
-            Max(r).(Class).(BlockM).DTS = datetime(Max(r).(Class).(BlockM).DTS,'ConvertFrom',"datenum"); Max(r).(Class).(BlockM).R = [];
-            
-        end
-    end
-end
-
+Max = GetBlockMax(MaxEvents,ClassType,BM);
 
 % --- Step 4: Curve Fitting ---
 

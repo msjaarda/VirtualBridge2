@@ -12,15 +12,14 @@
 clear, clc, tic, close all
 
 % Inputs
-Grav = 9.81;
 TAxSingle = true;
 TAxTandem = true;
 TAxTridem = true;
 
-%Country = 'CH';
+Country = 'CH';
 %Country = 'DE';
 %Country = 'AT';
-Country = 'US';
+%Country = 'US';
 %Country = '';
 % Can put another name here instead if a country name, then set Sites
 
@@ -38,6 +37,8 @@ Sites = VBGetSiteSet(Sites,1,1,Country);
 
 % Consider, for Swiss, incorporating Calibration info
 
+Grav = 9.81;
+
 % Initialize
 VNSingle = {'AWT1kN','SITE','CLASS','DTS'};
 AxSingle = cell2table(cell(0,4),'VariableNames',VNSingle);
@@ -45,6 +46,7 @@ VNTandem = {'AWT1kN','AWT2kN','W1_2','SITE','CLASS','DTS'};
 AxTandem = cell2table(cell(0,6),'VariableNames',VNTandem);
 VNTridem = {'AWT1kN','AWT2kN','AWT3kN','W1_2','W2_3','SITE','CLASS','DTS'};
 AxTridem = cell2table(cell(0,8),'VariableNames',VNTridem);
+AxSingle = []; AxTandem = []; AxTridem = [];
 
 % Get Axle Groups
 for i = 1:length(Sites)
@@ -111,8 +113,6 @@ for i = 1:length(Sites)
         Ind = find(Y);
         [R, ~] = ind2sub([size(countGroup,1) size(countGroup,2)],Ind);
         AxSingle = [AxSingle; array2table([AXkN(Y) PDs.SITE(R) PDs.CLASS(R) datenum(PDs.DTS(R))],'VariableNames',VNSingle)];
-    else
-        AxSingle = [];
     end
     
     if TAxTandem
@@ -127,8 +127,6 @@ for i = 1:length(Sites)
         Ind = find(Y);
         [R, ~] = ind2sub([size(countGroup,1) size(countGroup,2)],Ind);
         AxTandem = [AxTandem; array2table([AXkN(X) AXkN(Y) WB(X)./100 PDs.SITE(R) PDs.CLASS(R) datenum(PDs.DTS(R))],'VariableNames',VNTandem)];
-    else
-        AxTandem = [];
     end
     
     if TAxTridem
@@ -140,8 +138,6 @@ for i = 1:length(Sites)
         Ind = find(Y);
         [R, ~] = ind2sub([size(countGroup,1) size(countGroup,2)],Ind);
         AxTridem = [AxTridem; array2table([AXkN(X2) AXkN(X) AXkN(Y) WB(X2)./100 WB(X)./100 PDs.SITE(R) PDs.CLASS(R) datenum(PDs.DTS(R))],'VariableNames',VNTridem)];
-    else
-        AxTridem = [];
     end
     
     fprintf('\nSITE: %i (%i of %i)',SITE, i, length(Sites))
@@ -149,228 +145,86 @@ for i = 1:length(Sites)
 end
 
 % Let's do block max right here before saving the much smaller BM version...
-
 fprintf('\nTotal time: %.2f seconds\n\n',toc)
 clearvars -except AxSingle AxTandem AxTridem TAxSingle TAxTandem TAxTridem Country
 
 % NEXT STEP: BLOCK MAXIMA
 
 % Block Maxima (always use j)
-BM = {'Daily', 'Weekly', 'Yearly'};
+BM = {'Daily', 'Weekly', 'Monthly', 'Yearly'};
 % Select which Classification you want to analyze (always use i)
 ClassType = {'All', 'ClassOW', 'Class'};
-% Must be in the order 'All' 'Class+' 'Class' due to deletions
-ClassT = {'All', 'Classified+', 'Classified'};
 
-% Variable Names
-VNSingle = {'Max','AWT1kN','SITE','CLASS','DTS'};
-VNTandem = {'Max','AWT1kN','AWT2kN','W1_2M','SITE','CLASS','DTS'};
-VNTridem = {'Max','AWT1kN','AWT2kN','AWT3kN','W1_2M','W2_3M','SITE','CLASS','DTS'};
 
-if TAxSingle
-    NumAx = 1;
-    Z = table2array(AxSingle);
-    AxSingle.DTS = datetime(AxSingle.DTS,'ConvertFrom','datenum');
-    % Delete Cols for Speed
-    AxSingle.AWT1kN = [];
-    
-    for i = 1:length(ClassType)
-        Class = ClassType{i};
-        
-        % Filter based on Class - AxSingle is compromised after this (deleting entries)
-        if strcmp(Class,'ClassOW')
-            AxSingle(AxSingle.CLASS == 0,:) = [];
-            Z(Z(:,3) == 0,:) = [];
-        elseif strcmp(Class,'Class')
-            AxSingle(AxSingle.CLASS == 0,:) = [];
-            Z(Z(:,3) == 0,:) = [];
-            AxSingle(AxSingle.CLASS > 39 & AxSingle.CLASS < 50,:) = [];
-            Z(Z(:,3) > 39 & Z(:,3) < 50,:) = [];
-        end
-        
-        for j = 1:length(BM)
-            BlockM = BM{j};
-            
-            % Initialize
-            MaxAx.Single.(Class).(BlockM) = [];
-            
-            if strcmp(BlockM,'Daily')
-                % Make groups out of unique locations and days
-                [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','day'),AxSingle.SITE);
-            elseif strcmp(BlockM,'Weekly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','week'),AxSingle.SITE);
-            elseif strcmp(BlockM,'Monthly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxSingle.DTS,'start','month'),AxSingle.SITE);
-            else
-                [Gr, GrIDYear, GrIDZST] = findgroups(year(AxSingle.DTS),AxSingle.SITE);
-            end
-            
-            % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Single.(Class).(BlockM) = splitapply(@(Z)maxIndex(Z,BlockM,NumAx),Z,Gr);
-            % Transform back into table form
-            MaxAx.Single.(Class).(BlockM) = array2table(MaxAx.Single.(Class).(BlockM));
-            MaxAx.Single.(Class).(BlockM).Properties.VariableNames = VNSingle;
-            MaxAx.Single.(Class).(BlockM).DTS = datetime(MaxAx.Single.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
-            
-            % Delete -1 values
-            MaxAx.Single.(Class).(BlockM)(MaxAx.Single.(Class).(BlockM).Max == -1,:) = [];
-            
-        end
-    end
-    % Add to overall struct
-end
-
-if TAxTandem
-    NumAx = 2;
-    Z = table2array(AxTandem);
-    AxTandem.DTS = datetime(AxTandem.DTS,'ConvertFrom','datenum');
-    % Delete Cols for Speed
-    AxTandem.AWT1kN = []; AxTandem.AWT2kN = []; AxTandem.W1_2 = [];
-    
-    for i = 1:length(ClassType)
-        Class = ClassType{i};
-        
-        % Filter based on Class - AxTandem is compromised after this (deleting entries)
-        if strcmp(Class,'ClassOW')
-            AxTandem(AxTandem.CLASS == 0,:) = [];
-            Z(Z(:,5) == 0,:) = [];
-        elseif strcmp(Class,'Class')
-            AxTandem(AxTandem.CLASS == 0,:) = [];
-            Z(Z(:,5) == 0,:) = [];
-            AxTandem(AxTandem.CLASS > 39 & AxTandem.CLASS < 50,:) = [];
-            Z(Z(:,5) > 39 & Z(:,5) < 50,:) = [];
-        end
-        
-        for j = 1:length(BM)
-            BlockM = BM{j};
-            
-            % Initialize
-            MaxAx.Tandem.(Class).(BlockM) = [];
-            
-            if strcmp(BlockM,'Daily')
-                % Make groups out of unique locations and days
-                [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','day'),AxTandem.SITE);
-            elseif strcmp(BlockM,'Weekly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','week'),AxTandem.SITE);
-            elseif strcmp(BlockM,'Monthly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTandem.DTS,'start','month'),AxTandem.SITE);
-            else
-                [Gr, GrIDYear, GrIDZST] = findgroups(year(AxTandem.DTS),AxTandem.SITE);
-            end
-            
-            % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Tandem.(Class).(BlockM) = splitapply(@(Z)maxIndexTandem(Z,BlockM,NumAx),Z,Gr);
-            % Transform back into table form
-            MaxAx.Tandem.(Class).(BlockM) = array2table(MaxAx.Tandem.(Class).(BlockM));
-            MaxAx.Tandem.(Class).(BlockM).Properties.VariableNames = VNTandem;
-            MaxAx.Tandem.(Class).(BlockM).W1_2M = MaxAx.Tandem.(Class).(BlockM).W1_2M;
-            MaxAx.Tandem.(Class).(BlockM).DTS = datetime(MaxAx.Tandem.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
-            
-            % Delete -1 values
-            MaxAx.Tandem.(Class).(BlockM)(MaxAx.Tandem.(Class).(BlockM).Max == -1,:) = [];
-            
-        end
-    end
-    % Add to overall struct
-end
-
-if TAxTridem
-    NumAx = 3;
-    Z = table2array(AxTridem);
-    AxTridem.DTS = datetime(AxTridem.DTS,'ConvertFrom','datenum');
-    % Delete Cols for Speed
-    AxTridem.AWT1kN = []; AxTridem.AWT2kN = []; AxTridem.AWT3kN = []; AxTridem.W1_2 = []; AxTridem.W2_3 = [];
-    
-    for i = 1:length(ClassType)
-        Class = ClassType{i};
-        
-        % Filter based on Class - AxTridem is compromised after this (deleting entries)
-        if strcmp(Class,'ClassOW')
-            AxTridem(AxTridem.CLASS == 0,:) = [];
-            Z(Z(:,7) == 0,:) = [];
-        elseif strcmp(Class,'Class')
-            AxTridem(AxTridem.CLASS == 0,:) = [];
-            Z(Z(:,7) == 0,:) = [];
-            AxTridem(AxTridem.CLASS > 39 & AxTridem.CLASS < 50,:) = [];
-            Z(Z(:,7) > 39 & Z(:,7) < 50,:) = [];
-        end
-        
-        for j = 1:length(BM)
-            BlockM = BM{j};
-            
-            % Initialize
-            MaxAx.Tridem.(Class).(BlockM) = [];
-            
-            if strcmp(BlockM,'Daily')
-                % Make groups out of unique locations and days
-                [Gr, GrIDDay, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','day'),AxTridem.SITE);
-            elseif strcmp(BlockM,'Weekly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','week'),AxTridem.SITE);
-            elseif strcmp(BlockM,'Monthly')
-                [Gr, GrIDWeek, GrIDZST] = findgroups(dateshift(AxTridem.DTS,'start','month'),AxTridem.SITE);    
-            else
-                [Gr, GrIDYear, GrIDZST] = findgroups(year(AxTridem.DTS),AxTridem.SITE);
-            end
-            
-            % Perform splitapply (see function at end... not just Max as we want whole rows involving maxes)
-            MaxAx.Tridem.(Class).(BlockM) = splitapply(@(Z)maxIndexTridem(Z,BlockM,NumAx),Z,Gr);
-            % Transform back into table form
-            MaxAx.Tridem.(Class).(BlockM) = array2table(MaxAx.Tridem.(Class).(BlockM));
-            MaxAx.Tridem.(Class).(BlockM).Properties.VariableNames = VNTridem;
-            MaxAx.Tridem.(Class).(BlockM).DTS = datetime(MaxAx.Tridem.(Class).(BlockM).DTS,'ConvertFrom',"datenum");
-            
-            % Delete -1 values
-            MaxAx.Tridem.(Class).(BlockM)(MaxAx.Tridem.(Class).(BlockM).Max == -1,:) = [];
-            
-        end
-    end
-    % Add to overall struct
-end
-
-% Raph Explanation
-
-% Anonymous functions will look for variables in the workspace... that is
-% why BlockM still goes.
-
-% Two functions are being called by splitapply kinda.
-
-% function out = function_handle(Z)
-%     out = maxIndexTridem(Z)
+% % Get Variable Names (for reconstructing table)
+% VN = string(MaxEvents.Properties.VariableNames);
+% 
+% % Detect the column number of: DTS, SITE, and Max OR MaxLE, and m
+% DTSID = find(VN == "DTS");
+% mID = find(VN == "m");
+% SITEID = find(VN == "SITE");
+% InfCaseID = find(VN == "InfCase");
+% MaxID = find(VN == "Max");
+% if isempty(MaxID)
+%     MaxID = find(VN == "MaxLE");
 % end
 % 
-% function out = @(Z)
-%     BlockM = "Yearly";
-%     out = maxIndexTridem(Z,BlockM);
+% if ~isdatetime(MaxEvents.DTS(1))
+%     MaxEvents.DTS = datetime(MaxEvents.DTS,'ConvertFrom','datenum');
 % end
+% 
 
 
 
-% Optional Saving
+if TAxSingle
+    % Let's trim in advance based on experience...
+    AxSingle.Max = AxSingle.AWT1kN;
+    AxSingle(AxSingle.Max < 50,:) = [];
+    AxSingle.m = ones(height(AxSingle),1); AxSingle.m(AxSingle.CLASS > 0) = 3;
+    AxSingle.m(AxSingle.CLASS > 39 & AxSingle.CLASS < 50) = 2;
+    MaxAx.Single = GetBlockMax(AxSingle,ClassType,BM);
+end
+if TAxTandem
+    AxTandem.Max = AxTandem.AWT1kN + AxTandem.AWT2kN;
+    AxTandem(AxTandem.Max < 90,:) = [];
+    AxTandem.m = ones(height(AxTandem),1); AxTandem.m(AxTandem.CLASS > 0) = 3;
+    AxTandem.m(AxTandem.CLASS > 39 & AxTandem.CLASS < 50) = 2;
+    MaxAx.Tandem = GetBlockMax(AxTandem,ClassType,BM);
+end
+if TAxTridem
+    AxTridem.Max = AxTridem.AWT1kN + AxTridem.AWT2kN + AxTridem.AWT3kN;
+    AxTridem(AxTridem.Max < 120,:) = [];
+    AxTridem.m = ones(height(AxTridem),1); AxTridem.m(AxTridem.CLASS > 0) = 3;
+    AxTridem.m(AxTridem.CLASS > 39 & AxTridem.CLASS < 50) = 2;
+    MaxAx.Tridem = GetBlockMax(AxTridem,ClassType,BM);
+end
+
 % Load MaxAx
 load('Misc/BMAxles.mat')
 BMAxles.(Country).MaxAx = MaxAx;
-%BMAxles.(Country).MaxAx.Tridem = MaxAx.Tridem;
-
-%save('Misc/BMAxles.mat','BMAxles')
+% Optional Saving
+save('Misc/BMAxles.mat','BMAxles')
 
 fprintf('\nTotal time: %.2f seconds\n\n',toc)
 
-function out = maxIndex(Z,BlockM,NumAx)
-    % For years, make sure # unique weeks > 25, for weeks the # days > 4
-    if strcmp(BlockM,'Yearly')
-        LimD = 0.6*365;
-    elseif strcmp(BlockM,'Weekly')
-        LimD = 4;
-    elseif strcmp(BlockM,'Monthly')
-        LimD = 18;
-    else
-        LimD = 0;
-    end
 
-    if days(max(datetime(Z(:,8),'ConvertFrom','datenum')) - min(datetime(Z(:,8),'ConvertFrom','datenum'))) < LimD
-        out = [-1, Z(1,:)];
-    else
-        [ymax, loc] = max(sum([Z(:,1:NumAx)],2));
-        out = [ymax, Z(loc,:)];
-    end
-end
+% 
+% function out = maxIndex(Z,BlockM,DTSID,MaxID)
+%     if strcmp(BlockM,'Yearly')
+%         LimH = 0.6*365*24;
+%     elseif strcmp(BlockM,'Weekly')
+%         LimH = 4*24;
+%     elseif strcmp(BlockM,'Monthly')
+%         LimH = 18*24;
+%     else
+%         LimH = 12;
+%     end
+%     
+%     if hours(max(datetime(Z(:,DTSID),'ConvertFrom','datenum')) - min(datetime(Z(:,DTSID),'ConvertFrom','datenum'))) < LimH
+%         out = [-1, Z(1,:)];
+%     else
+%         [ymax, loc] = max(Z(:,MaxID));
+%         out = [ymax, Z(loc,:)];
+%     end
+%     
+% end

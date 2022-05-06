@@ -19,98 +19,84 @@ catch
 end
 
 %{%
-if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed 
-Data(end+1:round(length(Data)/PropTruck)) = 0;
-Dist = erase(Dist,'Zero');
+if contains(Dist,'Zero') && PropTruck ~= 0 % Consider the zero if needed
+    Data(end+1:round(length(Data)/PropTruck)) = 0;
+    Dist = erase(Dist,'Zero');
 end
 %}
 
 if oldcode
-% MODIFY -- MAXECF DOESN'T WORK AT ALL... JUST AFFECTS % FIT REPORTED
-
-% New fit
-Prop = 0.95;
-if strcmp(Dist,'Normal')
-    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-    pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
-elseif strcmp(Dist,'Lognormal')
-    %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
-    mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-    pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));   
-end
-
-% Old fit
-%pd = fitdist(Data,Dist);
-
-
-Top = ceil(max(Data)/10)*10;
-Bot = floor(min(Data)/10)*10;
-TBDiff = Top-Bot;
-
-% Must add try catch to be compatible with versions before specifying
-% x_values was offered
-try
-if x_values == 0
-    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
-end
-catch
-    x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
-end
-y_PDF_Fit = pdf(pd,x_values);
-y_CDF_Fit = cdf(pd,x_values);
-
-
-if Plot
-    % X is for the plot
-    X = x_values;
-    % x is for the bar
-    x = X(1:end-1) + diff(X);
-    y = histcounts(Data,'BinEdges',X,'normalization','pdf');
-        
-    figure
-    bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
-    hold on
-    plot(X,y_PDF_Fit,'r--','LineWidth',1)
     
-    %figure
-    %bar(x,ym1*sum(m1)/height(m1)+ym2*sum(m2)/height(m2)+ym3*sum(m3)/height(m3),'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
-            
-    % We can also put the fit type and R^2 value on the plot
-    
-%     [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
-%     if strcmp(Dist,'Normal')
-%         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
-%         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-%     elseif strcmp(Dist,'Lognormal')
-%         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
-%         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-%     end
-
-    y1 = ylim;
-    text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
-    if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-        text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
-%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+    % New fit
+    Prop = 0.95;
+    if strcmp(Dist,'Normal')
+        %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+        pd = makedist('normal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
+    elseif strcmp(Dist,'Lognormal')
+        %mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear','Weights',[0.1*ones(round(length(Data)*Prop),1);1*ones(length(Data)-round(length(Data)*(Prop)),1)]);
+        mdlx = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+        pd = makedist('lognormal',mdlx.Coefficients.Estimate(1),mdlx.Coefficients.Estimate(2));
     end
     
-    set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
-    ylabel('Normalized Histograms (NTS)')
-    xlabel('Bridge Action Effect')
-
-end
-
-% [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
-%     if strcmp(Dist,'Normal')
-%         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
-%     elseif strcmp(Dist,'Lognormal')
-%         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
-%     end
-%     
-%         if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-%         %text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
-%         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
-%     end
+    % Old fit
+    %pd = fitdist(Data,Dist);
+    
+    Top = ceil(max(Data)/10)*10;
+    Bot = floor(min(Data)/10)*10;
+    TBDiff = Top-Bot;
+    
+    % Must add try catch to be compatible with versions before specifying
+    % x_values was offered
+    try
+        if x_values == 0
+            x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+        end
+    catch
+        x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
+    end
+    y_PDF_Fit = pdf(pd,x_values);
+    y_CDF_Fit = cdf(pd,x_values);
+    
+    
+    if Plot
+        % X is for the plot
+        X = x_values;
+        % x is for the bar
+        x = X(1:end-1) + diff(X);
+        y = histcounts(Data,'BinEdges',X,'normalization','pdf');
+        
+        figure
+        bar(x,y,'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
+        hold on
+        plot(X,y_PDF_Fit,'r--','LineWidth',1)
+        
+        %figure
+        %bar(x,ym1*sum(m1)/height(m1)+ym2*sum(m2)/height(m2)+ym3*sum(m3)/height(m3),'EdgeColor','none','FaceColor',[.6 .6 .6],'FaceAlpha',0.5)
+        
+        % We can also put the fit type and R^2 value on the plot
+        
+        %     [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
+        %     if strcmp(Dist,'Normal')
+        %         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
+        %         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+        %     elseif strcmp(Dist,'Lognormal')
+        %         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
+        %         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
+        %     end
+        
+        y1 = ylim;
+        text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
+        if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
+            text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlx.Rsquared.Ordinary*100),"Color",'k')
+            %         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
+        end
+        
+        set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
+        ylabel('Normalized Histograms (NTS)')
+        xlabel('Bridge Action Effect')
+        
+    end
 else
     
     % New fit
@@ -144,7 +130,7 @@ else
     
     % Old fit
     %pd = fitdist(Data,Dist);
-        
+    
     Top = ceil(max(Data)/10)*10;
     Bot = floor(min(Data)/10)*10;
     TBDiff = Top-Bot;
@@ -152,29 +138,29 @@ else
     x_values = linspace(max(0,Bot-TBDiff*.1),Top+TBDiff*.1);
     y_PDF_Fit = pdf(pd,x_values);
     y_CDF_Fit = cdf(pd,x_values);
-      
-    try
-    x_valuesm1 = linspace(max(0,Botm1-TBDiffm1*.1),Topm1+TBDiffm1*.1);
-    y_PDF_Fitm1 = pdf(pdm1,x_valuesm1);
-    y_CDF_Fitm1 = cdf(pdm1,x_valuesm1);
-    catch 
-    x_valuesm1 = 0; y_PDF_Fitm1 = 0; y_CDF_Fitm1 = 0;
-    end
     
     try
-    x_valuesm2 = linspace(max(0,Botm2-TBDiffm2*.1),Topm2+TBDiffm2*.1);
-    y_PDF_Fitm2 = pdf(pdm2,x_valuesm2);
-    y_CDF_Fitm2 = cdf(pdm2,x_valuesm2);
+        x_valuesm1 = linspace(max(0,Botm1-TBDiffm1*.1),Topm1+TBDiffm1*.1);
+        y_PDF_Fitm1 = pdf(pdm1,x_valuesm1);
+        y_CDF_Fitm1 = cdf(pdm1,x_valuesm1);
     catch
-    x_valuesm2 = 0; y_PDF_Fitm2 = 0; y_CDF_Fitm2 = 0;
+        x_valuesm1 = 0; y_PDF_Fitm1 = 0; y_CDF_Fitm1 = 0;
     end
     
     try
-    x_valuesm3 = linspace(max(0,Botm3-TBDiffm3*.1),Topm3+TBDiffm3*.1);
-    y_PDF_Fitm3 = pdf(pdm3,x_valuesm3);
-    y_CDF_Fitm3 = cdf(pdm3,x_valuesm3);
-    catch 
-    x_valuesm3 = 0; y_PDF_Fitm3 = 0; y_CDF_Fitm3 = 0;
+        x_valuesm2 = linspace(max(0,Botm2-TBDiffm2*.1),Topm2+TBDiffm2*.1);
+        y_PDF_Fitm2 = pdf(pdm2,x_valuesm2);
+        y_CDF_Fitm2 = cdf(pdm2,x_valuesm2);
+    catch
+        x_valuesm2 = 0; y_PDF_Fitm2 = 0; y_CDF_Fitm2 = 0;
+    end
+    
+    try
+        x_valuesm3 = linspace(max(0,Botm3-TBDiffm3*.1),Topm3+TBDiffm3*.1);
+        y_PDF_Fitm3 = pdf(pdm3,x_valuesm3);
+        y_CDF_Fitm3 = cdf(pdm3,x_valuesm3);
+    catch
+        x_valuesm3 = 0; y_PDF_Fitm3 = 0; y_CDF_Fitm3 = 0;
     end
     
     if Plot
@@ -195,11 +181,11 @@ else
         plot(x_valuesm2,y_PDF_Fitm2*sum(m2)/height(m2),'Color',[.85 .3250 .098],'LineStyle','--','LineWidth',1)
         plot(x_valuesm3,y_PDF_Fitm3*sum(m3)/height(m3),'Color',[.929 .694 .125],'LineStyle','--','LineWidth',1)
         plot(x_valuesm1,y_PDF_Fitm1*sum(m1)/height(m1),'Color',[0 .4470 .7410],'LineStyle','--','LineWidth',1)
-      
+        
         y1 = ylim;
         text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
         if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-           
+            
             text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdlxm1.Rsquared.Ordinary*100),"Color",[0 .4470 .7410])
             text(x_values(70),y1(1)+(y1(2)-y1(1))*.65,sprintf('R^2:    %.1f%%',mdlxm2.Rsquared.Ordinary*100),"Color",[.85 .3250 .098])
             text(x_values(70),y1(1)+(y1(2)-y1(1))*.60,sprintf('R^2:    %.1f%%',mdlxm3.Rsquared.Ordinary*100),"Color",[.929 .694 .125])
@@ -218,17 +204,6 @@ else
         %figure
         %bar(x,ym1*sum(m1)/height(m1)+ym2*sum(m2)/height(m2)+ym3*sum(m3)/height(m3),'EdgeColor','none','FaceColor',[.929 .694 .125],'FaceAlpha',0.5)
         
-        % We can also put the fit type and R^2 value on the plot
-        
-        %     [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
-        %     if strcmp(Dist,'Normal')
-        %         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
-        %         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-        %     elseif strcmp(Dist,'Lognormal')
-        %         %mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
-        %         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-        %     end
-        
         y1 = ylim;
         text(x_values(70),y1(1)+(y1(2)-y1(1))*.75,sprintf('Dist:  %s',Dist),"Color",'k')
         if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
@@ -246,20 +221,5 @@ else
         y_CDF_Fitm.y_CDF_Fitm1 = y_CDF_Fitm1; y_CDF_Fitm.y_CDF_Fitm2 = y_CDF_Fitm2; y_CDF_Fitm.y_CDF_Fitm3 = y_CDF_Fitm3;
         
     end
-    
-    % [MaxECDF, MaxECDFRank] = ecdf(Data); MaxECDFRank = MaxECDFRank'; MaxECDF(1) = []; MaxECDFRank(1) = [];
-    %     if strcmp(Dist,'Normal')
-    %         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),MaxECDFRank,'linear');
-    %     elseif strcmp(Dist,'Lognormal')
-    %         mdl = fitlm(norminv((1:length(MaxECDFRank))/(length(MaxECDFRank) + 1)),log(MaxECDFRank),'linear');
-    %     end
-    %
-    %         if strcmp(Dist,'Normal') || strcmp(Dist,'Lognormal')
-    %         %text(x_values(70),y1(1)+(y1(2)-y1(1))*.70,sprintf('R^2:    %.1f%%',mdl.Rsquared.Ordinary*100),"Color",'k')
-    %         y_CDF_Fit =  mdl.Rsquared.Ordinary*100; % temp!
-    %     end
-    
 end
-
-    
 end

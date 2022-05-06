@@ -399,7 +399,8 @@ for g = 1:height(BaseData)
     %BM = {'Monthly'};
     ClassType = {'ClassOW'};        % i
     DistTypes = {'Lognormal'};
-    [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData); % TROUBLESHOOT
+    %[Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData); % TROUBLESHOOT
+    Max = GetBlockMax(MaxEvents,ClassType,BM);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     % Need to go back to original BaseData... no SITE switch
@@ -462,7 +463,8 @@ for g = 1:height(BaseData)
     
     if BaseData.StopSim(g)
         MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
-        [Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEventsStop,ILData);
+        %[Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEventsStop,ILData);
+        Max = GetBlockMax(MaxEvents,ClassType,BM);
         
         TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
         OutInfo.Name = TName;
