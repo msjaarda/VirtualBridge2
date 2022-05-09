@@ -13,19 +13,7 @@ function [Ed, AQ, Aq] = GetBlockMaxEd(Data,BlockM,Dist,ESIAT,ESIAEQ,ESIAEq,AQ1,A
 
 % --- Calculate Real Design Value Ed ---
 
-if strcmp(BlockM,'Yearly')
-    n = 1;
-elseif strcmp(BlockM,'Weekly')
-    n = 1/50;
-elseif strcmp(BlockM,'Daily')
-    n = 1/(5*50);
-elseif strcmp(BlockM,'Monthly')
-    n = 1/12;
-elseif strcmp(BlockM,'Lifetime')
-    n = 50;
-else
-    n = BlockM;
-end
+n = GetnBlockM(BlockM);
     
 Beta = norminv(1-n*0.0000013/PropTruck);
 Alpha = 0.7;

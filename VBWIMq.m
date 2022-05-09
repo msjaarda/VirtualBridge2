@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60t.xlsx';
+FName = 'Input/VBWIMqInputNew.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -229,9 +229,9 @@ for g = 1:height(BaseData)
                             MaxEvents1Stop = [MaxEvents1Stop; datenum(MaxLETime), BaseData.SITE(g), MaxLEe, t, m, k, BrStInde];
                         end
                         
-%                         if m == 3
-%                             k = 100; % Bump k up so that analysis doesn't continue!
-%                         end
+                        if m == 3
+                            k = 100; % Bump k up so that analysis doesn't continue!
+                        end
                         
                         % Prepare for next run - Set Axles to zero in AllTrAx (can't delete because indices are locations)
                         AllTrAxSub(BrInds,:) = 0;
@@ -295,9 +295,10 @@ for g = 1:height(BaseData)
         for i = 1:length(ClassType)
             Class = ClassType{i};
             BlockM = BM{2};
-            [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
+            OutInfo.pd(r).(Class).(BlockM).pd = GetFit(Max(r).(Class).(BlockM).Max,BlockM,'All',1,1);
+            %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
             %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-            [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,1,1);
+            %[OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,1,1);
         end
     end
     
@@ -325,14 +326,16 @@ for g = 1:height(BaseData)
                 Class = ClassType{i};
                 BlockM = BM{2};
                 %BlockM = BM{1};
-                [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
-                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,1,1);
+                OutInfo.pd(r).(Class).(BlockM).pd = GetFit(Max(r).(Class).(BlockM).Max,BlockM,'All',1,1);
+                %OutInfo.Ed.(Class).(BlockM)(r) = OutInfo.pd(r).(Class).(BlockM).pd.(OutInfo.pd(r).(Class).(BlockM).pd.Best).Ed;
+                %[OutInfo.AQ.(Class).(BlockM)(r), ~] = GetAlphas(OutInfo.Ed.(Class).(BlockM)(r),ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5);
+                %[~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
+                %[OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,1,1);
             end
         end
         
         if BaseData.Save(g) == 1
-            save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')
+            save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo','-v7.3')
         end
     end
     

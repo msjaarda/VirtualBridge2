@@ -38,20 +38,6 @@ x_values = 0:1:800;
 % Initialize Fig Positions
 Ri = 0; Up = 0;
 
-% Fit Block Maxima to Normal Curve
-for i = 1:length(ClassType)
-    Class = ClassType{i};
-    for j = 1:length(BM)
-        BlockM = BM{j};
-        for k = 1:length(DistTypes)
-            Dist = DistTypes{k};
-            Data = Max.(Class).(BlockM).Max/Div;
-            [pd.(Class).(BlockM).(Dist),~,y_values.(Class).(BlockM).(Dist).PDF_Fit,y_values.(Class).(BlockM).(Dist).CDF_Fit] = GetBlockMaxFit(Data,Dist,0,0,x_values);
-        end
-    end
-end
-
-
 % Set colours
 C = linspecer(9);
 % ScaleDown
@@ -81,7 +67,8 @@ for i = 1:length(ClassType)
         
         for k = 2
             Dist = DistTypes{k};
-            plot(x_values,y_values.(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
+            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+            plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
         end
     end
     
@@ -116,14 +103,16 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    plot(x_values,y_values.(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])    
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+    plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])    
     
     Class = 'All';
     y = histcounts(Max.(Class).(BlockM).Max/Div,'BinEdges',X,'normalization','pdf');
     bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.2,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    plot(x_values,y_values.(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+    plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
 
     % Set Plot Details
     a = ylim;
@@ -192,9 +181,11 @@ for i = 1:length(ClassType)
     for j = 1:length(BM)
         BlockM = BM{j};
 
-        Data = Max.(Class).(BlockM).Max/Div;
-        [~, AQN, ~] = GetBlockMaxEd(Data,BlockM,'Normal',300*1.5,[1 1],1,1,1,1,1);
-        [EdLN, AQLN, ~] = GetBlockMaxEd(Data,BlockM,'Lognormal',300*1.5,[1 1],1,1,1,1,1);
+        pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,{'Normal','Lognormal'},0,1);
+        EdN = pd.Normal.Ed;
+        EdLN = pd.Lognormal.Ed;
+        AQN = EdN/(300*1.5);
+        AQLN = EdLN/(300*1.5);
         
         Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQN; AQLN];
         
@@ -213,11 +204,12 @@ if FitPlots
     BlockM = BM{2};
     Class = ClassType{1};
     Dist = DistTypes{k}; Data = Max.(Class).(BlockM).Max/Div;
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
     
     y = histcounts(Max.(Class).(BlockM).Max/Div,'BinEdges',X,'normalization','pdf');
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
     hold on
-    plot(x_values,y_values.(Class).(BlockM).(Dist).PDF_Fit/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
+    plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
     
 
     % Set Plot Details
@@ -253,7 +245,7 @@ if DispTab
 %     fprintf('\n')
 %     disp(Summary)
     
-    figure('Position',[Ri Up 1300 125],'Name',[Country ' Q1Q2' ' Summary'],'NumberTitle','off'); Ri = Ri+25; Up = Ri+25;
+    figure('Position',[Ri Up 1300 125],'Name',[Country ' ' Type ' Summary'],'NumberTitle','off'); Ri = Ri+25; Up = Ri+25;
     
     % Get the table in string form.
     TString = evalc('disp(Summary)');
