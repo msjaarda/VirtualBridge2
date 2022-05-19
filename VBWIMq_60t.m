@@ -371,7 +371,7 @@ for g = 1:height(BaseData)
             % Update progress bar
             user = memory;
             RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-            LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
+            LenPrint = VBUpProgBar(st,RamUsed(end),r,LenPrint);
                         
         end % r, years
     end % w, SiteGroups
@@ -471,17 +471,17 @@ for g = 1:height(BaseData)
         OutInfo.SimStop = true;
         OutInfo.Max = Max;
         
-        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-        for r = 1:Num.InfCases
-            for i = 1:length(ClassType)
-                Class = ClassType{i};
-                BlockM = BM{2};
-                %BlockM = BM{1};
-                [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
-                %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
-                [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
-            end
-        end
+%         % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+%         for r = 1:Num.InfCases
+%             for i = 1:length(ClassType)
+%                 Class = ClassType{i};
+%                 BlockM = BM{2};
+%                 %BlockM = BM{1};
+%                 [~,OutInfo.x_values.(Class).(BlockM)(:,r),OutInfo.y_valuespdf.(Class).(BlockM)(:,r),~] = GetBlockMaxFit(Max(r).(Class).(BlockM).Max,'Lognormal',BaseData.Plots(g));
+%                 %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2] = GetLogNormPPP(Max(r).(Class).(BlockM).Max,false);
+%                 [OutInfo.EdLN.(Class).(BlockM)(r), OutInfo.AQ.(Class).(BlockM)(r), ~] = GetBlockMaxEd(Max(r).(Class).(BlockM).Max,BlockM,'Lognormal',ESIA.Total(r),ESIA.EQ(:,r),ESIA.Eq(:,r),0.6,0.5,PropTrucks);
+%             end
+%         end
         
         if BaseData.Save(g) == 1
             save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')

@@ -11,6 +11,9 @@ function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
 % pd.Best = name of Dist with lowest gof
 % can use pd.(pd.Best) to access best fit
 
+% Turn off fit warning
+warning('off','stats:gevfit:IterLimit')
+
 % Consider adding convergence score
 
 % Gives Ed as well, although a more complete GetEd includes support for
@@ -28,8 +31,24 @@ function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
 % 'gev Gumbel' Generalized Extreme Value k == 0 Type 1 Max equation
 % 'All'
 
+
+% In future turn off: msg =
+
+%     'Maximum likelihood estimation did not converge.  Iteration limit exceeded.'
+% 
+% 
+% warnID =
+% 
+%     'stats:gevfit:IterLimit'
+    
+    % but save events in pd
+
 if strcmp(DistTypes,'All')
-    DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
+    if length(Data) < 30
+        DistTypes = {'Normal', 'Lognormal', 'LognormalTF'};
+    else
+        DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
+    end
 elseif ~iscell(DistTypes) % Turn Dist into cell if it is individual
     DistTypes = cellstr(DistTypes);
 end
@@ -79,12 +98,12 @@ for k = 1:length(DistTypes)
         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
         pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
         pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
-    elseif  strcmp(Dist,'LognormalLM')
+    elseif  strcmp(Dist,'LognormalLM') % Min Sum ^2 Error
         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
         pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
         pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
     else
-        pd.(Dist).pd = fitdist(Data,Dist);
+        pd.(Dist).pd = fitdist(Data,Dist); % Maximum Likelihood
     end
 end
 [pd.ecdf, pd.ecdfx] = ecdf(Data);
