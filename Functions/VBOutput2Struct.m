@@ -10,7 +10,7 @@ File_List = GetFileList(Folder_Name);
 
 % Load even if not WIM, just in case
 load('Sites.mat')
-load('SiteGroups.mat')
+%load('SiteGroups.mat')
 
 % Read in .mat results variables into a single OInfo variable
 for i = 1:length(File_List)

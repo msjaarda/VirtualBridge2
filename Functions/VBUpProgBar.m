@@ -1,8 +1,5 @@
-function [LenPrint] = VBUpProgBar(st, v, NumSims, Ram, r, LenPrint)
+function [LenPrint] = VBUpProgBar(st, Ram, r, LenPrint)
 %GETKEYVARS Grabs key variables
-t = v;
-Num = NumSims;
-
 
 no = (now-st);
 if no > 1

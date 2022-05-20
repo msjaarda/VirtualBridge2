@@ -13,7 +13,7 @@ BaseData = VBReadInputFile('VBSimInputNumaImprLoads.xlsx');
 for g = 1:height(BaseData)
 
     % Update analysis data for current row of BaseData
-    [Num,Lane,ILData,TrData,FolDist,E] = VBUpdateData(BaseData(g,:));
+    [Num,Lane,ILData,TrData,FolDist] = VBUpdateData(BaseData(g,:));
     
     % Get key variables from imported data
     [BatchSize,Num.Batches,FixVars] = VBGetKeyVars(BaseData(g,:),TrData.TrDistr);
@@ -131,7 +131,7 @@ for g = 1:height(BaseData)
     end
     
     % Get ESIM and Ratio
-    ESIM = 1.1*prctile(OverMax,99); Ratio = ESIM./E.Total; RatioBR = ESIM./E.EBRU.Total; Ratio41 = ESIM./E.E41.Total; Ratio48 = ESIM./E.E48.Total; Ratio72 = ESIM./E.E72.Total;
+    ESIM = 1.1*prctile(OverMax,99); %Ratio = ESIM./E.Total; RatioBR = ESIM./E.EBRU.Total; Ratio41 = ESIM./E.E41.Total; Ratio48 = ESIM./E.E48.Total; Ratio72 = ESIM./E.E72.Total;
     
     % Print Summary Stats to Command Window
     VBPrintSummary(BaseData(g,:),BatchSize,TrData,Num,VirtualWIM,Time,Lane.TrDistr)
@@ -156,19 +156,17 @@ for g = 1:height(BaseData)
     if BaseData.Save(g) == 1
         % Save structure variable with essential simulation information
         OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
-        OutInfo.E = E;
+        %OutInfo.E = E;
         OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
         OutInfo.ILData = ILData;
         
         % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-        for r = 1:Num.InfCases
-            [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
-            % Must be rewritten (the below)
-            %[ECDF,ECDFRank,PPx,PPy,Fity,OutInfo.LNFitR2(r)] = GetLogNormPPP(OutInfo.OverMax(:,r),false);
-            [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',E.Total(r),E.EQ(:,r),E.Eq(:,r),0.6,0.5,1,1);
-        end
+%         for r = 1:Num.InfCases
+%             [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
+%             [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',E.Total(r),E.EQ(:,r),E.Eq(:,r),0.6,0.5,1,1);
+%         end
         % Apply Model Factor to EdLN and AQ
-        OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;
+        %OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;
         
         save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')
     end
@@ -177,6 +175,6 @@ end
 
 % Run Apercu to see critical case... does all IL given for the last row of BaseData
 if BaseData.Apercu(g) == 1
-    [T, OverMx, AllTrAxx] = VBGetApercuv2(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),E.Total,Lane,BaseData.ILRes(g));
+    [T, OverMx, AllTrAxx] = VBApercuv2(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
 end
 

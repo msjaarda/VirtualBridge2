@@ -1,5 +1,9 @@
-function T = VBApercuv2(PDC,Title,ILData,BrStInd,TrLineUp,PEsia,DLF,Lane,ILRes)
+function T = VBApercuv2(PDC,Title,ILData,BrStInd,TrLineUp,DLF,Lane,ILRes)
 % Plot a Series of WIM or VWIM Vehicles on a Bridge
+
+% PEsia is no longer provided! Must call GetECode
+
+PEsia = 1;
 
 % Take only the influence lines that apply to the current InfCase
 Infv = ILData.v;
