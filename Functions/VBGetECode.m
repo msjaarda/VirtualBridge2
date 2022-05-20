@@ -137,13 +137,16 @@ for i = 1:length(ILData)
         [MaxInf.vCONV72(j,i),MaxInf.vCONV72Posi(j,i)] = max(conv(Conc.K72,yILv));
         [MaxInf.vCONVSPTR(j,i),MaxInf.vCONVSPTRPosi(j,i)] = max(conv(Conc.KSPTR,yILv));
         MaxInf.vCONVEURO(j,i) = max(conv(Conc.EURO,yILv));
+        % CSA
         [MaxInf.vCONVCSA(j,i),MaxInf.vCONVCSAPosi(j,i)] = max(conv(Conc.CSA,yILv));
         LongeurPontRes = (size(ILData(i).v,1)-1); % Length of the bridge with resolution factor
         % Find wich axles are determinant for CSA dynamic factor
         CSA.OnBridge = [(MaxInf.vCONVCSAPosi(j,i)<=LongeurPontRes+1)&&(MaxInf.vCONVCSAPosi(j,i)>1);(MaxInf.vCONVCSAPosi(j,i)-3.6/ILRes<=LongeurPontRes+1)&&(MaxInf.vCONVCSAPosi(j,i)-3.6/ILRes>0);(MaxInf.vCONVCSAPosi(j,i)-4.8/ILRes<=LongeurPontRes+1)&&(MaxInf.vCONVCSAPosi(j,i)-4.8/ILRes>0);(MaxInf.vCONVCSAPosi(j,i)-11.4/ILRes<=LongeurPontRes+1)&&(MaxInf.vCONVCSAPosi(j,i)-11.4/ILRes>0);(MaxInf.vCONVCSAPosi(j,i)-18/ILRes<=LongeurPontRes+1)&&(MaxInf.vCONVCSAPosi(j,i)-18/ILRes>0)];
         CSA.OnBridge = CSA.OnBridge.*[0.8;0.8;0.8;1;1]; % weight of the axle for the combination CSA dynamic factor
         CSA.Axle(i) = CSA.Axle(i)+round(sum(CSA.OnBridge)); % Number of CSA axle on the bridge
-        % Loop for AASHTO, to modify the rear axle position
+        % AASHTO
+        % 1st load model with one HS20-44 truck
+        % Loop to modify the rear axle position
         MaxInf.vCONVAAS1(j,i) = max(conv(Conc.AAS1,yILv));
         for k=1:round(4.9/ILRes)
             Conc.AAS1(end-k) = Conc.AAS1(end-k+1); Conc.AAS1(end-k+1) = 0;
@@ -151,15 +154,16 @@ for i = 1:length(ILData)
             MaxInf.vCONVAAS1(j,i) = max(MaxInf.vCONVAAS1(j,i),MaxTempAAS1);
         end
         MaxInf.vCONVAAS2(j,i) = max(conv(Conc.AAS2,yILv)); % AASHTO tandem (American Code), not sure if you must add other tandem at 8 to 12 meters
-        Conc.AAS3 = 0.9*Conc.AAS1; % AASHTO 2 trucks HS20-44 90% for Mn (American Code)
+        % AASHTO 2 trucks HS20-44 90% for Mn (American Code)
+        Conc.AAS3 = 0.9*Conc.AAS1; % 90% of the load
         MaxInf.vCONVAAS3(j,i) = 0;
-        [MaxInf.vCONVAAS31(j,i),MaxInf.vCONVAAS3Posi(j,i)] = max(conv(Conc.AAS3,yILv));
-        yILvtemp = yILv; yILvtemp(max(MaxInf.vCONVAAS3Posi(j,i)+round(-8.6/ILRes-15.2/ILRes),1):min(MaxInf.vCONVAAS3Posi(j,i)+round(15.2/ILRes),end)) = 0;
-        MaxInf.vCONVAAS32(j,i) = max(conv(Conc.AAS3,yILvtemp));
-        MaxInf.vCONVAAS3(j,i) = MaxInf.vCONVAAS31(j,i)+MaxInf.vCONVAAS32(j,i);
+        [MaxInf.vCONVAAS31(j,i),MaxInf.vCONVAAS3Posi(j,i)] = max(conv(Conc.AAS3,yILv)); % find worst position for 1st truck
+        yILvtemp = yILv; yILvtemp(max(MaxInf.vCONVAAS3Posi(j,i)+round(-8.6/ILRes-15.2/ILRes),1):min(MaxInf.vCONVAAS3Posi(j,i)+round(15.2/ILRes),end)) = 0; % Fix Influence Line = 0 from 15 meters tail and head of the 1st truck
+        MaxInf.vCONVAAS32(j,i) = max(conv(Conc.AAS3,yILvtemp)); % find worst position for 2sd truck
+        MaxInf.vCONVAAS3(j,i) = MaxInf.vCONVAAS31(j,i)+MaxInf.vCONVAAS32(j,i); % combine the results of the 2 trucks
     end
     CSA.AllDLA = [1.4;1.3;1.25]; % CSA all dynamic factors
-    CSA.DLA(i) = CSA.AllDLA(min(CSA.Axle(i),3)); % Current dynamic factor for the infl studied
+    CSA.DLA(i) = CSA.AllDLA(min(CSA.Axle(i),3)); % Current dynamic factor for the infl studied (CSA)
  end
 
 % Assign integral values into IntInfv (each InfCase)
@@ -243,8 +247,8 @@ for i = 1:length(ILData)
     MultiLaneFactorCSA = [1;0.9;0.8;0.7;0.6;0.55];
     LiveLoadFactorCSA = 1.7;
     E(i).CSA.Total = 0;
-    E(i).CSA.EQm1 = MultiLaneFactorCSA(min(size(ILData(i).v,2),6))*Maxv.CONVCSA*CSA.DLA(i);
-    E(i).CSA.EQm2 = MultiLaneFactorCSA(min(size(ILData(i).v,2),6))*(Int.vCSA.*qkCSA*LaneWidth+0.8*Maxv.CONVCSA);
+    E(i).CSA.EQm1 = MultiLaneFactorCSA(min(size(ILData(i).v,2),6))*Maxv.CONVCSA*CSA.DLA(i); % CSA truck CL-625
+    E(i).CSA.EQm2 = MultiLaneFactorCSA(min(size(ILData(i).v,2),6))*(Int.vCSA.*qkCSA*LaneWidth+0.8*Maxv.CONVCSA); % CSA 80% truck CL-625 + linear load
     E(i).CSA.Total = max([sum(E(i).CSA.EQm1),sum(E(i).CSA.EQm2)])*LiveLoadFactorCSA;
         
     % AASHTO (American code)
@@ -252,9 +256,9 @@ for i = 1:length(ILData)
     MultiLaneFactorAASHTO = [1.2;1.0;0.85;0.65];
     LiveLoadFactorAASHTO = 1.75;
     E(i).AAS.Total = 0;
-    E(i).AAS.EQm1 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS1*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
-    E(i).AAS.EQm2 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS2*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
-    E(i).AAS.EQm3 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS3*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth*0.9;
+    E(i).AAS.EQm1 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS1*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth; % AASHTO truck HS20-44 + Linear load
+    E(i).AAS.EQm2 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS2*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth; % AASHTO tandem + Linear load
+    E(i).AAS.EQm3 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS3*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth*0.9; % AASHTO 90% 2 trucks HS20-44 + 90% Linear load : for Mn
     E(i).AAS.Total = max([sum(E(i).AAS.EQm1),sum(E(i).AAS.EQm2),sum(E(i).AAS.EQm3)])*LiveLoadFactorAASHTO;
     
     % KUBA-ST (ASTRA load model) 
