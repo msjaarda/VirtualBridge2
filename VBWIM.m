@@ -32,7 +32,7 @@ for g = 1:height(BaseData)
         % Modify BaseData.SITE(g) based on SiteSet
         BaseData.SITE(g) = SitesList(w);
         % Update analysis data for current row of BaseData
-        [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
+        [Num,Lane,ILData,~,~] = VBUpdateData(BaseData(g,:));
         
         % Get MaxLength for Spacesave
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
