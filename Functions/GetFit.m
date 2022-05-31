@@ -51,6 +51,10 @@ if strcmp(DistTypes,'All')
     end
 elseif ~iscell(DistTypes) % Turn Dist into cell if it is individual
     DistTypes = cellstr(DistTypes);
+else % if manually selected, remove gev for less than 30 data
+    if length(Data) < 30 || length(Data(Data>0)) < 10
+        DistTypes(contains(DistTypes,'gev')) = [];
+    end
 end
 
 n = GetnBlockM(BlockM);
@@ -60,6 +64,18 @@ if ~IncZ
     PropZ = sum(Data == 0)/length(Data);
     Data(Data == 0) = [];
     Beta = norminv(1-n*0.0000013/PropZ);
+    
+    if isempty(Data) % do a normal fit if Data is empty
+    Data = 0;
+    Dist = "Normal";    
+    warning('off','stats:LinearModel:RankDefDesignMat')
+    mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+    pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
+    pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
+    pd.Best = Dist;
+    pd.(Dist).Ed = Data;
+    return
+    end
 else
     Beta = norminv(1-n*0.0000013);
 end

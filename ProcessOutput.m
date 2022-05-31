@@ -43,9 +43,9 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIM';
-NewFolder = 'WIMpr';
-IncZ = 1;
+Folder_Name = 'WIM60tv11';
+NewFolder = 'WIM1160tAll';
+IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -104,7 +104,7 @@ if any(contains(fields,'ESIA'))
     OInfo = rmfield(OInfo,'ESIA');
 end
 if any(contains(fields,'MaxEvents'))
-    if any(contains(fields,'Max'))
+    if any(matches(fields,'max','IgnoreCase',true))
         OInfo = rmfield(OInfo,'Max');
     end
 end
@@ -120,8 +120,9 @@ fields = fieldnames(OInfo(v));
 
 % GetBlockMax and GetFit
 BlockMax = {'Daily', 'Weekly', 'Monthly', 'Yearly'};        % j
-ClassTypes = {'All', 'ClassOW', 'Class'};                   % i
-DistTypes = {'All'};                                        % k
+ClassTypes = {'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
+%DistTypes = {'All'};                                        % k
+DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
     % Start Progress Bar
     u = StartProgBar(length(File_List), 1, 2, 5); tic; st = now;
@@ -229,6 +230,14 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
     end
 end
 
+% check if NewFolder folder exist, if not create one
+Dir_List = dir('Output/');
+Folder_List = {Dir_List.name}';
+if sum(strcmp(Folder_List,NewFolder))>=1
+else
+   mkdir(append('Output/',NewFolder));
+end
+
 % Save
 for v = 1:length(OInfo)
     OutInfo = OInfo(v);
@@ -236,14 +245,17 @@ for v = 1:length(OInfo)
     save(['Output'  '/' NewFolder '/' OutInfo.Name], 'OutInfo')
 end
 
-
 % GetPlotFormat
-BlockM = 'Weekly';
+%BlockM = {'Weekly'};
+BlockM = BlockMax; %{'Daily', 'Weekly', 'Monthly', 'Yearly'};
+ClassTypes = {'All', 'ClassOW', 'Class'}; 
 
 % Make a table
-VBResults.(BlockM) = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+for v = 1:length(BlockM)
+VBResults.(BlockM{v}) = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
 % Delete at the end if they are empty?
-VBResults.SS.(BlockM) = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+VBResults.SS.(BlockM{v}) = array2table(zeros(0,12), 'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class'});
+end
 
 % Start Progress Bar
 u = StartProgBar(length(File_List), 1, 5, 5); tic; st = now;
@@ -289,36 +301,65 @@ for v = 1:length(OInfo)
                 Sitex = VBGetSiteSet(OInfo(v).BaseData.SITE,OInfo(v).BaseData.LightVehs,0,OInfo(v).BaseData.Country);
                 Traffic = ConvertLayoutName(OInfo(v).BaseData.SITE);
             end
+            for n = 1:length(BlockM)
+                for m = 1:length(ClassTypes)
+            CT = ClassTypes{m};
             T1 = array2table(ILSplit(ic == k,1:7),'VariableNames',{'Type','SubType','Width','Layout','Support','Trans','AE'});
-            T8 = array2table(repmat(string(Traffic),length(OInfo(v).AQ.Class.(BlockM)(ic == k)),1),'VariableNames',{'Traffic'});
+            try T8 = array2table(repmat(string(Traffic),length(OInfo(v).AQ.(CT).(BlockM{n})(ic == k)),1),'VariableNames',{'Traffic'}); catch end
             T9 = array2table(cellfun(@str2num,ILSplit(ic == k,8)),'VariableNames',{'Span'});
-            T10 = array2table(OInfo(v).AQ.All.(BlockM)(ic == k)','VariableNames',{'All'});
-            T11 = array2table(OInfo(v).AQ.ClassOW.(BlockM)(ic == k)','VariableNames',{'ClassOW'});
-            T12 = array2table(OInfo(v).AQ.Class.(BlockM)(ic == k)','VariableNames',{'Class'});
-            if OInfo(v).BaseData.StopSim
-                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = OInfo(v).AQ.(CT).(BlockM)(ic == k);
-                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = cellfun(@str2num,ILSplit(ic == k,8));
-                VBResults.SS.(BlockM) = [VBResults.(BlockM); T1 T8 T9 T10 T11 T12];
-            elseif OInfo(v).BaseData.Plat
-                VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(v).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(v).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(v).BaseData.PlatFolDist))).(CT) = OInfo(v).AQ.(CT).(BlockM)(ic == k);
-                VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(v).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(v).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(v).BaseData.PlatFolDist))).(CT) = cellfun(@str2num,ILSplit(ic == k,8));
-            else
-                VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = OInfo(v).AQ.(CT).(BlockM)(ic == k);
-                VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = cellfun(@str2num,ILSplit(ic == k,8));
-                VBResults.(BlockM) = [VBResults.(BlockM); T1 T8 T9 T10 T11 T12];
+            %try T10 = array2table(OInfo(v).AQ.All.(BlockM{n})(ic == k)','VariableNames',{'All'}); catch end
+            %T10.(append('table',int2str(n))) = array2table(OInfo(v).AQ.ClassOW.(BlockM{n})(ic == k)','VariableNames',{CT});
+            try T10(:,m) = array2table(OInfo(v).AQ.(CT).(BlockM{n})(ic == k)');
+            catch T10(:,m) = array2table(ic(ic == k).*0);
+            end
+            T10.Properties.VariableNames{m} = CT;
+            %try T12 = array2table(OInfo(v).AQ.Class.(BlockM{n})(ic == k)','VariableNames',{'Class'}); catch end
+                end
+                if OInfo(v).BaseData.StopSim
+                    for m = 1:length(ClassTypes)
+                    CT = ClassTypes{m};
+                    try VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = OInfo(v).AQ.(CT).(BlockM{n})(ic == k);
+                    catch VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = (ic(ic == k).*0)';
+                    end
+                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = cellfun(@str2num,ILSplit(ic == k,8));
+                    end
+                    VBResults.SS.(BlockM{n}) = [VBResults.(BlockM{n}); T1 T8 T9 T10];
+                elseif OInfo(v).BaseData.Plat
+                    for m = 1:length(ClassTypes)
+                    CT = ClassTypes{m};
+                    try VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(v).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(v).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(v).BaseData.PlatFolDist))).(CT) = OInfo(v).AQ.(CT).(BlockM{n})(ic == k);
+                    catch VBResults.P.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(v).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(v).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(v).BaseData.PlatFolDist))).(CT) = (ic(ic == k).*0)';
+                    end
+                    VBResults.P.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(strcat('Size',num2str(OInfo(v).BaseData.PlatSize))).(strcat('Rate',num2str(10*OInfo(v).BaseData.PlatRate))).(strcat('FolDist',num2str(10*OInfo(v).BaseData.PlatFolDist))).(CT) = cellfun(@str2num,ILSplit(ic == k,8));
+                    end
+                else
+                    for m = 1:length(ClassTypes)
+                    CT = ClassTypes{m};
+                    try VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = OInfo(v).AQ.(CT).(BlockM{n})(ic == k);
+                    catch VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = (ic(ic == k).*0)';
+                    end
+                    VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = cellfun(@str2num,ILSplit(ic == k,8));
+                    end
+                    VBResults.(BlockM{n}) = [VBResults.(BlockM{n}); T1 T8 T9 T10];
+                end
+                clear T1 T8 T9 T10
             end
             for z = 1:length(Sitex)
                 for p = 1:length(ClassTypes)
                     CT = ClassTypes{p};
                     Traffic = ConvertLayoutName(Sitex(z));
                     if OInfo(v).BaseData.StopSim
-                        VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = OInfo(v).(Traffic).AQ.(CT).(BlockM)(ic == k);
+                        try VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = OInfo(v).(Traffic).AQ.(CT).Weekly(ic == k);
+                        catch VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = (ic(ic == k).*0)';
+                        end
                         VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(['Stop' CT]) = cellfun(@str2num,ILSplit(ic == k,8));
-                        VBResults.SS.(BlockM) = [VBResults.(BlockM); T1 T8 T9 T10 T11 T12];
+                        %VBResults.SS.(BlockM{n}) = [VBResults.(BlockM{n}); T1 T8 T9 T10 T11 T12];
                     else
-                        VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = OInfo(v).(Traffic).AQ.(CT).(BlockM)(ic == k);
+                        try VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = OInfo(v).(Traffic).AQ.(CT).Weekly(ic == k);
+                        catch VBResults.AQ.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = (ic(ic == k).*0)';
+                        end
                         VBResults.x.(ILSplit(ia(k),1)).(ILSplit(ia(k),2)).(ILSplit(ia(k),3)).(ILSplit(ia(k),4)).(ILSplit(ia(k),5)).(ILSplit(ia(k),6)).(ILSplit(ia(k),7)).(Traffic).(CT) = cellfun(@str2num,ILSplit(ic == k,8));
-                        VBResults.(BlockM) = [VBResults.(BlockM); T1 T8 T9 T10 T11 T12];
+                        %VBResults.(BlockM{n}) = [VBResults.(BlockM{n}); T1 T8 T9 T10 T11 T12];
                     end
                 end
             end
@@ -330,12 +371,13 @@ for v = 1:length(OInfo)
     LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
 end % v OInfo
 
-if isempty(VBResults.(BlockM))
-    VBResults.(BlockM) = [];
-end
-if isempty(VBResults.SS.(BlockM))
-    VBResults.SS.(BlockM) = [];
-end
+
+%if isempty(VBResults.(BlockM))
+%    VBResults.(BlockM) = [];
+%end
+%if isempty(VBResults.SS.(BlockM))
+%    VBResults.SS.(BlockM) = [];
+%end
 
 % User Save
 

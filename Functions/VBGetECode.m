@@ -13,9 +13,9 @@ for i = 1:length(ILData)
         
         if j == 1
             PL = 300; % SIA
-            PLBR(1) = 140; %210; %140; % Bruhwiler values from 15 october 2019 document, updated with the one found with blockmax axles types
-            PLBR(2) = 110; %170; %110;
-            PLBR(3) = 95; %170; %95;
+            PLBR(1) = 210; %210; %140; % Bruhwiler values from 15 october 2019 document, updated with the one found with blockmax axles types
+            PLBR(2) = 175; %175; %110;
+            PLBR(3) = 135; %135; %95;
             PL12 = 120; % 12 tonnes per axle (load model for 41, 48 and 72 truck)
             PLEU = 300; % EUROCODE
             PLCSA(1) = 50; PLCSA(2) = 125; PLCSA(3) = 125; PLCSA(4) = 175; PLCSA(5) = 150; % CSA (Canadian code)
@@ -23,8 +23,8 @@ for i = 1:length(ILData)
         elseif j == 2
             PL = 200; % SIA
             PLBR(1) = 0;
-            PLBR(2) = 85; %150; %85;
-            PLBR(3) = 70; %150; %70;
+            PLBR(2) = 150; %150; %85;
+            PLBR(3) = 110; %110; %70;
             PLEU = 200; % EUROCODE
         elseif j == 3
             PL = 0; % SIA
@@ -251,42 +251,42 @@ for i = 1:length(ILData)
     AASHTODLA = 1.33; % AASHTO Dynamic Load
     MultiLaneFactorAASHTO = [1.2;1.0;0.85;0.65];
     LiveLoadFactorAASHTO = 1.75;
-    E(i).AAS.Total = 0;
-    E(i).AAS.EQm1 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS1*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
-    E(i).AAS.EQm2 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS2*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
-    E(i).AAS.EQm3 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS3*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth*0.9;
-    E(i).AAS.Total = max([sum(E(i).AAS.EQm1),sum(E(i).AAS.EQm2),sum(E(i).AAS.EQm3)])*LiveLoadFactorAASHTO;
+    E(i).AASHTO.Total = 0;
+    E(i).AASHTO.EQm1 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS1*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
+    E(i).AASHTO.EQm2 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS2*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth;
+    E(i).AASHTO.EQm3 = MultiLaneFactorAASHTO(min(size(ILData(i).v,2),4))*Maxv.CONVAAS3*AASHTODLA+Int.vAAS.*qkAAS*LaneWidth*0.9;
+    E(i).AASHTO.Total = max([sum(E(i).AASHTO.EQm1),sum(E(i).AASHTO.EQm2),sum(E(i).AASHTO.EQm3)])*LiveLoadFactorAASHTO;
     
     % KUBA-ST (ASTRA load model) 
-    E(i).EKUBA_T41.Total= 1.5*Alpha*(sum(Maxv.CONV41)+Int.v41'*qk05*LaneWidth);
-    E(i).EKUBA_T41.EQ = Maxv.CONV41;
-    E(i).EKUBA_T41.Eq = Int.v41.*qk05*LaneWidth;
-    E(i).EKUBA_T48.Total= 1.5*Alpha*(sum(Maxv.CONV48)+Int.v48'*qk05*LaneWidth);
-    E(i).EKUBA_T48.EQ = Maxv.CONV48;
-    E(i).EKUBA_T48.Eq = Int.v48.*qk05*LaneWidth;
-    E(i).EKUBA_T72.Total= 1.5*Alpha*(sum(Maxv.CONV72)+Int.v72'*qk05*LaneWidth);
-    E(i).EKUBA_T72.EQ = Maxv.CONV72;
-    E(i).EKUBA_T72.Eq = Int.v72.*qk05*LaneWidth;
-    E(i).EKUBA_SPTR.Total= 1.5*Alpha*(sum(Maxv.CONVSPTR)+Int.vSPTR'*qk05*LaneWidth);
-    E(i).EKUBA_SPTR.EQ = Maxv.CONVSPTR;
-    E(i).EKUBA_SPTR.Eq = Int.vSPTR.*qk05*LaneWidth;
+    E(i).KUBA_T41.Total= 1.5*Alpha*(sum(Maxv.CONV41)+Int.v41'*qk05*LaneWidth);
+    E(i).KUBA_T41.EQ = Maxv.CONV41;
+    E(i).KUBA_T41.Eq = Int.v41.*qk05*LaneWidth;
+    E(i).KUBA_T48.Total= 1.5*Alpha*(sum(Maxv.CONV48)+Int.v48'*qk05*LaneWidth);
+    E(i).KUBA_T48.EQ = Maxv.CONV48;
+    E(i).KUBA_T48.Eq = Int.v48.*qk05*LaneWidth;
+    E(i).KUBA_T72.Total= 1.5*Alpha*(sum(Maxv.CONV72)+Int.v72'*qk05*LaneWidth);
+    E(i).KUBA_T72.EQ = Maxv.CONV72;
+    E(i).KUBA_T72.Eq = Int.v72.*qk05*LaneWidth;
+    E(i).KUBA_SPTR.Total= 1.5*Alpha*(sum(Maxv.CONVSPTR)+Int.vSPTR'*qk05*LaneWidth);
+    E(i).KUBA_SPTR.EQ = Maxv.CONVSPTR;
+    E(i).KUBA_SPTR.Eq = Int.vSPTR.*qk05*LaneWidth;
     % EKUBA but the load from the KUBA truck in 1st lane is removed
-    E(i).EKUBA_SPTR_RmvL1.Total= 1.5*Alpha*(sum(Maxv.CONVSPTR_RmvL1)+Int.vSPTR'*qk05*LaneWidth);
-    E(i).EKUBA_SPTR_RmvL1.EQ = Maxv.CONVSPTR_RmvL1;
-    E(i).EKUBA_SPTR_RmvL1.Eq = Int.vSPTR.*qk05*LaneWidth;
+    E(i).KUBA_SPTR_RmvL1.Total= 1.5*Alpha*(sum(Maxv.CONVSPTR_RmvL1)+Int.vSPTR'*qk05*LaneWidth);
+    E(i).KUBA_SPTR_RmvL1.EQ = Maxv.CONVSPTR_RmvL1;
+    E(i).KUBA_SPTR_RmvL1.Eq = Int.vSPTR.*qk05*LaneWidth;
     
     % EBRU (Professor Eugen Brühwiler load model (EPFL))
-    [E(i).EBRU.Total,posi] = max([1.5*(sum(Maxv.CONVBR1)+Int.vBR1'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR2)+Int.vBR2'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR3)+Int.vBR3'*qkBR*LaneWidth)]);
-    E(i).EBRU.LoadMod = append('Model n°',int2str(posi));
+    [E(i).BRU.Total,posi] = max([1.5*(sum(Maxv.CONVBR1)+Int.vBR1'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR2)+Int.vBR2'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR3)+Int.vBR3'*qkBR*LaneWidth)]);
+    E(i).BRU.LoadMod = append('Model n°',int2str(posi));
     if posi == 1
-        E(i).EBRU.EQ = Maxv.CONVBR1;
-        E(i).EBRU.Eq = Int.vBR1.*qkBR*LaneWidth;
+        E(i).BRU.EQ = Maxv.CONVBR1;
+        E(i).BRU.Eq = Int.vBR1.*qkBR*LaneWidth;
     elseif posi == 2
-        E(i).EBRU.EQ = Maxv.CONVBR2;
-        E(i).EBRU.Eq = Int.vBR2.*qkBR*LaneWidth;
+        E(i).BRU.EQ = Maxv.CONVBR2;
+        E(i).BRU.Eq = Int.vBR2.*qkBR*LaneWidth;
     elseif posi == 3
-        E(i).EBRU.EQ = Maxv.CONVBR3;
-        E(i).EBRU.Eq = Int.vBR3.*qkBR*LaneWidth;
+        E(i).BRU.EQ = Maxv.CONVBR3;
+        E(i).BRU.Eq = Int.vBR3.*qkBR*LaneWidth;
     else
         error('error with EBRU');
     end
