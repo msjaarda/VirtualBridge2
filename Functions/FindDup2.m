@@ -57,8 +57,11 @@ if Print
     fprintf('Same AX of not same SPEED: \t\t%i/%i (%.2f %%)\n\n',sum(LogSameAXDiffSPEED),sum(~LogSameSPEED),100*sum(LogSameAXDiffSPEED)/sum(~LogSameSPEED));
 end
 
-% Find those with GW_TOT within 20%
+% Find those with GW_TOT within 20% except for when they are Class+, then no weight restriction (cranes
+% don't pass other cranes)
 LogSameGW = abs(PDs1.GW_TOT-PDs2.GW_TOT)./PDs1.GW_TOT < 0.2;
+LogClassOW = PDs1.CLASS > 40 & PDs1.CLASS < 50 & PDs2.CLASS > 40 & PDs2.CLASS < 50;
+LogSameGW = LogSameGW | LogClassOW;
 LogSameGWnSPEEDnAX = LogSameGW & LogSameSPEEDnAX;
 % Report
 if Print
