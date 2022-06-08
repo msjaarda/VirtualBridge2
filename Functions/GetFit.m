@@ -66,20 +66,23 @@ if ~IncZ
     Beta = norminv(1-n*0.0000013/PropZ);
     
     if isempty(Data) % do a normal fit if Data is empty
-    Data = 0;
-    Dist = "Normal";    
-    warning('off','stats:LinearModel:RankDefDesignMat')
-    mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
-    pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
-    pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
-    pd.Best = Dist;
-    pd.(Dist).Ed = Data;
-    return
+        Data = 0;
+        Dist = "Normal";
+        warning('off','stats:LinearModel:RankDefDesignMat')
+        mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),sort(Data),'linear');
+        pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
+        pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
+        pd.Best = Dist;
+        pd.(Dist).Ed = Data;
+        return
     end
 else
     Beta = norminv(1-n*0.0000013);
+    
 end
-Alpha = 0.7;
+
+% As of 8/6/22, Alpha depends on Reference Period...
+Alpha = GetAlpha(BlockM);
 
 % Gather a few stats from Data
 Em = mean(Data);
