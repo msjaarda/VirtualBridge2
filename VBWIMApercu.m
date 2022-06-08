@@ -7,7 +7,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-BaseData = VBReadInputFile('Input/VBWIMInput.xlsx');
+BaseData = VBReadInputFile('Input/VBWIMInputApercu.xlsx');
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
@@ -18,14 +18,15 @@ u = StartProgBar(height(BaseData), 1, 1, 1); st = now;
 for g = 1:height(BaseData)
     
     % Update analysis data for current row of BaseData
-    [Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(g,:));
+    [Num,Lane,ILData,~,~] = VBUpdateData(BaseData(g,:));
     
     % Load File
     %PDx = 
     load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
     %PDs = PDx.PDs;
     PDs = Stage2Prune(PDs);
-    PDs = PDs(PDs.DTS > datetime(2017,1,1),:);
+    PDs = PDs(PDs.DTS > datetime(2009,9,30),:);
+    PDs = PDs(PDs.DTS < datetime(2010,8,1),:);
     
     % Get Only the ClassType Specified
     try
@@ -82,7 +83,7 @@ for g = 1:height(BaseData)
             % Optional Apercu
             if BaseData.Apercu(g) == 1
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
-                T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,MaxLE/ESIA.Total(t),DLF,Lane,BaseData.ILRes(g));
+                T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,DLF,Lane,BaseData.ILRes(g));
                 %exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end
             

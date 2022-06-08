@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'JRC';
-NewFolder = 'JRCpr';
+Folder_Name = 'WIMMatt020622';
+NewFolder = 'WIMMatt020622Output';
 IncZ = 1; % Line 123-124 modify
 
 % Ensure file list is succinct
@@ -119,9 +119,8 @@ fields = fieldnames(OInfo(v));
 % 2. We are doing SIM, and therefore only have OverMax
 
 % GetBlockMax and GetFit
-BlockMax = {'Weekly', 'Monthly'};        % j
-ClassTypes = {'All', 'ClassOW', 'Class'};     % i
-%ClassTypes = {'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
+BlockMax = {'Daily', 'Weekly', 'Monthly', 'Yearly'};        % j
+ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
@@ -243,7 +242,7 @@ end
 for v = 1:length(OInfo)
     OutInfo = OInfo(v);
     %save(['Output' char(OutInfo.BaseData.Folder) '/' OutInfo.Name], 'OutInfo')
-    save(['Output'  '/' NewFolder '/' OutInfo.Name], 'OutInfo')
+    save(['Output'  '/' NewFolder '/' OutInfo.Name], 'OutInfo','-v7.3')
 end
 
 % GetPlotFormat
@@ -381,7 +380,7 @@ end % v OInfo
 %end
 
 % User Save
-
+save('VBResults(Q1=07etQ2=05)NEW.mat','VBResults');
 % The end result of VBOutput2Struct is a var, WIM/AGB/MAT
 
     
