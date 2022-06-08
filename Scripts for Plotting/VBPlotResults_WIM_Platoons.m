@@ -41,7 +41,7 @@ for m = 1:3
         if i == 1
             ydata{m,i} = VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic{1}).(Class)(1:2:end);
             PDets.MFC{m}(i,:) = D(i*5,:);
-            PDets.DN{m,i} = Traffic{1};
+            PDets.DN{m,i} = ['Ceneri Base'];
         elseif i == 2
             ydata{m,i} = VBResultsPlat.P.AQ.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Traffic{1}).(PSize).(PRate).(PFolDist{i}).(Class);
             PDets.MFC{m}(i,:) = D(i*5,:);
@@ -67,7 +67,7 @@ for m = 1:3
 end
 
 % Plot
-FigNum = VBTriPlotPro(xdata,ydata,PDets,Title,'WIM',FigNum,FName);
+FigNum = VBTriPlotPro(xdata,ydata,PDets,Title,'PLAT',FigNum,FName);
 
 if Export
     exportgraphics(gcf,FName + ".jpg",'Resolution',600);
@@ -86,11 +86,22 @@ FName = 'Input/VBWIMqInput_WIMPlatoonFull.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Update analysis data for current row of BaseData
-[Num,Lane,ILData,~,~,ESIA] = VBUpdateData(BaseData(1,:));
+[Num,Lane,ILData,~,~] = VBUpdateData(BaseData(1,:));
 
-ESIA.V = ESIA.Total(1:4);
-ESIA.Mp = ESIA.Total(5:8);
-ESIA.Mn = ESIA.Total(9:12);
+E = VBGetECode(ILData,1);
+for i = 1:4
+    ESIA.V(i) = E(i).SIA.Total;
+end
+for i = 1:4
+    ESIA.Mp(i) = E(i+4).SIA.Total;
+end
+for i = 1:4
+    ESIA.Mn(i) = E(i+8).SIA.Total;
+end
+% 
+% ESIA.V = ESIA.Total(1:4);
+% ESIA.Mp = ESIA.Total(5:8);
+% ESIA.Mn = ESIA.Total(9:12);
 
 % Get VBResults using VBOutput2Struct
 %[VBResultsPlat] = VBOutput2Struct('Platooningno35');
@@ -127,7 +138,7 @@ for m = 1:3
         if i == 1
             ydata{m,i} = VBResultsPlat.AQ.(Type).(SubType).(Width).(Layout).(Support).(Trans).(AE(m)).(Trafficx{1}).(PSize).(PRate).(PFolDist{i}).(Class)./ESIA.(AE(m))';
             PDets.MFC{m}(i,:) = D(i*5,:);
-            PDets.DN{m,i} = Trafficx{1};
+            PDets.DN{m,i} = ['Ceneri Base'];
         elseif i == 2
                           % Normalize, see below... BUT we have to use the
                           % Jammed BaseData... not the flowing as here
@@ -158,7 +169,7 @@ FName = [Type ' Girder Uni2L ' PSize(end) ' Tr Platoons @ ' PRate(end) '0 % (' C
 
 
 % Plot
-FigNum = VBTriPlotPro(xdata,ydata,PDets,Title,'WIM',FigNum,FName);
+FigNum = VBTriPlotPro(xdata,ydata,PDets,Title,'PLAT',FigNum,FName);
 
 if Export
     exportgraphics(gcf,FName + ".jpg",'Resolution',600);

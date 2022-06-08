@@ -157,6 +157,11 @@ end
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
     pd.(Dist).Ed = icdf(pd.(Dist).pd,1-normcdf(-Beta*Alpha));
+    
+    % Probability of failure
+    PF = n/1000;   
+    pd.(Dist).E1000 = icdf(pd.(Dist).pd,1-PF);
+    
 end
 pd.ecdfEd = interp1(pd.ecdf,pd.ecdfx,1-normcdf(-Beta*Alpha),'linear','extrap');
 

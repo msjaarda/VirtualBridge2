@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMInputOFROU.xlsx';
+FName = 'Input/VBWIMInputF325.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -252,7 +252,7 @@ for g = 1:height(BaseData)
     BaseData = VBReadInputFile(FName);
     OutInfo.Name = TName;
     OutInfo.BaseData = BaseData(g,:);
-    OutInfo.BaseData.StopSim(g) = 0;
+    OutInfo.BaseData.StopSim = 0;
     % We do not need ESIA... can load this from outside later on
     %OutInfo.ESIA = ESIA;
     OutInfo.ILData = ILData;
@@ -266,7 +266,7 @@ for g = 1:height(BaseData)
     end
     
     if BaseData.StopSim(g)
-        OutInfo.BaseData.StopSim(g) = 1;
+        OutInfo.BaseData.StopSim = 1;
         % Hmmm should this line be there? I don't think so... comment 4 now
         %MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
         

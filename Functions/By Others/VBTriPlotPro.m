@@ -96,6 +96,8 @@ if strcmp(Type,'WIMComp')
         if m == 1
             if strcmp(Type,'WIM')
                 ylabel('E_{WIM}/E_{SIA}')
+            elseif strcmp(Type,'PLAT')
+                ylabel('[E_{BASE} OR E_{PLATOON}] /E_{SIA}')
             else
                 ylabel('E_{SIM}/E_{SIA}')
             end
@@ -188,6 +190,8 @@ else
         if m == 1
             if strcmp(Type,'WIM')
                 ylabel('E_{WIM}/E_{SIA}')
+            elseif strcmp(Type,'PLAT')
+                ylabel('[E_{BASE} OR E_{PLATOON}] /E_{SIA}')
             else
                 ylabel('E_{SIM}/E_{SIA}')
             end
@@ -253,6 +257,8 @@ set(gca,'XTick',[],'YTick',[]);
 
 %Trafic distr
 if strcmp(Type,'WIM') ||  strcmp(Type,'WIMComp') 
+    LaneTrDistr = {' ',' ',' ',' ',' ',' '};
+elseif strcmp(Type,'PLAT')
     LaneTrDistr = {' ',' ',' ',' ',' ',' '};
 else
     LaneTrDistr = strsplit(char(LaneTrDistr),',');
