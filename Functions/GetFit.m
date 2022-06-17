@@ -166,34 +166,65 @@ for k = 1:length(DistTypes)
     pd.(Dist).E1000 = icdf(pd.(Dist).pd,1-PF);
     
 end
+% The reason we can't take ecdfEd is because it can never be larger than
+% your largest data value... the last data value is defined with the cdf
+% value of 1! Therefore... we have to approximate...
+% Note that the top value won't show on the scatter - it is infinity!
+% Neither will zero... but this is added by matlab into the ecdfx for the
+% purpose of plotting stairs.
 pd.ecdfEd = interp1(pd.ecdf,pd.ecdfx,1-normcdf(-Beta*Alpha),'linear','extrap');
+% % XXOld = sort(Data);
+% % YYOld = ((1:length(Data))/(length(Data) + 1))';
+% % [XXXOld, ia, ~] = unique(XXOld);
+% % YYYOld = YYOld(ia);
+% XX = [min(Data); sort(Data)];
+% YY = ((0:length(Data))/length(Data))';
+% [XXX, ia, ~] = unique(XX);
+% YYY = YY(ia);
+% pd.ecdfEd = interp1(YYYOld,XXXOld,1-normcdf(-Beta*Alpha),'linear','extrap');
 
 if Plot
     % Probability Paper
     fGumbelPP = figure('Name','Probability Paper','NumberTitle','off'); hold on
-    scatter(sort(Data),-log(-log((1:length(Data))/(length(Data) + 1))),7,'k','filled','DisplayName','Daily Max Data');
+    %scatter(sort(Data),-log(-log((1:length(Data))/(length(Data) + 1))),7,'k','filled','DisplayName','Max Data');
+    %scatter([min(Data); sort(Data)],-log(-log((0:length(Data))/(length(Data)+0.00001))),7,'k','filled','DisplayName','Max Data');
+    scatter([min(Data); sort(Data)],-log(-log((0:length(Data))/(length(Data)))),7,'k','filled','DisplayName','Max Data');
     C = linspecer(length(DistTypes));
     
+    %TempX = 220:480;
     for k = 1:length(DistTypes)
         Dist = DistTypes{k};
         plot(sort(Data),-log(-log(cdf(pd.(Dist).pd,sort(Data)))),'--','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+        %plot(TempX,-log(-log(cdf(pd.(Dist).pd,TempX))),'--','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
     end
     
     xlabel('X - Load Effect'); ylabel('-log(-log(Probability of non-exceedance))')
-    title('Gumbel Probability Paper'); legend('location','best'); box on
+    title('Gumbel Probability Paper'); legend('location','northwest'); box on
 end
 
-% Goodness of Fit -Tail
+% Goodness of Fit -Tail - SPECIAL ATTENTION PAID! THIS IS VERY TRICKY...
+% ONGOING MONITOR.. BASICALLY LINSPACE COULD BE GOOD BECAUSE WHEN THERE IS
+% LITTLE DATA, THE .99, .999, .9999. .99993 ALL COMPARE TO A THE MAX
+% EMPIRICAL DIST
 Vals = [0.9:0.01:0.99 0.999 0.9999 0.99993];
+%Vals = linspace(0.9,(1-1/length(Data)));
+%Vals = [0.9:0.01:(1-1/length(Data))];
 EDataTail = interp1(pd.ecdf,pd.ecdfx,Vals,'linear','extrap');
 % Initialize pd.Best
 pd.Best = DistTypes{1};
+% We need a smarter selection method - must take into account how much data
+% we have...
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
     pd.(Dist).gof = sqrt(sum((EDataTail-icdf(pd.(Dist).pd,Vals)).^2));
     if pd.(Dist).gof < pd.(pd.Best).gof
         pd.Best = Dist;
     end
+end
+
+if Plot
+    %scatter(pd.(pd.Best).Ed,-log(-log(1-normcdf(-Beta*Alpha))),'r','filled','DisplayName','Ed');
+    %scatter(pd.ecdfEd,-log(-log(1-normcdf(-Beta*Alpha))),'g','filled','DisplayName','ecdfEd');
 end
 
 end

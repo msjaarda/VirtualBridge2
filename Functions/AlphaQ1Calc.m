@@ -173,21 +173,26 @@ end
 Summary = array2table(zeros(4,length(BM)*length(ClassType)));
 Summary.Properties.VariableNames = {[BM{3} ' ' ClassType{1}], [BM{3} ' ' ClassType{2}], [BM{3} ' ' ClassType{3}], [BM{2} ' ' ClassType{1}],...
     [BM{2} ' ' ClassType{2}], [BM{2} ' ' ClassType{3}], [BM{1} ' ' ClassType{1}], [BM{1} ' ' ClassType{2}], [BM{1} ' ' ClassType{3}]};
-Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQ1N', 'AlphaQ1LN'};
+Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQ1Best', 'AlphaQ1LN'};
 
 for i = 1:length(ClassType)
     Class = ClassType{i};
 
     for j = 1:length(BM)
         BlockM = BM{j};
-
-        pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,{'Normal','Lognormal'},0,1);
-        EdN = pd.Normal.Ed;
+        
+        if j == 2
+            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',1,1);
+            set(gcf,'Name',[get(gcf,'name') ' ' sprintf('%s %s %s \n',Class,BlockM,pd.Best)],'NumberTitle','off')
+        end
+        pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',0,1);
+        EdBest = pd.(pd.Best).Ed;
+        %fprintf('%s %s %s \n',Class,BlockM,pd.Best)
         EdLN = pd.Lognormal.Ed;
-        AQN = EdN/(300*1.5);
+        AQBest = EdBest/(300*1.5);
         AQLN = EdLN/(300*1.5);
         
-        Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQN; AQLN];
+        Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQBest; AQLN];
         
         if strcmp(BlockM,'Weekly')
             AQ1(i) = AQLN; Ed(i) = EdLN;
@@ -330,9 +335,9 @@ if AdvPlots
         for j = 1:length(BM)
             BlockM = BM{j};
             
-            y = histcounts(Max.(Class).(BlockM).W1_2M,'BinEdges',X,'normalization','pdf');
+            y = histcounts(Max.(Class).(BlockM).W1_2,'BinEdges',X,'normalization','pdf');
 %             if i == 2 && strcmp(BlockM,"Weekly")
-%                 ystar = Max.(Class).(BlockM).W1_2M;
+%                 ystar = Max.(Class).(BlockM).W1_2;
 %             end
             bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.5,'DisplayName',BlockM)
             
