@@ -63,24 +63,26 @@ if strcmp(BaseData.AnalysisType,"WIM")
             Lane.Details.Dir(i) = 2;
         end
     end
-    
+      
 else % Lets try to form Lane.Sites and Lane.Details from Lane.Dir for the VBApercu
     % Get Lane Truck Distribution, Lane.TrDistr, and Lane Directions, Lane.Dir
     % If optional, do try
     
     % Splitting by ',' is no problem, even where there is no ','
+    Lane.Details = table();
     Lane.Details.Dir =  cellfun(@str2num,split(BaseData.LaneDir{:},','));
     Lane.Sites = table();
-    Lane.Sites.NumLanes = length(Lane.Dir);
+    Lane.Sites.NumLanes = length(Lane.Details.Dir);
     Lane.Sites.STATE = "";
     Lane.Sites.HWY = "";
-    Lane.Details = table();
+    %Lane.Details = table();
     Lane.Details.LANE(1:Lane.Sites.NumLanes) = 1:Lane.Sites.NumLanes;
     Lane.Details.ALANE = Lane.Details.LANE;
-    Lane.Details.NSEW(Lane.Dir == 1) = 3;
-    Lane.Details.NSEW(Lane.Dir == 2) = 4;
+    Lane.Details.NSEW(Lane.Details.Dir == 1) = 3;
+    Lane.Details.NSEW(Lane.Details.Dir == 2) = 4;
     Lane.Details.FROM = repmat("",Lane.Sites.NumLanes,1);
     Lane.Details.DIR = repmat("",Lane.Sites.NumLanes,1);
+    
 end
 
 try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch end
