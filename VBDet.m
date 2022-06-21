@@ -40,7 +40,7 @@ for g = 1:height(BaseData)
     % Initialize
     OverMax = [];
     
-    FName = 'VB40&60.mat'; % 'Det60t.mat'
+    FName = 'VB40&60t.mat'; % 'Det60t.mat'
     load(FName)
     
     InAxs = contains(PDC.Properties.VariableNames, 'AWT');
