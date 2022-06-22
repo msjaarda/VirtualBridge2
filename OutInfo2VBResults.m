@@ -29,7 +29,7 @@ LenghtClear = 140;
 end
 end
 
-boucle = 0; LenghtClear = 70;
+boucle = 0; LenghtClear = 70; FasterLoop = 0;
 while boucle == 0
 disp("---------------------------------------------------------------------");
 Prompt = 'Voulez-vous importer les ECodes d''un autre fichier? 1)Oui 2)Non \n';
@@ -48,7 +48,8 @@ while boucle == 0
         LenghtClear = 140;
         end
 end
-elseif Entry == 2   
+elseif Entry == 2  
+FasterLoop = 1;
 boucle = 1;
 else
 end
@@ -172,7 +173,7 @@ File_List = File_List(~strcmp(File_List,'.')&~strcmp(File_List,'..')&contains(Fi
 File_List = erase(File_List,'.mat');
 
 % Start Progress Bar
-u = StartProgBar(height(File_List), 1, 1, 3); tic; st = now;
+u = StartProgBar(height(File_List), 1, 1, 3-FasterLoop); tic; st = now;
 
 for i=1:height(File_List)
     
@@ -216,6 +217,53 @@ for i=1:height(File_List)
         end
         
     end
+    
+    if FasterLoop
+        Comp_List = fieldnames(OutInfo.E);
+        ILDataNames = {OutInfo.ILData.Name}';
+        
+        for j=1:height(Comp_List)
+            
+            temp2 = OutInfo.E.(Comp_List{j});
+            Fields1 = fieldnames(temp2);
+            
+            for k=1:height(Fields1)
+                
+                for l=1:height(ILDataNames)
+                    
+                    % Create and save inside CombInfo struct
+                    MatName = append(ILDataNames{l},'.',Comp_List{j},'.',Fields1{k},' = ','OutInfo.E','(',int2str(l),')','.',Comp_List{j},'.',Fields1{k},';');
+                    MatName = erase(MatName,'ILLib');
+                    MatName = append('CombInfo',MatName);
+                    eval(MatName);
+                    
+                    % Check if EdLN exist with EModels, if yes do the ratio
+                    if isfield(eval(append('CombInfo',erase(ILDataNames{l},'ILLib'))),'EdLN') && strcmp(Fields1{k},'Total')
+                        
+                        Fields2 = fieldnames(eval(append('CombInfo',erase(ILDataNames{l},'ILLib'),'.EdLN')));
+                        
+                        for m=1:height(Fields2)
+                            
+                            Fields3 = fieldnames(eval(append('CombInfo',erase(ILDataNames{l},'ILLib'),'.EdLN.',Fields2{m})));
+                            
+                            for n=1:height(Fields3)
+                                
+                                Actual = append('CombInfo',erase(ILDataNames{l},'ILLib'),'.EdLN',Fields2{m},Fields3{n},'0',Comp_List{j},' = ','CombInfo',erase(ILDataNames{l},'ILLib'),'.EdLN.',Fields2{m},'.',Fields3{n},'/','CombInfo',erase(ILDataNames{l},'ILLib'),'.',Comp_List{j},'.Total;');
+                                eval(Actual);
+                                
+                            end
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+            end
+            
+        end
+    end
+    
     end
     % Update progress bar
     user = memory;
@@ -223,6 +271,7 @@ for i=1:height(File_List)
     LenPrint = VBUpProgBar(st,RamUsed(end),i,LenPrint);
 end
 
+if FasterLoop == 0
 % Go inside Model folder
 Dir_List = dir(append('Output/',Folder_Names{2}));
 File_List = {Dir_List(:).name}';
@@ -287,14 +336,14 @@ for i=1:height(File_List)
     RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
     LenPrint = VBUpProgBar(st,RamUsed(end),i,LenPrint);
 end
-
+end
 %NameAnala = {'Monthly','Yearly'};
 %NameAnala = {'Daily','Weekly','Monthly','Yearly'};
 NameAnala = (Fields3(~contains(Fields3,'Fit')))';
 warning('off','MATLAB:table:RowsAddedExistingVars');
 
 % Start Progress Bar
-u = StartProgBar(width(NameAnala), 1, 3, 3); tic; st = now;
+u = StartProgBar(width(NameAnala), 1, 3-FasterLoop, 3-FasterLoop); tic; st = now;
 
 for b = 1:width(NameAnala)
 
