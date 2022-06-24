@@ -40,7 +40,7 @@ for g = 1:height(BaseData)
     % Initialize
     OverMax = [];
     
-    FName = 'VB40&60t.mat'; % 'Det60t.mat'
+    FName = 'VB40&60tNEW.mat'; % 'Det60t.mat'
     load(FName)
     
     InAxs = contains(PDC.Properties.VariableNames, 'AWT');
@@ -56,10 +56,13 @@ for g = 1:height(BaseData)
     % Round TrLineUp first row, move unrounded to fifth row
     TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
     
+    % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)]
+    TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID','mStation'});
+    
     for t = 1:Num.InfCases
         
         % Subject Influence Line to Truck Axle Stream
-        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,BaseData.RunDyn(g));
+        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,0);
         % Record Maximums
         % Add AGB 1.3 DLF
         OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
@@ -68,7 +71,7 @@ for g = 1:height(BaseData)
     
     if BaseData.Apercu(g)
         % Display Apercu
-        T = VBApercuv2(PDCx,sprintf('%i %s','Deterministic Analysis',g),ILData(t),BrStInd,TrLineUp,1.3,Lane,BaseData.ILRes(g));
+        T = VBApercuv2(PDCx,sprintf('%s %i','Deterministic Analysis',g),ILData(t),BrStInd,table2array(TrLineUp),1.3,Lane,BaseData.ILRes(g));
     end
     
     % Convert Results to Table

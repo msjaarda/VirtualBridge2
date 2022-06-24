@@ -237,13 +237,13 @@ for g = 1:height(BaseData)
                             % return 23 loads to original using Mult
                             TrLineUpSub(TrLineUpSub.TrNum == PosiRemTruck,2) = TrLineUpSub(TrLineUpSub.TrNum == PosiRemTruck,2)/Mult;
                             TrLineUpSubTemp(TrLineUpSub.TrNum == PosiRemTruck,:) = [];
-                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,table2array(TrLineUpSubTemp),MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            T = VBApercuv2(PDsy,'',ILData(t),BrStIndx,table2array(TrLineUpSubTemp),1,Lane,BaseData.ILRes(g));
                             
                             AXD = strncmp(PDsy.Properties.VariableNames,'AW',2);
                             PDsy{PDsy.CLASS == Tar & PDsy.LANE == LaneOps,AXD} = PDsy{PDsy.CLASS == Tar & PDsy.LANE == LaneOps,AXD}/Mult;
                             PDsy.GW_TOT(PDsy.CLASS == Tar & PDsy.LANE == LaneOps) = PDsy.GW_TOT(PDsy.CLASS == Tar & PDsy.LANE == LaneOps)/Mult;
                             
-                            Tx = VBApercu(PDsy,'',ILData(t),BrStIndx,table2array(TrLineUpSub),B4/ESIA.Total(t)/Mult,1,Lane,BaseData.ILRes(g));
+                            Tx = VBApercuv2(PDsy,'',ILData(t),BrStIndx,table2array(TrLineUpSub),1,Lane,BaseData.ILRes(g));
                             
                             %return original values
                             TrLineUpSub(TrLineUpSub.TrNum == PosiRemTruck,2) = TrLineUpSub(TrLineUpSub.TrNum == PosiRemTruck,2)*Mult;

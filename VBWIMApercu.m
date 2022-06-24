@@ -43,8 +43,9 @@ for g = 1:height(BaseData)
     
     % Round TrLineUp first row, move unrounded to fifth row
     TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
-    % TrLineUp [     1            2         3         4          5     ]
-    %           AllTrAxIndex  AxleValue   Truck#    LaneID   Station(m)
+    
+    % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)]
+    TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID','mStation'});
     
     % For each influence case
     for t = 1:Num.InfCases
@@ -70,7 +71,7 @@ for g = 1:height(BaseData)
                 AllTrAxt = [zeros(PadLen,size(AllTrAxt,2)); AllTrAxt; zeros(PadLen,size(AllTrAxt,2))];
                 BrStInd = BrStInd + PadLen;
                 % Also need to modify TrLineUp
-                TrLineUpt(:,1) = TrLineUpt(:,1) + PadLen; TrLineUpt(:,5) = TrLineUpt(:,5) + BaseData.ILRes(g)*PadLen;
+                TrLineUpt.ATAIndex = TrLineUpt.ATAIndex + PadLen; TrLineUpt.mStation = TrLineUpt.mStation + BaseData.ILRes(g)*PadLen;
             end
             
             BrEndInds = BrStInd + BrLengthInds-1;
@@ -83,7 +84,7 @@ for g = 1:height(BaseData)
             % Optional Apercu
             if BaseData.Apercu(g) == 1
                 ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
-                T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,DLF,Lane,BaseData.ILRes(g));
+                T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,table2array(TrLineUpt),DLF,Lane,BaseData.ILRes(g));
                 %exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end
             

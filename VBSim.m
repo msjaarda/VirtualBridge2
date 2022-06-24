@@ -7,7 +7,7 @@
 clear, clc, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputNumaImprLoads.xlsx');
+BaseData = VBReadInputFile('VBSimInputGerEx3.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -158,16 +158,7 @@ for g = 1:height(BaseData)
         OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
         %OutInfo.E = E;
         OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
-        OutInfo.ILData = ILData;
-        
-        % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
-%         for r = 1:Num.InfCases
-%             [pd,OutInfo.x_values(:,r),OutInfo.y_valuespdf(:,r),y_valuescdf] = GetBlockMaxFit(OutInfo.OverMax(:,r),'Lognormal',BaseData.Plots(g));
-%             [OutInfo.EdLN(r), OutInfo.AQ(r), ~] = GetBlockMaxEd(OverMax(:,r),BaseData.Period(g),'Lognormal',E.Total(r),E.EQ(:,r),E.Eq(:,r),0.6,0.5,1,1);
-%         end
-        % Apply Model Factor to EdLN and AQ
-        %OutInfo.AQ = 1.1*OutInfo.AQ;  OutInfo.EdLN = 1.1*OutInfo.EdLN;
-        
+        OutInfo.ILData = ILData;        
         save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')
     end
     

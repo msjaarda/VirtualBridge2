@@ -182,7 +182,7 @@ end
 
 % Define ESIA details
 LaneWidth = 3; % meters, hard coded
-% Distributed loads
+% Distributed loads CHANGE TO 2.5 NORMALLY (3 FOR EXPERIMENT)
 qk = 2.5*ones(width(ILData(1).v),1);
 qkBR = qk;
 qk05 = qk; % kN/m2 with alpha = 1 (needed alpha = 0.5)
