@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIMMatt020622';
-NewFolder = 'WIMMatt020622Output';
+Folder_Name = 'WIMDyn';
+NewFolder = 'WIMDynOutput';
 IncZ = 1; % Line 123-124 modify
 
 % Ensure file list is succinct
@@ -54,7 +54,7 @@ File_List = GetFileList(Folder_Name);
 load('Sites.mat'); LenPrint = []; RamUsed = [];
 
 % Start Progress Bar
-u = StartProgBar(length(File_List), 1, 1, 5); tic; st = now;
+u = StartProgBar(length(File_List), 1, 1, 4); tic; st = now;
 
 % Read in .mat results variables into a single OInfo variable
 for v = 1:length(File_List)
@@ -125,7 +125,7 @@ DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
     % Start Progress Bar
-    u = StartProgBar(length(File_List), 1, 2, 5); tic; st = now;
+    u = StartProgBar(length(File_List), 1, 2, 4); tic; st = now;
     for v = 1:length(OInfo)
         % GetBlockMax can handle however MaxEvents is structured...
         % no need to loop ILs, BlockMaxs, or ClassTypes
@@ -155,7 +155,7 @@ end
 % For Sim
 if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
     % Start Progress Bar
-    u = StartProgBar(length(File_List), 1, 2, 5); tic; st = now;
+    u = StartProgBar(length(File_List), 1, 2, 4); tic; st = now;
     BlockMax = OInfo(v).BaseData.Period; BM = BlockMax{1};
     ClassTypes = {'Class'}; CT = ClassTypes{1};
     for v = 1:length(OInfo)
@@ -177,7 +177,7 @@ Gamma = 1.5;
 AQ1 = 0.7; AQ2 = 0.5;
 % VBGetECode and GetAlphas
 % Start Progress Bar
-u = StartProgBar(length(File_List), 1, 3, 5); tic; st = now;
+u = StartProgBar(length(File_List), 1, 3, 4); tic; st = now;
 for v = 1:length(OInfo)
     OInfo(v).E = VBGetECode(OInfo(v).ILData,OInfo(v).BaseData.ILRes);
     for r = 1:length(OInfo(v).ILData)
@@ -200,7 +200,7 @@ end
 % Repeat some of the above for each site... save as OInfo(v).SNameSITE
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
     % Start Progress Bar
-    u = StartProgBar(length(File_List), 1, 4, 5); tic; st = now;
+    u = StartProgBar(length(File_List), 1, 4, 4); tic; st = now;
     BlockMax = {'Weekly'};        % j
     for v = 1:length(OInfo)
         if isempty(strcat(Sites.SName(Sites.SITE == OInfo(v).BaseData.SITE),num2str(OInfo(v).BaseData.SITE)))

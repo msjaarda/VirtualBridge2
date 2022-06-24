@@ -6,7 +6,7 @@ load("ILLib.mat");
 
 disp("-----------------------------------------------------");
 disp("Bonjour bienvenue dans le script COMPARATOR");
-disp("Vous utilisez la version 2.3 du 02/09/2021, Lucas");
+disp("Vous utilisez la version 2.4 du 24/06/2022, Lucas");
 disp("-----------------------------------------------------");
 a = 1;
 
@@ -29,6 +29,7 @@ Donnee.BridgeType = {'Box';'Twin';'Multi';'Slab'};
 Donnee.BridgeType = char(Donnee.BridgeType(Entry));
 Fields = fieldnames(ILLib);
 Fields = Fields(contains(Fields,Donnee.BridgeType));
+Fields(contains(Fields,'Test')) = [];
 Fields = flip(Fields);
 
 b = 0;

@@ -72,5 +72,5 @@ for i=1:height(File_List)
     LenPrint = VBUpProgBar(st,RamUsed(end),i,LenPrint);
 end
 
-%save(NameFileSave,'VBResults');
+save(NameFileSave,'VBResults');
 
