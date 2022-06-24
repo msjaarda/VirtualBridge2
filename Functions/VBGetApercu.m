@@ -1,4 +1,4 @@
-function [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,NumInfCases,ILData,RunDyn,ESIA,Lane,ILRes)
+function [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,NumInfCases,ILData,RunDyn,Lane,ILRes)
 %GETAPERCU Prepares results to be handed to WIMtoAllTrAx, then into Apercu
 
 % Dummy year
@@ -24,7 +24,7 @@ for t = 1:NumInfCases
     % Record Maximums
     OverMax = [OverMax; [t, MaxLEx, BrStIndx, MaxSimNum]];
     
-    T = VBApercu(PDC,'',ILData(t),BrStIndx,TrLineUp,MaxLEx/ESIA(t),DLFx,Lane,ILRes);
+    T = VBApercuv2(PDC,'',ILData(t),BrStIndx,TrLineUp,DLFx,Lane,ILRes);
             
 end
 

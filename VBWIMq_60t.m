@@ -307,7 +307,7 @@ for g = 1:height(BaseData)
                             % return 23 loads to original using Multiplicater
                             TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2) = TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2)/Multiplicater;
                             TrLineUpSubTemp(find(TrLineUpSub(:,3) == PosiRemTruck),:) = [];
-                            T = VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSubTemp,MaxLE/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                            T = VBApercuv2(PDsy,'',ILData(t),BrStIndx,TrLineUpSubTemp,1,Lane,BaseData.ILRes(g));
                             
                             PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT01(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
                             PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT02(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
@@ -320,7 +320,7 @@ for g = 1:height(BaseData)
                             PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.AWT09(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
                             PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1]) = PDsy.GW_TOT(PDsy.CLASS == [23] & PDsy.LANE == [1])/Multiplicater;
 
-                            VBApercu(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,B4/ESIA.Total(t)/Multiplicater,1,Lane,BaseData.ILRes(g));
+                            VBApercuv2(PDsy,'',ILData(t),BrStIndx,TrLineUpSub,1,Lane,BaseData.ILRes(g));
                             
                             %return original values
                             TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2) = TrLineUpSub(find(TrLineUpSub(:,3) == PosiRemTruck),2)*Multiplicater;
@@ -337,7 +337,7 @@ for g = 1:height(BaseData)
                             end
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
-                                TStop = VBApercu(PDe,'',ILData(t),BrStInde,TrLineUpStop,MaxLEe/ESIA.Total(t),1,Lane,BaseData.ILRes(g));
+                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,TrLineUpStop,1,Lane,BaseData.ILRes(g));
                             end
                         end
                         

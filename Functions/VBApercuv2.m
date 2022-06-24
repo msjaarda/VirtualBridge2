@@ -2,8 +2,7 @@ function T = VBApercuv2(PDC,Title,ILData,BrStInd,TrLineUp,DLF,Lane,ILRes)
 % Plot a Series of WIM or VWIM Vehicles on a Bridge
 
 % PEsia is no longer provided! Must call GetECode
-
-PEsia = 1;
+E = VBGetECode(ILData,ILRes);
 
 % Take only the influence lines that apply to the current InfCase
 Infv = ILData.v;
@@ -51,7 +50,7 @@ else
     end
 end
 xlabel('Distance Along Bridge (m)'); ylabel('Inf Line'); xlim([-0.5 Span+0.5]); box on
-text(1,-max(max(Infv))+max(max(Infv))/5,sprintf('%.1f%% of E_{SIA}',PEsia*100),'FontSize',11,'FontWeight','bold','Color','k')
+%text(1,-max(max(Infv))+max(max(Infv))/5,sprintf('%.1f%% of E_{SIA}',PEsia*100),'FontSize',11,'FontWeight','bold','Color','k')
 PerI = find(ILData.Name == '.');
 text(Span-1,-max(max(Infv))+max(max(Infv))/5,sprintf('%s',strrep(ILData.Name(PerI(1)+1:PerI(end)-1),'.',' ')),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
 set(gca,'ytick',[]); set(gca,'yticklabel',[])
@@ -155,6 +154,8 @@ if size(Infvtemp,2) < TotalLanes
     Infvtemp(1:size(Infvtemp,1), size(Infvtemp,2)+1:TotalLanes) = 0;
 end
 
+% Could put PEsia in the below 'text
+PEsia = (sum(sum(barp(1:end,:).*flip(Infvtemp(:,1:end)))))/E.SIA.Total;
 % Show text of Load Effect and % of ESIA
 text(Span-1,ceil(max(max(barp/9.81))/5)*5-3,sprintf('Load Effect: %.0f',DLF*sum(sum(barp(1:end,:).*flip(Infvtemp(:,1:end))))),'FontSize',11,'FontWeight','bold','Color','k','HorizontalAlignment','right')
 
