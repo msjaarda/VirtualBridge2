@@ -1,5 +1,5 @@
-function [PDCx, TrLineUp] = VBWIMtoAllTrAx_Exp(PDCx,SpaceSaver,Lane,ILRes)
-% WIMTOALLTRAX Translates WIM or VWIM data into AllTrAx and TrLineUp
+function [PDCx, TrLineUp] = VBWIM2TrLineUp(PDCx,SpaceSaver,Lane)
+% VBWIM2TRLINEUP Translates WIM or VWIM data into AllTrAx and TrLineUp
 % Also returns PDC (in the form of PDCx) with some mods
 
 % Detect type of PDCx... basically, does it have time (DTS) or spacing (SpCu)
@@ -56,19 +56,23 @@ if isWIM
         PDCx.LnTrSpacing(LaneInds) = AA;
         % The following only makes sense in direction 1. We don't circshift
         % for the 2 direction... why not?
+        try
         if Lane.Details.Dir(Lanes(i)) == 1
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
         else
             PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
         end
+        catch
+        if Lane.Details.Dir(i) == 1
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
+        else
+            PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
+        end
+        end
 
     end
     
     % If LnTrBtw is negative we delete entry
-    if PDCx.CLASS(PDCx.LnTrBtw < 1.5,:) == 23
-    %disp('Overlapping 23');
-    end
-    
     PDCx(PDCx.LnTrBtw < 1.5,:) = [];
 end
 
@@ -76,7 +80,6 @@ end
 IndW = find(string(PDCx.Properties.VariableNames) == "W1_2");
 NumW = sum(cell2mat(regexp(string(PDCx.Properties.VariableNames), 'W\d_*')));
 WB = PDCx{:,IndW:IndW+NumW-1}/100;
-%WB = PDCx{:,strncmp(PDCx.Properties.VariableNames,'W',1)}/100;
 AX = PDCx{:,strncmp(PDCx.Properties.VariableNames,'AW',2)}/102;
 
 % Make wheelbase length cummulative
@@ -89,9 +92,15 @@ for i = 1:length(Lanes)
     LaneInds = PDCx.LANE == Lanes(i);
     
     % Change the sign of the WBL for those in direction 2
+    try
     if Lane.Details.Dir(Lanes(i)) == 2
         WB(LaneInds,:) = -WB(LaneInds,:);
     end 
+    catch
+    if Lane.Details.Dir(i) == 2
+        WB(LaneInds,:) = -WB(LaneInds,:);
+    end    
+    end
 end
 
 WB = [PDCx.SpCu PDCx.SpCu + WB];
@@ -122,23 +131,6 @@ LaneNum = LaneNum(LaneNum > 0);
 % Update the below
 %AllLaneLineUp = [SpCu(1) AllAxLoads(2) AllVehNum(3) AllLaneNum(4)...
 TrLineUp = [WBv AXv TrNum LaneNum];
-
-% The way that the indexing and accumarray is working, we have wasted stuff
-% at the start of the AllTrAx... and it is much too long (when using VWIM)
-TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
-
-% Make a separate axle stream vector for each lane, and last one for all
-% Put max() function in incase one lane has no representation in TrLineUp
-% AllTrAx = zeros(max(TrLineUp(:,1)),max(length(Lane.Details.Dir),length(Lanes)));
-% 
-% for i = 1:length(Lanes)
-%     A = accumarray(TrLineUp(TrLineUp(:,4)==Lanes(i),1),TrLineUp(TrLineUp(:,4)==Lanes(i),2));
-%     AllTrAx(1:length(A),i) = A;
-%     %AllTrAx(1:length(A(1:1:end)),i) = A(1:1:end); 
-% end
-
-% Return TrLineUp first row unrounded
-TrLineUp(:,1) = WBv;
 
 end
 

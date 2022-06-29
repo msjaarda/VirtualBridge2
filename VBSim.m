@@ -7,7 +7,7 @@
 clear, clc, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputNumaGerEx3.xlsx');
+BaseData = VBReadInputFile('VBSimInputGerEx3.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -31,8 +31,8 @@ for g = 1:height(BaseData)
     if BaseData.Parallel(g) > 0, gcp; clc; end 
     m = StartProgBar(BaseData.NumSims(g), Num.Batches, g, height(BaseData)); tic; st = now;
     
-    parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
-    %for v = 1:BaseData.NumSims(g)
+    %parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
+    for v = 1:BaseData.NumSims(g)
         
         % Initialize variables outside of batch simulation loop
         LaneAxLineUp = cell(Num.Lanes,1); LaneVehLineUp = cell(Num.Lanes,1); ApercuMax = [];
@@ -63,7 +63,7 @@ for g = 1:height(BaseData)
             end % END OF LANE SPECIFIC TRAFFIC GENERATION
             
             % Assemble lane specific data, flip for direction, sort by axle position
-            [AxLineUp, VehLineUp] = VBAssembleLineUps(LaneAxLineUp,LaneVehLineUp,BatchSize,Num.Lanes,BaseData(g,:),Lane.Details.Dir,FixVars);
+            [AxLineUp, VehLineUp] = VBAssembleLineUps(LaneAxLineUp,LaneVehLineUp,BaseData(g,:));
             
             % Log Virtual WIM if necessary
             if BaseData.VWIM(g) == 1
@@ -156,7 +156,6 @@ for g = 1:height(BaseData)
     if BaseData.Save(g) == 1
         % Save structure variable with essential simulation information
         OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
-        %OutInfo.E = E;
         OutInfo.OverMax = OverMax; OutInfo.OverMaxT = OverMaxT;
         OutInfo.ILData = ILData;    
         save(['Output' BaseData.Folder{g} '/' OutInfo.Name], 'OutInfo')

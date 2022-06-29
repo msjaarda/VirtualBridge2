@@ -103,7 +103,7 @@ for g = 1:height(BaseData)
             end
             
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
-            [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+            [TrLineUpGr,PDsy] = VBGetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g),'day');
 
             % Perform search for maximums for each day
             %parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)

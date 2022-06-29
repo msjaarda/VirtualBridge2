@@ -136,7 +136,7 @@ for g = 1:height(BaseData)
             end
             
             % Get TrLineUp, AllTrAx, Starti and Endi in sliced form
-            [TrLineUpGr,PDsy] = GetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g));
+            [TrLineUpGr,PDsy] = VBGetSlicedPDs2AllTrAx(PDsy,MaxLength,Lane,BaseData.ILRes(g),'day');
 
             % Perform search for maximums for each day
             %parfor (z = 1:max(PDsy.Group), BaseData.Parallel(g)*100)
@@ -221,10 +221,11 @@ for g = 1:height(BaseData)
                             
                             % Call VBWIMtoAllT.rAx w/ mods... must give stationary point or truck
                             [PDe, AllTrAxStop, TrLineUpStop] = VBWIMtoAllTrAxStop(PDe,MaxLength,Lane,BaseData.ILRes(g),find(TrNumsUE == TrIdMax));
+                            TrLineUpStop = array2table(TrLineUpStop,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID'});
                             
-                            % Round TrLineUp first row, move unrounded to fifth row
-                            TrLineUpStop(:,5) = TrLineUpStop(:,1); TrLineUpStop(:,1) = round(TrLineUpStop(:,1)/BaseData.ILRes(g));
-                            % TrLineUpStop [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m) ]
+                            % Round TrLineUp to ILRes
+                            TrLineUpStop.mStation = TrLineUpStop.ATAIndex;
+                            TrLineUpStop.ATAIndex = round(TrLineUpStop.ATAIndex/BaseData.ILRes(g));
                             
                             [MaxLEe,DLFe,BrStInde,Re] = VBGetMaxLE(AllTrAxStop,ILData(t).v,BaseData.RunDyn(g));
                         end
@@ -337,7 +338,7 @@ for g = 1:height(BaseData)
                             end
                             %exportgraphics(gcf,"Max"  + ".jpg",'Resolution',600)
                             if BaseData.StopSim(g)
-                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,TrLineUpStop,1,Lane,BaseData.ILRes(g));
+                                TStop = VBApercuv2(PDe,'',ILData(t),BrStInde,table2array(TrLineUpStop),1,Lane,BaseData.ILRes(g));
                             end
                         end
                         
