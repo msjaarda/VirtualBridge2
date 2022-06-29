@@ -36,11 +36,11 @@ for g = 1:height(BaseData)
     
     % Obtain Influence Line Info
     [Num,Lane,ILData,~,~] = VBUpdateData(BaseData(g,:));
-    
+
     % Initialize
     OverMax = [];
     
-    FName = 'VBTrial.mat'; % 'Det60t.mat'
+    FName = 'VB40&60t.mat'; % 'Det60t.mat'
     load(FName)
     
     InAxs = contains(PDC.Properties.VariableNames, 'AWT');
@@ -49,6 +49,29 @@ for g = 1:height(BaseData)
     PDC{PDC.GW_TOT == 60000,InAxs} = 1.1*PDC{PDC.GW_TOT == 60000,InAxs};
     PDC{PDC.GW_TOT == 40000,InAxs} = 1.5*PDC{PDC.GW_TOT == 40000,InAxs};
     PDCx = PDC;
+      
+    % Convert PDC to AllTrAx
+    [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,0,Lane,BaseData.ILRes(g));
+    
+    % Round TrLineUp first row, move unrounded to fifth row
+    TrLineUp(:,5) = TrLineUp(:,1); TrLineUp(:,1) = round(TrLineUp(:,1)/BaseData.ILRes(g));
+    
+    % TrLineUp [ 1: AllTrAxIndex  2: AxleValue  3: Truck#  4: LaneID  5: Station(m)]
+    TrLineUp = array2table(TrLineUp,'VariableNames',{'ATAIndex','AxleValue','TrNum','LaneID','mStation'});
+    
+    for t = 1:Num.InfCases
+        
+        % Subject Influence Line to Truck Axle Stream
+        [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,0);
+        % Record Maximums
+        % Add AGB 1.3 DLF
+        OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
+        
+    end
+    
+    % Do again, different direction To switch the case
+    L1 = Lane.Details.Dir == 1;
+    Lane.Details.Dir(L1) = 2; Lane.Details.Dir(~L1) = 1;
     
     % Convert PDC to AllTrAx
     [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,0,Lane,BaseData.ILRes(g));
@@ -68,6 +91,9 @@ for g = 1:height(BaseData)
         OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
         
     end
+    
+    
+    
     
     if BaseData.Apercu(g)
         % Display Apercu
