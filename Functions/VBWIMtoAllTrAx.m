@@ -4,6 +4,9 @@ function [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,SpaceSaver,Lane,ILRes)
 
 [PDCx, TrLineUp] = VBWIM2TrLineUp(PDCx,SpaceSaver,Lane);
 
+% Get Lanes
+Lanes = unique(PDCx.LANE);
+
 % The way that the indexing and accumarray is working, we have wasted stuff
 % at the start of the AllTrAx... and it is much too long (when using VWIM)
 TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
