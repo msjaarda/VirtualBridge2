@@ -2,7 +2,7 @@ function [PDCx, AllTrAx, TrLineUp] = VBWIMtoAllTrAx(PDCx,SpaceSaver,Lane,ILRes)
 % WIMTOALLTRAX Translates WIM or VWIM data into AllTrAx and TrLineUp
 % Also returns PDC (in the form of PDCx) with some mods
 
-[PDCx, TrLineUp] = VBWIM2TrLineUp(PDCx,SpaceSaver,Lane,ILRes);
+[PDCx, TrLineUp] = VBWIM2TrLineUp(PDCx,SpaceSaver,Lane);
 
 % The way that the indexing and accumarray is working, we have wasted stuff
 % at the start of the AllTrAx... and it is much too long (when using VWIM)

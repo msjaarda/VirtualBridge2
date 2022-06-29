@@ -9,7 +9,7 @@ clear, clc, format long g, rng('shuffle'), close all;
 % Input Information --------------------
 
 % Read Input File
-BaseData = VBReadInputFile('VBWIMInputOFROUDet.xlsx');
+BaseData = VBReadInputFile('VBWIMInputOFROUDetx.xlsx');
 
 % % Manual BaseData Input
 % BaseData = table;
@@ -40,7 +40,7 @@ for g = 1:height(BaseData)
     % Initialize
     OverMax = [];
     
-    FName = 'VB40&60tNEW.mat'; % 'Det60t.mat'
+    FName = 'VBTrial.mat'; % 'Det60t.mat'
     load(FName)
     
     InAxs = contains(PDC.Properties.VariableNames, 'AWT');
