@@ -9,6 +9,9 @@ Lanes = unique(PDCx.LANE);
 
 % The way that the indexing and accumarray is working, we have wasted stuff
 % at the start of the AllTrAx... and it is much too long (when using VWIM)
+
+WBv = TrLineUp(:,1);
+
 TrLineUp(:,1) = round(TrLineUp(:,1)/ILRes);
 
 % Make a separate axle stream vector for each lane, and last one for all
