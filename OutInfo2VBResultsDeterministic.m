@@ -11,6 +11,7 @@ DetTraffic_Names = 'Deterministic'; % Name of the deterministic truck(s) inside 
 %NameFileSave = append('VBResults.mat');
 NameFileSave = append(VBResults_Names,'.mat');
 load(append(VBResults_Names,'.mat'));
+warning('off','MATLAB:table:RowsAddedExistingVars');
 
 LenPrint = []; RamUsed = [];
 

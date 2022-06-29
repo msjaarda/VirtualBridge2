@@ -3,7 +3,7 @@ clear, clc, close all, load('Sites.mat')
 
 %% INPUT
 % Select the Infl Line to inspect
-InfLine = 'Slab.Long.Wid9.Uni.Semi.p3.Mn.S25';
+InfLine = 'Box.Stand.Wid12.Uni.Simp.p0.V.S40';
 OutputFolder = 'WIMMatt020622Output';
 BlockM = 'Weekly';
 Class = 'ClassOW';
