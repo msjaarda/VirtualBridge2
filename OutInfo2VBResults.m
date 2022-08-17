@@ -340,6 +340,7 @@ end
 %NameAnala = {'Monthly','Yearly'};
 %NameAnala = {'Daily','Weekly','Monthly','Yearly'};
 NameAnala = (Fields3(~contains(Fields3,'Fit')))';
+%NameAnala = {'Monthly'};
 warning('off','MATLAB:table:RowsAddedExistingVars');
 
 % Start Progress Bar

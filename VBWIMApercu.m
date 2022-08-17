@@ -7,7 +7,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-BaseData = VBReadInputFile('Input/VBWIMInputApercu.xlsx');
+BaseData = VBReadInputFile('Input/VBWIMInputApercuSerb.xlsx');
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
@@ -25,8 +25,8 @@ for g = 1:height(BaseData)
     load(['WIM/',num2str(BaseData.SITE(g)),'.mat']);
     %PDs = PDx.PDs;
     PDs = Stage2Prune(PDs);
-    PDs = PDs(PDs.DTS > datetime(2009,9,30),:);
-    PDs = PDs(PDs.DTS < datetime(2010,8,1),:);
+    %PDs = PDs(PDs.DTS > datetime(2009,9,30),:);
+    %PDs = PDs(PDs.DTS < datetime(2010,8,1),:);
     
     % Get Only the ClassType Specified
     try

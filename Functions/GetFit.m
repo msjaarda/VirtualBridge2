@@ -60,6 +60,9 @@ end
 n = GetnBlockM(BlockM);
 
 if ~IncZ
+    if sum(Data == 0) == 0
+        Beta = norminv(1-n*0.0000013);
+    else
     % Delete zeros from Data, but save proportion
     PropZ = sum(Data == 0)/length(Data);
     Data(Data == 0) = [];
@@ -75,6 +78,7 @@ if ~IncZ
         pd.Best = Dist;
         pd.(Dist).Ed = Data;
         return
+    end
     end
 else
     Beta = norminv(1-n*0.0000013);
@@ -206,8 +210,14 @@ end
 % ONGOING MONITOR.. BASICALLY LINSPACE COULD BE GOOD BECAUSE WHEN THERE IS
 % LITTLE DATA, THE .99, .999, .9999. .99993 ALL COMPARE TO A THE MAX
 % EMPIRICAL DIST
+
+% New algorithm attempt... say we want to pay attention to sample size...
+
+
 Vals = [0.9:0.01:0.99 0.999 0.9999 0.99993];
-%Vals = linspace(0.9,(1-1/length(Data)));
+% Try this next
+%Vals = linspace(0.9,(1-1/length(Data)),12);
+
 %Vals = [0.9:0.01:(1-1/length(Data))];
 EDataTail = interp1(pd.ecdf,pd.ecdfx,Vals,'linear','extrap');
 % Initialize pd.Best

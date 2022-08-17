@@ -43,9 +43,9 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'GerEx3';
-NewFolder = 'GerEx3pr';
-IncZ = 1; % Line 123-124 modify
+Folder_Name = 'WIMv17';
+NewFolder = 'WIMv17pr';
+IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -119,8 +119,8 @@ fields = fieldnames(OInfo(v));
 % 2. We are doing SIM, and therefore only have OverMax
 
 % GetBlockMax and GetFit
-BlockMax = {'Daily', 'Weekly', 'Monthly', 'Yearly'};        % j
-ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
+BlockMax = {'Weekly'};        % j
+ClassTypes = {'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
@@ -141,7 +141,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                     CT = ClassTypes{i};
-                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,IncZ);
+                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,0);
                 end
             end
         end
@@ -162,7 +162,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
         for r = 1:length(OInfo(v).ILData)
             for j = 1:length(BlockMax)
                 for i = 1:length(ClassTypes)
-                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,1,IncZ);
+                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,IncZ);
                 end
             end
         end

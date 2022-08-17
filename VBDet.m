@@ -38,7 +38,7 @@ for g = 1:height(BaseData)
     [Num,Lane,ILData,~,~] = VBUpdateData(BaseData(g,:));
 
     % Initialize
-    OverMax = [];
+    OverMax = []; OverMax1 = []; OverMax2 = [];
     
     FName = 'VB40&60t.mat'; % 'Det60t.mat'
     load(FName)
@@ -65,11 +65,17 @@ for g = 1:height(BaseData)
         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,0);
         % Record Maximums
         % Add AGB 1.3 DLF
-        OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
+        OverMax1 = [OverMax1; [t, 1.3*MaxLE, 1.3, BrStInd]];
         
     end
     
-    % Do again, different direction To switch the case
+    if BaseData.Apercu(g)
+        % Display Apercu
+        T = VBApercuv2(PDCx,sprintf('%s %i','Deterministic Analysis',g),ILData(t),BrStInd,table2array(TrLineUp),1.3,Lane,BaseData.ILRes(g));
+    end
+    
+    % Do again, different direction
+    % To switch the case
     L1 = Lane.Details.Dir == 1;
     Lane.Details.Dir(L1) = 2; Lane.Details.Dir(~L1) = 1;
     
@@ -88,17 +94,19 @@ for g = 1:height(BaseData)
         [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAx,ILData(t).v,0);
         % Record Maximums
         % Add AGB 1.3 DLF
-        OverMax = [OverMax; [t, 1.3*MaxLE, 1.3, BrStInd]];
+        OverMax2 = [OverMax2; [t, 1.3*MaxLE, 1.3, BrStInd]];
         
     end
-    
-    
-    
     
     if BaseData.Apercu(g)
         % Display Apercu
         T = VBApercuv2(PDCx,sprintf('%s %i','Deterministic Analysis',g),ILData(t),BrStInd,table2array(TrLineUp),1.3,Lane,BaseData.ILRes(g));
     end
+    
+    % Take the max for each row of OverMax1 and 2
+    [~, Ind] = max([OverMax1(:,2) OverMax2(:,2)],[],2);
+    OverMax = OverMax1; OverMax(Ind == 2,:) = OverMax2(Ind == 2,:);
+    
     
     % Convert Results to Table
     OverMaxT = array2table(OverMax,'VariableNames',{'InfCase','MaxLE','DLF','BrStInd'});
