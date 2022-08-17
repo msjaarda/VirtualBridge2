@@ -84,13 +84,13 @@ for g = 1:height(BaseData)
     PDs = PDs(PDs.DTS > (BaseData.Date(g)-1),:);
     PDs = PDs(PDs.DTS < (BaseData.Date(g)+1),:);
     
-%      % Find and remove duplicates
-%      if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11
-%             % Get Duplicates
-%             PDs = FindDup2(PDs,0,0);
-%             % Delete Duplicates - from L1
-%             PDs(PDs.Dup & PDs.LANE == 1,:) = [];
-%      end
+     % Find and remove duplicates
+     if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11
+            % Get Duplicates
+            PDs = FindDup2(PDs,0,0);
+            % Delete Duplicates - from L1
+            PDs(PDs.Dup & PDs.LANE == 1,:) = [];
+     end
     
     % Get Only the ClassType Specified
     try
