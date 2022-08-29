@@ -4,17 +4,18 @@ function [NumInfCases, ILData] = findIL(ILs,ILRes,NumLanes)
 
 % Initialize
 NumInfCases = 0; ILData = struct();
+load Misc\ILLib.mat
 
 for i = 1:length(ILs)
      
     TName = ['ILLib.' ILs{i}];
-    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes);
+    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib);
     
 end
 end
 
-function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes)
-    load Misc\ILLib.mat
+function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib)
+    
     % Detect if we are at the end
     if isnumeric(eval([TName '(:,1)']));
         NumInfCases = NumInfCases + 1;
@@ -44,7 +45,8 @@ function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLane
         FNames = fieldnames(eval(TName));
         for j = 1:length(FNames)
             T1Name = [TName '.' FNames{j}];
-            [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes);
+            [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib);
         end
     end
 end
+

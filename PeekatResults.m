@@ -3,12 +3,13 @@ clear, clc, close all, load('Sites.mat')
 
 %% INPUT
 % Select the Infl Line to inspect
-InfLine = 'Box.Stand.Wid12.Uni.Simp.p0.V.S40';
-OutputFolder = 'WIMMatt020622Output';
+InfLine = 'Box.Stand.Wid12.Bi.Simp.p0.Mn.S70';
+OutputFolder = 'WIMv17pr';
 BlockM = 'Weekly';
 Class = 'ClassOW';
 DistTypes = 'All'; % fitting
 NumAnalyses = 5;
+Dyna = 0; % Run dynamique, 0) No 1) Yes
 
 %% CODE
 Dir_List = dir('Output');
@@ -67,6 +68,7 @@ BaseData.NumAnalyses(:) = 1;
 BaseData.AnalysisType(:) = 'WIM';
 BaseData.ClassType(:) = Class;
 BaseData.Date = Max.DTS(1:NumAnalyses);
+BaseData.RunDyn(:) = Dyna;
 
 % Initialize parpool if necessary and initialize progress bar
 u = StartProgBar(height(BaseData), 1, 1, 1); st = now;

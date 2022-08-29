@@ -235,6 +235,12 @@ end
 if Plot
     %scatter(pd.(pd.Best).Ed,-log(-log(1-normcdf(-Beta*Alpha))),'r','filled','DisplayName','Ed');
     %scatter(pd.ecdfEd,-log(-log(1-normcdf(-Beta*Alpha))),'g','filled','DisplayName','ecdfEd');
+    text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.85,append('Best Fit: ',pd.Best));
+    text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*1.3,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
+    %xplot= [min(Data); sort(Data)]; xplot = xplot(end-1);
+    %yplot= -log(-log((0:length(Data))/(length(Data)))); yplot = yplot(end-1);
+    %scatter(xplot,yplot,10,'r','filled','DisplayName','Data of interest');
+    %text(xplot*0.8,yplot*1.05,append('AE: ',num2str(xplot,5)),'Color','red');
 end
 
 end

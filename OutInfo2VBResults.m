@@ -2,157 +2,46 @@ clear all, clc
 
 %% Script to create VBResults table from OutInfo results
 
-disp("---------------------------------------------------------------------");
-disp("Bonjour bienvenue dans le script OutInfo2VBResults");
-disp("Vous utilisez la version 1.0 du 16/06/2022, Lucas");
-disp("---------------------------------------------------------------------");
-
-%% Open folder who contains WIM results
+%% INPUT : Open folder who contains WIM results
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
+
+Folder_Names{1} = 'WIMv17pr';
+Folder_Names{2} = Folder_Names{1};
+%Folder_Names{2} = 'WIMDynPO'; %second folder will import the ECodes of the 2sd file
+
+% Select parameters for alpha analysis
+AlphaAnalys = 4; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
+AlphaQ1 = 0.6;
+AlphaQ2 = 0.4;
+Alphaq = 0.5;
+
+%% Running script
+%open folders
 Dir_List = dir('Output'); % Folder containing the Output results
 File_List = {Dir_List.name}';
 
-boucle = 0; LenghtClear = 70;
-while boucle == 0
-disp("---------------------------------------------------------------------");
-Prompt = 'Veuillez entrer le nom du fichier contenant les résultats OutInfo : \n';
-Folder_Names{1} = input(Prompt,"s");
-Folder_Names{2} = Folder_Names{1};
-fprintf(repmat('\b',1,LenghtClear+length(Prompt)+length(Folder_Names{1})));
 % check if WIM folder exist
 if sum(strcmp(File_List,Folder_Names{1}))>=1
-boucle = 1;
 else
 disp("------------------NO FOLDER IN OUTPUT TRY AGAIN----------------------");
-LenghtClear = 140;
-end
 end
 
-boucle = 0; LenghtClear = 70; FasterLoop = 0;
-while boucle == 0
-disp("---------------------------------------------------------------------");
-Prompt = 'Voulez-vous importer les ECodes d''un autre fichier? 1)Oui 2)Non \n';
-Entry = input(Prompt);
-fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(Entry))));
-if Entry == 1
-while boucle == 0
-    disp("---------------------------------------------------------------------");
-    Prompt = 'Veuillez entrer le nom du fichier contenant les ECodes : \n';
-    Folder_Names{2} = input(Prompt,"s");
-    fprintf(repmat('\b',1,LenghtClear+length(Prompt)+length(Folder_Names{2})));
-        if sum(strcmp(File_List,Folder_Names{2}))>=1
-        boucle = 1;
-        else
-        disp("------------------NO FOLDER IN OUTPUT TRY AGAIN----------------------");
-        LenghtClear = 140;
-        end
-end
-elseif Entry == 2  
-FasterLoop = 1;
-boucle = 1;
+% check fast loop
+if strcmp(Folder_Names{1},Folder_Names{2})
+   FasterLoop = 1;
 else
-end
+   FasterLoop = 0;
 end
 
-boucle = 0; LenghtClear = 70; AlphaAnalys = 0;
-while boucle == 0
-    disp("---------------------------------------------------------------------");
-    Prompt = 'Quel alpha étudier? 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq \n';
-    Entry = input(Prompt);
-    fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(Entry))));
-    if Entry == 1
-        AlphaAnalys = 1;
-        boucle = 1;
-        NameFileSave = append('VBResults.mat');
-    elseif Entry == 2 %AlphaQ1
-        AlphaAnalys = 2;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour AlphaQ2 : \n';
-            AlphaQ2 = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(AlphaQ2))));
-            if (AlphaQ2>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        boucle = 0;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour Alphaq : \n';
-            Alphaq = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(Alphaq))));
-            if (Alphaq>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        NameFileSave = append('VBResultsAlphaQ1(Q2=',num2str(AlphaQ2),'etq=',num2str(Alphaq),').mat');
-    elseif Entry == 3 %AlphaQ2
-        AlphaAnalys = 3;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour AlphaQ1 : \n';
-            AlphaQ1 = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(AlphaQ1))));
-            if (AlphaQ1>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        boucle = 0;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour Alphaq : \n';
-            Alphaq = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(Alphaq))));
-            if (Alphaq>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        NameFileSave = append('VBResultsAlphaQ2(Q1=',num2str(AlphaQ1),'etq=',num2str(Alphaq),').mat');
-    elseif Entry == 4 %Alphaq
-        AlphaAnalys = 4;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour AlphaQ1 : \n';
-            AlphaQ1 = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(AlphaQ1))));
-            if (AlphaQ1>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        boucle = 0;
-        while boucle == 0
-            disp("---------------------------------------------------------------------");
-            Prompt = 'Entrez la valeur pour AlphaQ2 : \n';
-            AlphaQ2 = input(Prompt);
-            fprintf(repmat('\b',1,LenghtClear+length(Prompt)+numel(num2str(AlphaQ2))));
-            if (AlphaQ2>=0)
-                boucle = 1;
-            else
-                disp("----------------------------WRONG ALPHA------------------------------");
-                LenghtClear = 140;
-            end
-        end
-        NameFileSave = append('VBResultsAlphaq(Q1=',num2str(AlphaQ1),'etQ2=',num2str(AlphaQ2),').mat');
-    else
-        disp("---------------------------WRONG NUMBER------------------------------");
-        LenghtClear = 140;
-    end
+if AlphaAnalys == 1
+   NameFileSave = append('VBResults.mat');
+elseif AlphaAnalys == 2
+   NameFileSave = append('VBResultsAlphaQ1(Q2=',num2str(AlphaQ2),'etq=',num2str(Alphaq),').mat');
+elseif AlphaAnalys == 3
+   NameFileSave = append('VBResultsAlphaQ2(Q1=',num2str(AlphaQ1),'etq=',num2str(Alphaq),').mat');
+elseif AlphaAnalys == 4
+   NameFileSave = append('VBResultsAlphaq(Q1=',num2str(AlphaQ1),'etQ2=',num2str(AlphaQ2),').mat');
 end
 
 %set factors
@@ -346,99 +235,78 @@ warning('off','MATLAB:table:RowsAddedExistingVars');
 % Start Progress Bar
 u = StartProgBar(width(NameAnala), 1, 3-FasterLoop, 3-FasterLoop); tic; st = now;
 
+[NumInfCases, ILData] = findILNamesStr(CombInfo);
+CodesName = fieldnames(eval(append(ILData(1).Name,';'))); CodesName = CodesName(contains(CodesName,'0'));CodesName = cellfun(@(x) strsplit(x, '0'), CodesName, 'UniformOutput', false);CodesName = vertcat(CodesName{:});CodesName = CodesName(:,2);CodesName = unique(CodesName);
+ClassName = fieldnames(eval(append(ILData(1).Name,'.EdLN',';')));
+
 for b = 1:width(NameAnala)
-
-% Save new format for plotting all results with AlphaSummaryPlot
-
-fields1 = fieldnames(CombInfo);
-a = 1; %initialise a
-for i=1:height(fields1)
-    fields2 = fieldnames(CombInfo.(fields1{i}));
-    for j=1:height(fields2)
-        fields3 = fieldnames(CombInfo.(fields1{i}).(fields2{j}));
-        for k=1:height(fields3)
-            fields4 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}));
-            for l=1:height(fields4)
-                fields5 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}));
-                for m=1:height(fields5)
-                    fields6 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}));
-                    for n=1:height(fields6)
-                        fields7 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}));
-                        for o=1:height(fields7)
-                            fields8 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}));
-                            for p=1:height(fields8)
-                                fields9 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p})); fields9 = fields9(contains(fields9,'0'));fields9 = cellfun(@(x) strsplit(x, '0'), fields9, 'UniformOutput', false);fields9 = vertcat(fields9{:});fields9 = fields9(:,2);fields9 = unique(fields9);
-                                fields10 = fieldnames(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).EdLN);
-                                for q=1:height(fields9)
-                                    if a==1 % create table at the begining
-                                        VBResults.(fields9{q}).(NameAnala{b}) = table('Size',[1,15],'VariableTypes',["string","string","string","string","string","string","string","string","double","double","double","double","string","string","string"]);%,"double"]);
-                                        VBResults.(fields9{q}).(NameAnala{b}).Properties.VariableNames = {'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class','BestFitAll','BestFitClassOW','BestFitClass'};%,'PropTrucks'};
-                                    end
-                                    try
-                                        if AlphaAnalys ~= 1
-                                    Q1 = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).(fields9{q}).EQ(1);
-                                    Q2 = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).(fields9{q}).EQ(2);
-                                    Qq = sum(CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).(fields9{q}).Eq);
-                                        end
-                                    for r=1:height(fields10)
-                                    Ed = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).EdLN.(fields10{r}).(NameAnala{b});
-                                    if AlphaAnalys == 1
-                                        VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).(append('EdLN',fields10{r},NameAnala{b},'0',fields9{q}));
-                                        VBResults.(fields9{q}).(NameAnala{b}).(append('BestFit',fields10{r}))(a) = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).('EdLN').(fields10{r}).(append(NameAnala{b},'BestFit'));
-                                        %VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = Ed./(LambdaQ.*(AlphaQ1.*Q1+Alphaq.*Qq+AlphaQ2.*Q2));
-                                    elseif AlphaAnalys == 2
-                                        VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = (Ed./LambdaQ-(AlphaQ2.*Q2+Alphaq.*Qq))./Q1;
-                                        VBResults.(fields9{q}).(NameAnala{b}).(append('BestFit',fields10{r}))(a) = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).('EdLN').(fields10{r}).(append(NameAnala{b},'BestFit'));
-                                    elseif AlphaAnalys == 3
-                                        VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = (Ed./LambdaQ-(AlphaQ1.*Q1+Alphaq.*Qq))./Q2;
-                                        VBResults.(fields9{q}).(NameAnala{b}).(append('BestFit',fields10{r}))(a) = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).('EdLN').(fields10{r}).(append(NameAnala{b},'BestFit'));
-                                    elseif AlphaAnalys == 4
-                                        VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = (Ed./LambdaQ-(AlphaQ1.*Q1+AlphaQ2.*Q2))./Qq;
-                                        VBResults.(fields9{q}).(NameAnala{b}).(append('BestFit',fields10{r}))(a) = CombInfo.(fields1{i}).(fields2{j}).(fields3{k}).(fields4{l}).(fields5{m}).(fields6{n}).(fields7{o}).(fields8{p}).('EdLN').(fields10{r}).(append(NameAnala{b},'BestFit'));
-                                    else
-                                    end                           
-                                    end
-                                    catch
-                                       for r=1:height(fields10) 
-                                       VBResults.(fields9{q}).(NameAnala{b}).(fields10{r})(a) = 0;
-                                       end
-                                    end
-                                    VBResults.(fields9{q}).(NameAnala{b}).Type(a) = fields1{i};
-                                    VBResults.(fields9{q}).(NameAnala{b}).SubType(a) = fields2{j};
-                                    VBResults.(fields9{q}).(NameAnala{b}).Width(a) = fields3{k};
-                                    VBResults.(fields9{q}).(NameAnala{b}).Layout(a) = fields4{l};
-                                    VBResults.(fields9{q}).(NameAnala{b}).Support(a) = fields5{m};
-                                    VBResults.(fields9{q}).(NameAnala{b}).Trans(a) = fields6{n};
-                                    VBResults.(fields9{q}).(NameAnala{b}).AE(a) = fields7{o};
-                                    if (contains(fields4{l},'Uni')||contains(fields4{l},'Bi'))&&(contains(fields3{k},'12')||contains(fields3{k},'9'))
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'2L');
-                                    elseif ((contains(fields4{l},'Uni')||contains(fields4{l},'Bi'))&&contains(fields3{k},'15'))||(contains(fields4{l},'PUN')&&(contains(fields3{k},'12')||contains(fields3{k},'9')))
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'3L');
-                                    elseif ((contains(fields4{l},'Uni')||contains(fields4{l},'Bi'))&&contains(fields3{k},'18'))||(contains(fields4{l},'PUN')&&contains(fields3{k},'15'))||(contains(fields4{l},'Chan')&&contains(fields3{k},'12'))
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'4L');
-                                    elseif (contains(fields4{l},'PUN')&&contains(fields3{k},'18'))||(contains(fields4{l},'Chan')&&contains(fields3{k},'15'))
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'5L');
-                                    elseif contains(fields4{l},'Chan')&&contains(fields3{k},'18')
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'6L');
-                                    elseif contains(fields1{i},'Multi')
-                                        VBResults.(fields9{q}).(NameAnala{b}).Traffic(a) = append(fields4{l},'XL');
-                                    end
-                                    VBResults.(fields9{q}).(NameAnala{b}).Span(a) = str2double(erase(fields8{p},'S'));
-                                    %clc
-                                end
-                                a = a+1;
-                            end
-                        end
+    
+    for i = 1:height(CodesName)
+        % Save new format for plotting all results with AlphaSummaryPlot
+        VBResults.(CodesName{i}).(NameAnala{b}) = table('Size',[1,15],'VariableTypes',["string","string","string","string","string","string","string","string","double","double","double","double","string","string","string"]);%,"double"]);
+        VBResults.(CodesName{i}).(NameAnala{b}).Properties.VariableNames = {'Type','SubType','Width','Layout','Support','Trans','AE','Traffic','Span','All','ClassOW','Class','BestFitAll','BestFitClassOW','BestFitClass'};%,'PropTrucks'};
+        
+        for j = 1:NumInfCases
+            
+            try
+                if AlphaAnalys ~= 1
+                    Q1 = eval(append(ILData(j).Name,'.',CodesName{i},'.EQ(1)'));
+                    Q2 = eval(append(ILData(j).Name,'.',CodesName{i},'.EQ(2)'));
+                    Qq = sum(eval(append(ILData(j).Name,'.',CodesName{i},'.Eq')));
+                end
+                
+                for k = 1:height(ClassName)
+                    
+                    Ed = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b}));
+                    if AlphaAnalys == 1
+                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = eval(append(ILData(j).Name,'.EdLN',ClassName{k},NameAnala{b},'0',CodesName{i}));
+                        VBResults.(CodesName{i}).(NameAnala{b}).(append('BestFit',ClassName{k}))(j) = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},'BestFit'));
+                        %VBResults.(CodesName{i}).(NameAnala{b}).(fields10{r})(a) = Ed./(LambdaQ.*(AlphaQ1.*Q1+Alphaq.*Qq+AlphaQ2.*Q2));
+                    elseif AlphaAnalys == 2
+                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = (Ed./LambdaQ-(AlphaQ2.*Q2+Alphaq.*Qq))./Q1;
+                        VBResults.(CodesName{i}).(NameAnala{b}).(append('BestFit',ClassName{k}))(j) = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},'BestFit'));
+                    elseif AlphaAnalys == 3
+                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = (Ed./LambdaQ-(AlphaQ1.*Q1+Alphaq.*Qq))./Q2;
+                        VBResults.(CodesName{i}).(NameAnala{b}).(append('BestFit',ClassName{k}))(j) = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},'BestFit'));
+                    elseif AlphaAnalys == 4
+                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = (Ed./LambdaQ-(AlphaQ1.*Q1+AlphaQ2.*Q2))./Qq;
+                        VBResults.(CodesName{i}).(NameAnala{b}).(append('BestFit',ClassName{k}))(j) = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},'BestFit'));
+                    else
                     end
                 end
+            catch
+                for k=1:height(ClassName)
+                    VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = 0;
+                end
             end
+            InflName = strsplit(ILData(j).Name,'.'); InflName = InflName(2:end);
+            VBResults.(CodesName{i}).(NameAnala{b}).Type(j) = InflName{1};
+            VBResults.(CodesName{i}).(NameAnala{b}).SubType(j) = InflName{2};
+            VBResults.(CodesName{i}).(NameAnala{b}).Width(j) = InflName{3};
+            VBResults.(CodesName{i}).(NameAnala{b}).Layout(j) = InflName{4};
+            VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5};
+            VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
+            VBResults.(CodesName{i}).(NameAnala{b}).AE(j) = InflName{7};
+            if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
+            elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'3L');
+            elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'18'))||(contains(InflName{4},'PUN')&&contains(InflName{3},'15'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'12'))
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'4L');
+            elseif (contains(InflName{4},'PUN')&&contains(InflName{3},'18'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'15'))
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'5L');
+            elseif contains(InflName{4},'Chan')&&contains(InflName{3},'18')
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'6L');
+            elseif contains(InflName{1},'Multi')
+                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'XL');
+            end
+            VBResults.(CodesName{i}).(NameAnala{b}).Span(j) = str2double(erase(InflName{8},'S'));
         end
-    end      
-end
-
-VBResults.AQ = CombInfo;
-
-% Update progress bar
+    end
+    
+    VBResults.AQ = CombInfo;
+    
+    % Update progress bar
     user = memory;
     RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
     LenPrint = VBUpProgBar(st,RamUsed(end),b,LenPrint);

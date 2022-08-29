@@ -2,6 +2,8 @@ function E = VBGetECode(ILData,ILRes)
 % VBGetECode takes an influence line (or set) in the form of 
 % To be decided if we want ILData to be simply the line (ILData.v) or the
 % structure complete with values (v) and Name
+% Warning!!!! ILData must have the same resolution as ILRes otherwise
+% results will be wrong!!
 
 for i = 1:length(ILData)
 
