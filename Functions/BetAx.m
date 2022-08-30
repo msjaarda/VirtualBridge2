@@ -1,6 +1,8 @@
 function [BetAx_Excel] = BetAx(PDC,TrName,TrTyps,TrAxPerGr,TrTypPri,SName,Year,plotflag)
 % This function used in the MATSim input file pipeline
 
+BaseNumTrTyps = 13;
+
 shift = find(string(PDC.Properties.VariableNames) == "W1_2")-1;
 
 % Plot Stuff
@@ -33,7 +35,7 @@ NumTrTyp = length(TrTyps);
 % Check if we can do this as NaN
 BetAx_Excel = NaN(NumTrTyp,4*3);
 
-for i = 1:13%NumTrTyp    % For each truck type
+for i = 1:BaseNumTrTyps%NumTrTyp    % For each truck type
     TrTypNumAxPerGr{i} = arrayfun(@(x) mod(floor(TrAxPerGr(i)/10^x),10),floor(log10(TrAxPerGr(i))):-1:0);
     TrTypPriority{i} = arrayfun(@(x) mod(floor(TrTypPri(i)/10^x),10),floor(log10(TrTypPri(i))):-1:0);
     TrTypNumAx(i) = sum(TrTypNumAxPerGr{i});
@@ -92,13 +94,25 @@ for i = 1:13%NumTrTyp    % For each truck type
     end
 end
 
-g = 1;
-total = 6;
+g = 1; total = 0;
+% Get total number of required subplots...
+for i = BaseNumTrTyps+1:NumTrTyp
+    if TrAxPerGr(i) > 10
+        total = total + 1;
+    end
+    if TrAxPerGr(i) > 100
+        total = total + 1;
+    end
+    if TrAxPerGr(i) > 1000
+        total = total + 1;
+    end
+end
 
-if NumTrTyp > 13
-    figure('Name','Distances Between Axles','NumberTitle','off','units','normalized','outerposition',[0 0 1 .3])
-    sgtitle([SName ' ' num2str(Year) ' Truck Axle Group Wheelbases']);
-    for i = 14:NumTrTyp
+if NumTrTyp > BaseNumTrTyps
+    if plotflag == 1
+        figure('units','normalized','outerposition',[0 0 1*total/5 .3])
+    end
+    for i = BaseNumTrTyps+1:NumTrTyp
         TrTypNumAxPerGr{i} = arrayfun(@(x) mod(floor(TrAxPerGr(i)/10^x),10),floor(log10(TrAxPerGr(i))):-1:0);
         TrTypPriority{i} = arrayfun(@(x) mod(floor(TrTypPri(i)/10^x),10),floor(log10(TrTypPri(i))):-1:0);
         TrTypNumAx(i) = sum(TrTypNumAxPerGr{i});

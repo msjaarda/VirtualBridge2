@@ -1,6 +1,8 @@
 function [LinFit_Excel] = LinFit(PDC,TrName,TrTyps,TrAxPerGr,TrTypPri,Location,Year,plotflag)
 % This function used in the MATSim input file pipeline
 
+BaseNumTrTyps = 13;
+
 % Plot Stuff
 FaceAlpa = 0.7;
 if plotflag == 1
@@ -16,7 +18,7 @@ LinFit_Excel = NaN(NumTrTyp,4*2);
 LinFit_Excel(:,1) = ones(length(TrTyps),1);
 LinFit_Excel(:,2) = zeros(length(TrTyps),1);
 
-for i = 1:13%NumTrTyp    % For each truck type
+for i = 1:BaseNumTrTyps%NumTrTyp    % For each truck type
     TrTypNumAxPerGr{i} = arrayfun(@(x) mod(floor(TrAxPerGr(i)/10^x),10),floor(log10(TrAxPerGr(i))):-1:0);
     TrTypPriority{i} = arrayfun(@(x) mod(floor(TrTypPri(i)/10^x),10),floor(log10(TrTypPri(i))):-1:0);
     TrTypNumAx(i) = sum(TrTypNumAxPerGr{i});
@@ -86,14 +88,26 @@ if plotflag == 1
 end
 
 
+total = 0;
+% Get total number of required subplots...
+for i = BaseNumTrTyps+1:NumTrTyp
+    if TrAxPerGr(i) > 10
+        total = total + 1;
+    end
+    if TrAxPerGr(i) > 100
+        total = total + 1;
+    end
+    if TrAxPerGr(i) > 1000
+        total = total + 1;
+    end
+end
 
 if plotflag == 1
-    figure('units','normalized','outerposition',[0 0 1 .3])
+    figure('units','normalized','outerposition',[0 0 1*total/5 .3])
     g = 1;
 end
-total = 6;
 
-for i = 14:NumTrTyp    % For each truck type
+for i = BaseNumTrTyps+1:NumTrTyp    % For each truck type
     TrTypNumAxPerGr{i} = arrayfun(@(x) mod(floor(TrAxPerGr(i)/10^x),10),floor(log10(TrAxPerGr(i))):-1:0);
     TrTypPriority{i} = arrayfun(@(x) mod(floor(TrTypPri(i)/10^x),10),floor(log10(TrTypPri(i))):-1:0);
     TrTypNumAx(i) = sum(TrTypNumAxPerGr{i});
@@ -145,8 +159,8 @@ for i = 14:NumTrTyp    % For each truck type
             title(['Type ' TrName{i}])
             xlabel([xLabel ' (kN)'])
             ylabel([yLabel ' (kN)'])
-            xlim([0 700])
-            ylim([0 500])
+            xlim([0 1000])
+            ylim([0 700])
         
         end
         

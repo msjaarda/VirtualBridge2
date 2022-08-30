@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMInputF325.xlsx';
+FName = 'Input/VBWIMInputWIMSim.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar
@@ -228,8 +228,13 @@ for g = 1:height(BaseData)
             end % z, groups
             
             % Update progress bar
-            user = memory;
-            RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+            try
+                user = memory; memused = user.MemUsedMATLAB;
+                RamUsed = [RamUsed;memused/(user.MemAvailableAllArrays+memused)*100];
+            catch
+                allvars = whos; memused = sum([allvars.bytes]);
+                RamUsed = [RamUsed;memused/(2450994696)*100];
+            end
             LenPrint = VBUpProgBar(st,RamUsed(end),r,LenPrint);
             
         end % r, years

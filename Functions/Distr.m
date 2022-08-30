@@ -1,5 +1,7 @@
 function [Distr_Excel] = Distr(PDC,TrName,TrTyps,TrAxPerGr,TrTypPri,Location,Year,plotflag)
 
+BaseNumTrTyps = 13;
+
 FaceAlpa = 0.7;
 
 %[TrDistr, P2, A1, B1, a1, b1, A2, B2, a2, b2, p, mu1, mu2, sig1, sig2] = deal(zeros(length(TrTyps),1));
@@ -18,7 +20,7 @@ if plotflag == 1
     color = cell(length(TrTyps),1);
 end
 
-for i = 1:13%length(TrTyps)
+for i = 1:BaseNumTrTyps%length(TrTyps)
     
     TrTyp = TrTyps(i);
     
@@ -85,7 +87,7 @@ if plotflag == 1
     % Pie chart for distribution
     subplot(4,4,16)
     
-    if length(TrTyps) == 12
+    if length(TrTyps) == BaseNumTrTyps -1
 
     Labels = {sprintf('%s', TrName{1}) sprintf('%s', TrName{2})...
         sprintf('%s', TrName{3}) sprintf('')...
@@ -104,7 +106,7 @@ if plotflag == 1
         sprintf('%s', TrName{13})};
     end
 
-    h = pie(TrDistr(1:13), Labels);
+    h = pie(TrDistr(1:BaseNumTrTyps), Labels);
     if length(TrTyps) == 12
 
     colormap([color{1}; color{2}; color{3}; color{4}; color{5}; color{6}; color{7}; color{8};...
@@ -166,23 +168,25 @@ if plotflag == 1
 end
 
 if length(TrTyps) == 12
-PlatPct = 0.1*ones(12,1);
+    PlatPct = 0.1*ones(12,1);
 else
     PlatPct = 0.1*ones(length(TrTyps),1);
 end
 
+NumNotBase = length(TrTyps)-BaseNumTrTyps;
+
 if plotflag == 1
-    figure('units','normalized','outerposition',[0 0 1 .3])
+    figure('units','normalized','outerposition',[0 0 1*NumNotBase/4 .3])
     color = cell(length(TrTyps),1);
 end
 
-for i = 14:length(TrTyps)
+for i = BaseNumTrTyps+1:length(TrTyps)
     
     TrTyp = TrTyps(i);
     
     if plotflag == 1
-        subplot(1,4,i-13);
-         color{i} = ((i-13)/(4))*(200/255)*[1, 1, 1];
+        subplot(1,NumNotBase,i-BaseNumTrTyps);
+         color{i} = ((i-BaseNumTrTyps)/(4))*(200/255)*[1, 1, 1];
     end
     
 % Reinstate in the future... but for now we need to emulate just bimodal
