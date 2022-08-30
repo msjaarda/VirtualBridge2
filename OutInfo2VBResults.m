@@ -280,13 +280,28 @@ for b = 1:width(NameAnala)
                 end
             end
             InflName = strsplit(ILData(j).Name,'.'); InflName = InflName(2:end);
-            VBResults.(CodesName{i}).(NameAnala{b}).Type(j) = InflName{1};
-            VBResults.(CodesName{i}).(NameAnala{b}).SubType(j) = InflName{2};
-            VBResults.(CodesName{i}).(NameAnala{b}).Width(j) = InflName{3};
-            VBResults.(CodesName{i}).(NameAnala{b}).Layout(j) = InflName{4};
-            VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5};
-            VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
-            VBResults.(CodesName{i}).(NameAnala{b}).AE(j) = InflName{7};
+            if width(InflName)<8 % For old format of InflLines (AGB)
+                if contains(InflName{1},'AGBBox')
+                    InflName{7} = InflName{2};InflName{8} = InflName{3};InflName{2} = [];InflName{3} = [];
+                elseif contains(InflName{1},'AGBTwin')
+                    InflName{7} = InflName{3};InflName{8} = InflName{4};InflName{3} = [];InflName{4} = [];
+                    VBResults.(CodesName{i}).(NameAnala{b}).SubType(j) = InflName{2};
+                elseif contains(InflName{1},'AGBMulti')
+                    InflName{6} = InflName{2};InflName{7} = InflName{3};InflName{8} = InflName{4};InflName{2} = [];InflName{3} = [];InflName{4} = [];
+                    VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
+                elseif contains(InflName{1},'AGBSlab')
+                   InflName{6} = InflName{3};InflName{7} = InflName{4};InflName{8} = InflName{5};InflName{5} = InflName{2};InflName{2} = [];InflName{3} = [];InflName{4} = [];
+                   VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5};
+                   VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
+                else
+                    error('Error with ILData format');
+                end
+            else            
+            VBResults.(CodesName{i}).(NameAnala{b}).SubType(j) = InflName{2}; 
+            VBResults.(CodesName{i}).(NameAnala{b}).Width(j) = InflName{3}; 
+            VBResults.(CodesName{i}).(NameAnala{b}).Layout(j) = InflName{4}; 
+            VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5}; 
+            VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6}; 
             if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
             elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))
@@ -300,6 +315,9 @@ for b = 1:width(NameAnala)
             elseif contains(InflName{1},'Multi')
                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'XL');
             end
+            end
+            VBResults.(CodesName{i}).(NameAnala{b}).Type(j) = InflName{1};
+            VBResults.(CodesName{i}).(NameAnala{b}).AE(j) = InflName{7};
             VBResults.(CodesName{i}).(NameAnala{b}).Span(j) = str2double(erase(InflName{8},'S'));
         end
     end
