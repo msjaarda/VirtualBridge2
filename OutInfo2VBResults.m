@@ -6,12 +6,12 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'WIMv17pr';
+Folder_Names{1} = 'SimWIMCongested';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'WIMDynPO'; %second folder will import the ECodes of the 2sd file
 
 % Select parameters for alpha analysis
-AlphaAnalys = 4; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
+AlphaAnalys = 1; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
 AlphaQ1 = 0.6;
 AlphaQ2 = 0.4;
 Alphaq = 0.5;
@@ -141,23 +141,18 @@ for i=1:height(File_List)
                                 eval(Actual);
                                 
                             end
-                            
                         end
-                        
                     end
-                    
                 end
-                
             end
-            
         end
     end
     
     end
     % Update progress bar
-    user = memory;
-    RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-    LenPrint = VBUpProgBar(st,RamUsed(end),i,LenPrint);
+    %user = memory;
+    %RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+    LenPrint = VBUpProgBar(st,1,i,LenPrint);
 end
 
 if FasterLoop == 0
@@ -221,9 +216,9 @@ for i=1:height(File_List)
     end
     end
     % Update progress bar
-    user = memory;
-    RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-    LenPrint = VBUpProgBar(st,RamUsed(end),i,LenPrint);
+    %user = memory;
+    %RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+    LenPrint = VBUpProgBar(st,1,i,LenPrint);
 end
 end
 %NameAnala = {'Monthly','Yearly'};
@@ -301,20 +296,22 @@ for b = 1:width(NameAnala)
             VBResults.(CodesName{i}).(NameAnala{b}).Width(j) = InflName{3}; 
             VBResults.(CodesName{i}).(NameAnala{b}).Layout(j) = InflName{4}; 
             VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5}; 
-            VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6}; 
-            if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
-            elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'3L');
-            elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'18'))||(contains(InflName{4},'PUN')&&contains(InflName{3},'15'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'12'))
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'4L');
-            elseif (contains(InflName{4},'PUN')&&contains(InflName{3},'18'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'15'))
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'5L');
-            elseif contains(InflName{4},'Chan')&&contains(InflName{3},'18')
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'6L');
-            elseif contains(InflName{1},'Multi')
-                VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'XL');
-            end
+            VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
+            % MS Added and commented below it on Sep 2, 2022
+            VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = OutInfo.BaseData.Traffic{:};
+%             if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
+%             elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'3L');
+%             elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'18'))||(contains(InflName{4},'PUN')&&contains(InflName{3},'15'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'12'))
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'4L');
+%             elseif (contains(InflName{4},'PUN')&&contains(InflName{3},'18'))||(contains(InflName{4},'Chan')&&contains(InflName{3},'15'))
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'5L');
+%             elseif contains(InflName{4},'Chan')&&contains(InflName{3},'18')
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'6L');
+%             elseif contains(InflName{1},'Multi')
+%                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'XL');
+%             end
             end
             VBResults.(CodesName{i}).(NameAnala{b}).Type(j) = InflName{1};
             VBResults.(CodesName{i}).(NameAnala{b}).AE(j) = InflName{7};
@@ -325,9 +322,9 @@ for b = 1:width(NameAnala)
     VBResults.AQ = CombInfo;
     
     % Update progress bar
-    user = memory;
-    RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-    LenPrint = VBUpProgBar(st,RamUsed(end),b,LenPrint);
+    %user = memory;
+    %RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+    LenPrint = VBUpProgBar(st,1,b,LenPrint);
 end
 
 save(NameFileSave,'VBResults');

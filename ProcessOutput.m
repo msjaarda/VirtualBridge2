@@ -43,9 +43,9 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIMv17';
-NewFolder = 'WIMv17pr';
-IncZ = 0; % Line 123-124 modify
+Folder_Name = 'WIMSim';
+NewFolder = 'WIMSimpr';
+IncZ = 1; % Line 123-124 modify
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -62,9 +62,13 @@ for v = 1:length(File_List)
     OInfo(v) = OutInfo;
     OInfo(v).BaseData = BaseDataDefaults(OInfo(v).BaseData);
     % Update progress bar
-    user = memory;
-    RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-    LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+    try
+        user = memory;
+        RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+        LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+    catch
+        LenPrint = VBUpProgBar(st,1,v,LenPrint);
+    end
 end
 clear OutInfo
 
@@ -146,9 +150,13 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
             end
         end
         % Update progress bar
-        user = memory;
-        RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-        LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        try
+            user = memory;
+            RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+            LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        catch
+            LenPrint = VBUpProgBar(st,1,v,LenPrint);
+        end
     end
 end
 
@@ -167,9 +175,13 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
             end
         end
         % Update progress bar
-        user = memory;
-        RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-        LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        try
+            user = memory;
+            RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+            LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        catch
+            LenPrint = VBUpProgBar(st,1,v,LenPrint);
+        end
     end
 end
 
@@ -192,9 +204,13 @@ for v = 1:length(OInfo)
         end
     end
     % Update progress bar
-    user = memory;
-    RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-    LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+    try
+        user = memory;
+        RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+        LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+    catch
+        LenPrint = VBUpProgBar(st,1,v,LenPrint);
+    end
 end
 
 % Repeat some of the above for each site... save as OInfo(v).SNameSITE
@@ -224,9 +240,13 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
             end
         end
         % Update progress bar
-        user = memory;
-        RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-        LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        try
+            user = memory;
+            RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
+            LenPrint = VBUpProgBar(st,RamUsed(end),v,LenPrint);
+        catch
+            LenPrint = VBUpProgBar(st,1,v,LenPrint);
+        end
     end
 end
 
