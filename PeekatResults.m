@@ -3,7 +3,7 @@ clear, clc, close all, load('Sites.mat')
 
 %% INPUT
 % Select the Infl Line to inspect
-InfLine = 'Box.Stand.Wid12.Bi.Simp.p0.Mn.S70';
+InfLine = 'Box.Stand.Wid12.Bi.Simp.p0.Mn.S80';
 OutputFolder = 'WIMv17pr';
 BlockM = 'Weekly';
 Class = 'ClassOW';
@@ -125,9 +125,14 @@ for g = 1:height(BaseData)
             
             % Subject Influence Line to Truck Axle Stream
             [MaxLE,DLF,BrStInd,R] = VBGetMaxLE(AllTrAxt,ILData(t).v,BaseData.RunDyn(g));
-            
+                        
             % Get length of bridge in number of indices
             BrLengthInds = size(ILData(t).v,1);
+            
+            % Correction des positions pour retrouver le cas d'origine : Lucas 31.08.22 
+            if MaxLE-Max.Max(g) ~=0
+                TrLineUpt = CorrectPosApercu(MaxLE,BrStInd,BrLengthInds,AllTrAxt,TrLineUpt,Max.Max(g),ILData(t).v);
+            end
             
             % Add Padding if necessary
             if BrStInd < 1 || BrStInd + BrLengthInds - 1 > height(AllTrAxt)

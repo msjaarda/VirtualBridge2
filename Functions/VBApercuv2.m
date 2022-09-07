@@ -82,6 +82,7 @@ for i = 1:TotalLanes
     %q{i} = Q(Q(:,4) == Lane.Details.LANE(i),:); t{i} = T(T.LANE == i,:);
     % normalize q values for start of the bridge at zero
     q{i}(:,1) = round((q{i}(:,1) - BrStInd)); q{i}(:,5) = q{i}(:,5) - BrStInd*ILRes;
+    q{i}(:,5) = q{i}(:,1)*ILRes; %Test Lucas
     [a, b] = unique(q{i}(:,3));
     % vc stands for vehicle corners, ac for accummulated
     if ~isempty(b)
