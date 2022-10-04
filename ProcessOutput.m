@@ -43,9 +43,9 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIMSim';
-NewFolder = 'WIMSimpr';
-IncZ = 1; % Line 123-124 modify
+Folder_Name = 'AB';
+NewFolder = 'ABpr';
+IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -124,7 +124,7 @@ fields = fieldnames(OInfo(v));
 
 % GetBlockMax and GetFit
 BlockMax = {'Weekly'};        % j
-ClassTypes = {'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
+ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')

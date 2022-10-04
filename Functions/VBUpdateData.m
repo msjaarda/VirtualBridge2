@@ -9,7 +9,7 @@ function [Num,Lane,ILData,TrData,FolDist] = VBUpdateData(BaseData)
 if strcmp(BaseData.AnalysisType,"WIM")
     
     % We need Lane.Dir and Num.Lanes for other things to work!
-    load('Sites.mat'); load('SiteLanes.mat');
+    load('Sites.mat'); load('SiteLanes.mat'); 
     
     % Get LaneDir automatically using Sites and SiteLanes
     Lane.Sites = Sites(Sites.SITE == BaseData.SITE,:);
@@ -90,8 +90,8 @@ try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch 
 Num.Lanes = length(Lane.Details.Dir);
 
 % FolDist can use qualitative measures:
-% "Jammed" or "Stopped" : 0 kph
-% "At-rest" or "Crawling" : 2 kph
+% "Jammed" or "Stopped" : 0 kph   -- Koshini Stopped
+% "At-rest" or "Crawling" : 2 kph -- Koshini w/ velocity as input (light and heavy treated the same)
 % "Congested" : 30 kph
 % "Free-flowing" : 1000 veh/hr
 

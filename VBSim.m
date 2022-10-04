@@ -130,7 +130,7 @@ for g = 1:height(BaseData)
         OverMax = [OverMax; OverMax];
     end
     
-    % Get ESIM and Ratio
+    % Get ESIM and Ratio - FOR INFORMATION ONLY - FOR COMPARISON TO OLDER METHODS
     ESIM = 1.1*prctile(OverMax,99); %Ratio = ESIM./E.Total; RatioBR = ESIM./E.EBRU.Total; Ratio41 = ESIM./E.E41.Total; Ratio48 = ESIM./E.E48.Total; Ratio72 = ESIM./E.E72.Total;
     
     % Print Summary Stats to Command Window

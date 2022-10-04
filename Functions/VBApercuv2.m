@@ -40,6 +40,9 @@ Col{4} = [.99 .67 0]; Col{5} = Col{2}; Col{6} = Col{3};
 
 % Plot Influence Line - Open up subplot and choose the last subplot
 sp(NumSubplots) = subplot(NumSubplots,1,NumSubplots);
+
+% Flip for mismatch between lane and alane
+Infv = Infv(:,Lane.Details.LANE(Lane.Details.ALANE));
 % Note that trucks go the other way than is plotted... must flip ILs
 if size(Infv,2) == 1 || all(all(Infv == Infv(:,1),2))
     plot(Infx,flip(-Infv),'k','LineWidth',1.5)
@@ -49,6 +52,7 @@ else
         plot(Infx,flip(-Infv(:,i)),'Color',Col{i},'LineWidth',1.5)
     end
 end
+
 xlabel('Distance Along Bridge (m)'); ylabel('Inf Line'); xlim([-0.5 Span+0.5]); box on
 %text(1,-max(max(Infv))+max(max(Infv))/5,sprintf('%.1f%% of E_{SIA}',PEsia*100),'FontSize',11,'FontWeight','bold','Color','k')
 PerI = find(ILData.Name == '.');
@@ -82,7 +86,8 @@ for i = 1:TotalLanes
     %q{i} = Q(Q(:,4) == Lane.Details.LANE(i),:); t{i} = T(T.LANE == i,:);
     % normalize q values for start of the bridge at zero
     q{i}(:,1) = round((q{i}(:,1) - BrStInd)); q{i}(:,5) = q{i}(:,5) - BrStInd*ILRes;
-    q{i}(:,5) = q{i}(:,1)*ILRes; %Test Lucas
+    %q{i}(:,5) = q{i}(:,1)*ILRes; %Test Lucas
+    %q{i}(:,5) = round(q{i}(:,5) - BrStInd*ILRes); %Test Matt ??
     [a, b] = unique(q{i}(:,3));
     % vc stands for vehicle corners, ac for accummulated
     if ~isempty(b)
@@ -297,7 +302,10 @@ for j = 1:TotalLanes
         ylabel(['Lane ' num2str(j)]); set(gca,'ytick',[]); set(gca,'yticklabel',[])
     end
     % Turn y axis off
+    try
     yaxish = gca; yaxish.YRuler.Axle.Visible = 'off';
+    catch
+    end
 
     % Set the background lane color to grey, like asphalt
     set(gca,'Color',[.6 .6 .6])
