@@ -6,15 +6,15 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'SimWIMCongested';
+Folder_Names{1} = 'WIM1160tAll'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
-%Folder_Names{2} = 'WIMDynPO'; %second folder will import the ECodes of the 2sd file
+%Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
 % Select parameters for alpha analysis
-AlphaAnalys = 1; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
-AlphaQ1 = 0.6;
-AlphaQ2 = 0.4;
-Alphaq = 0.5;
+AlphaAnalys = 3; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
+AlphaQ1 = 0; %0.6;
+AlphaQ2 = 1; %0.4;
+Alphaq = 0.5; %0.5;
 
 %% Running script
 %open folders
@@ -134,6 +134,7 @@ for i=1:height(File_List)
                         for m=1:height(Fields2)
                             
                             Fields3 = fieldnames(eval(append('CombInfo',erase(ILDataNames{l},'ILLib'),'.EdLN.',Fields2{m})));
+                            Fields3(contains(Fields3,'BestFit')) = [];
                             
                             for n=1:height(Fields3)
                                 
@@ -298,7 +299,7 @@ for b = 1:width(NameAnala)
             VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5}; 
             VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
             % MS Added and commented below it on Sep 2, 2022
-            VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = OutInfo.BaseData.Traffic{:};
+            try VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = OutInfo.BaseData.Traffic{:}; catch end
 %             if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
 %                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
 %             elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))

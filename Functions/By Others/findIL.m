@@ -15,9 +15,11 @@ end
 end
 
 function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib)
-    
-    % Detect if we are at the end
-    if isnumeric(eval([TName '(:,1)']));
+
+% Detect if we are at the end
+if isnumeric(eval([TName '(:,1)']));
+    ILt = eval([TName '(:,2:end)']);
+    if size(ILt,2) == NumLanes || contains(TName,'Box') % Added a check to keep only the right Infl Lane in accordance with the lane configuration Lucas 27/09/22
         NumInfCases = NumInfCases + 1;
         ILx = eval([TName '(:,1)']);
         ILv = eval([TName '(:,2:end)']);
@@ -34,19 +36,20 @@ function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLane
             if size(ILData(NumInfCases).v,2) == 1
                 ILData(NumInfCases).v = repmat(ILData(NumInfCases).v,1,NumLanes);
             else
-                for t = size(ILData(NumInfCases).v,2) + 1:NumLanes
+                for t = size(ILData(NumInfCases).v,2) + 1:NumLanes % No longer necessary Lucas 27/09/22 
                     ILData(NumInfCases).v(:,t) = 0;
                     % Turn back on later... was annoying!
                     %fprintf('\nWARNING Lane mismatch for IL: %s, ILs with zeros added',TName)
                 end
             end
         end
-    else
-        FNames = fieldnames(eval(TName));
-        for j = 1:length(FNames)
-            T1Name = [TName '.' FNames{j}];
-            [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib);
-        end
     end
+else
+    FNames = fieldnames(eval(TName));
+    for j = 1:length(FNames)
+        T1Name = [TName '.' FNames{j}];
+        [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib);
+    end
+end
 end
 

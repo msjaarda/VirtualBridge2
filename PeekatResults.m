@@ -6,9 +6,9 @@ clear, clc, close all, load('Sites.mat')
 InfLine = 'Box.Stand.Wid12.Bi.Simp.p0.Mn.S80';
 OutputFolder = 'WIMv17pr';
 BlockM = 'Weekly';
-Class = 'ClassOW';
+Class = 'Class';
 DistTypes = 'All'; % fitting
-NumAnalyses = 5;
+NumAnalyses = 4;
 Dyna = 0; % Run dynamique, 0) No 1) Yes
 
 %% CODE
@@ -153,7 +153,8 @@ for g = 1:height(BaseData)
 
             % Optional Apercu
             if BaseData.Apercu(g) == 1
-                ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
+                %ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(k);
+                ApercuTitle = Lane.Sites.SName + " " + num2str(BaseData.SITE(g)) + " Max " + num2str(g);
                 T = VBApercuv2(PDs,ApercuTitle,ILData(t),BrStInd,TrLineUpt,DLF,Lane,BaseData.ILRes(g));
                 %exportgraphics(gcf,"Apercu" + "/" + ApercuTitle + ".jpg",'Resolution',600)
             end

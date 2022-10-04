@@ -7,7 +7,9 @@ BestMaxLE = [MaxLE,0];
 AllTrAxtempo = AllTrAxt(BrStInd:(BrStInd + BrLengthInds-1),:);
 PosiAllTr = find(AllTrAxtempo~=0);
 LoadAllTr = AllTrAxtempo(PosiAllTr);
-PosiAllTr(:,2) = PosiAllTr(:,1);PosiAllTr(:,1)=PosiAllTr(:,2)-1;PosiAllTr(:,3)=PosiAllTr(:,2)+1; % Warning : by adding or removing 1, an axle can change lane, normally shouldn't be determining
+PosiAllTr(:,2) = PosiAllTr(:,1);PosiAllTr(:,1)=PosiAllTr(:,2)-1;PosiAllTr(:,3)=PosiAllTr(:,2)+1; % Warning : by adding or removing 1, an axle can change lane, repair done bellow
+PosiAllTr(mod(PosiAllTr(:,1),BrLengthInds)==0,1) = PosiAllTr(mod(PosiAllTr(:,1),BrLengthInds)==0,2); % axle gone on lower lane or outside
+PosiAllTr(mod(PosiAllTr(:,3),BrLengthInds)==1,3) = PosiAllTr(mod(PosiAllTr(:,3),BrLengthInds)==1,2); % axle gone on upper lane or outside
 if height(PosiAllTr)<=16 % For the moment, impossible to play with too many axles
 NameFunction = 'PosiAllCases = combvec(';
 for j=1:height(PosiAllTr)
@@ -18,7 +20,7 @@ NameFunction = append(NameFunction,')'';');
 eval(NameFunction);
 for j=1:height(PosiAllCases)
     if width(unique(PosiAllCases(j,:)))<width(PosiAllCases(j,:))
-        % If same positions for wheels skip
+        % If two or more axles are on the same position, skip
     else
         AllTrAxtempo = zeros(BrLengthInds,width(AllTrAxtempo));
         AllTrAxtempo(PosiAllCases(j,:)) = LoadAllTr;
