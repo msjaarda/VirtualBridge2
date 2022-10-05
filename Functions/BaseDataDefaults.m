@@ -63,6 +63,9 @@ end
 if ~ismember('LightVehs', BaseData.Properties.VariableNames) % 0 is not included, 1 is included, 2 is ONLY
     BaseData.LightVehs(:) = false;
 end
+if ~ismember('PUN', BaseData.Properties.VariableNames)
+    BaseData.PUN(:) = 0;
+end
 
 end
 

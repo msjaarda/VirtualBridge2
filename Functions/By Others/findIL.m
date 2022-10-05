@@ -1,6 +1,6 @@
 % findIL gets influence lines at the end of all branches
 
-function [NumInfCases, ILData] = findIL(ILs,ILRes,NumLanes)
+function [NumInfCases, ILData] = findIL(ILs,ILRes,NumLanes,PUN) % 05/10/22 Lucas PUN added, PUN = 0 (no PUN infl lanes), PUN = 1 (only PUN infl lanes)
 
 % Initialize
 NumInfCases = 0; ILData = struct();
@@ -9,12 +9,12 @@ load Misc/ILLib.mat
 for i = 1:length(ILs)
      
     TName = ['ILLib.' ILs{i}];
-    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib);
+    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,PUN);
     
 end
 end
 
-function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib)
+function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,PUN)
 
 % Detect if we are at the end
 if isnumeric(eval([TName '(:,1)']));
@@ -46,9 +46,16 @@ if isnumeric(eval([TName '(:,1)']));
     end
 else
     FNames = fieldnames(eval(TName));
+    if any(strcmp(FNames,'PUN')+strcmp(FNames,'Uni')+strcmp(FNames,'Bi')) %Check if we are in traffic dir, if yes, check if only PUN or no PUN infl lanes have to be loaded + if PUN~=0 or 1, load everything (if needed)
+        if PUN==1
+            FNames = FNames(strcmp(FNames,'PUN'));
+        elseif PUN==0
+            FNames(strcmp(FNames,'PUN')) = [];
+        end    
+    end
     for j = 1:length(FNames)
         T1Name = [TName '.' FNames{j}];
-        [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib);
+        [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib,PUN);
     end
 end
 end
