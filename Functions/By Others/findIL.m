@@ -1,6 +1,6 @@
 % findIL gets influence lines at the end of all branches
 
-function [NumInfCases, ILData] = findIL(ILs,ILRes,NumLanes,PUN) % 05/10/22 Lucas PUN added, PUN = 0 (no PUN infl lanes), PUN = 1 (only PUN infl lanes)
+function [NumInfCases, ILData] = findIL(ILs,ILRes,NumLanes,RType) % 05/10/22 Lucas PUN added, PUN = 0 (no PUN infl lanes), PUN = 1 (only PUN infl lanes)
 
 % Initialize
 NumInfCases = 0; ILData = struct();
@@ -9,15 +9,15 @@ load Misc/ILLib.mat
 for i = 1:length(ILs)
      
     TName = ['ILLib.' ILs{i}];
-    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,PUN);
+    [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,RType);
     
 end
 end
 
-function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,PUN)
+function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLanes,ILLib,RType)
 
 % Detect if we are at the end
-if isnumeric(eval([TName '(:,1)']));
+if isnumeric(eval([TName '(:,1)']))
     ILt = eval([TName '(:,2:end)']);
     if size(ILt,2) == NumLanes || contains(TName,'Box') % Added a check to keep only the right Infl Lane in accordance with the lane configuration Lucas 27/09/22
         NumInfCases = NumInfCases + 1;
@@ -47,15 +47,17 @@ if isnumeric(eval([TName '(:,1)']));
 else
     FNames = fieldnames(eval(TName));
     if any(strcmp(FNames,'PUN')+strcmp(FNames,'Uni')+strcmp(FNames,'Bi')) %Check if we are in traffic dir, if yes, check if only PUN or no PUN infl lanes have to be loaded + if PUN~=0 or 1, load everything (if needed)
-        if PUN==1
+        if strcmp(RType,'PUN')
             FNames = FNames(strcmp(FNames,'PUN'));
-        elseif PUN==0
-            FNames(strcmp(FNames,'PUN')) = [];
+        elseif strcmp(RType,'Bi') 
+            FNames = FNames(strcmp(FNames,'Bi'));
+        elseif strcmp(RType,'Uni')
+            FNames = FNames(strcmp(FNames,'Uni'));
         end    
     end
     for j = 1:length(FNames)
         T1Name = [TName '.' FNames{j}];
-        [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib,PUN);
+        [NumInfCases, ILData] = recurser(NumInfCases,ILData,T1Name,ILRes,NumLanes,ILLib,RType);
     end
 end
 end

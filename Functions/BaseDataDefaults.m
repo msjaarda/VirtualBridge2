@@ -62,10 +62,29 @@ if ~ismember('Country', BaseData.Properties.VariableNames) % Anything that doesn
 end
 if ~ismember('LightVehs', BaseData.Properties.VariableNames) % 0 is not included, 1 is included, 2 is ONLY
     BaseData.LightVehs(:) = false;
+end % RType stands for RoadwayType and can be "Uni"(directional) "Bi"(directional) or "PUN"
+
+if ~ismember('RType', BaseData.Properties.VariableNames)
+    BaseData.RType(:) = "Uni";
 end
-if ~ismember('PUN', BaseData.Properties.VariableNames)
-    BaseData.PUN(:) = 0;
-end
+% We can normally detect if we are "Uni" "Bi" or "PUN"
+
+
+% % Uni == 0, Bi == 1
+% if strcmp(BaseData.AnalysisType,'Sim') % Sim
+%     if contains(BaseData.LaneDir,'2')
+%         BaseData.RType = 1;
+%     else
+%         BaseData.UniBi = 0;
+%     end
+% else % WIM
+%     % Get Site Set?
+%     if contains(num2str(BaseData.SITE),'2')
+%         BaseData.UniBi = 1;
+%     else
+%         BaseData.UniBi = 0;
+%     end
+% end
 
 end
 

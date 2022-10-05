@@ -190,7 +190,7 @@ end
 
 % Split input by the commas to get individual IL families
 ILs = split(BaseData.ILs{:},',');
-[Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,BaseData.PUN);
+[Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,BaseData.RType);
 
 % NOTE - sometimes the "track average" (average of two wheel positions) is
 % not equal to the "area average", and so ESIA calculations which involve
