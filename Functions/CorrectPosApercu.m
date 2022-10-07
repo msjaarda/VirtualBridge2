@@ -26,7 +26,19 @@ for j=1:height(PosiAllCases)
         AllTrAxtempo(PosiAllCases(j,:)) = LoadAllTr;
         MaxLEtemp = 0;
         for k=1:width(AllTrAxtempo)
-            MaxLEtemp = MaxLEtemp + max(AllTrAxtempo(:,k)'*ILData(:,k),AllTrAxtempo(:,k)'*flip(ILData(:,k)));
+            %MaxLEtemp = MaxLEtemp + max(AllTrAxtempo(:,k)'*ILData(:,k),AllTrAxtempo(:,k)'*flip(ILData(:,k)));
+            MaxLEtemp = MaxLEtemp + AllTrAxtempo(:,k)'*ILData(:,k);
+        end
+        if MaxLEtemp-Max ==0
+            BestMaxLE = [MaxLEtemp,j];
+            break
+        end
+        if abs(MaxLEtemp-Max)<=abs(BestMaxLE(1)-Max)
+            BestMaxLE = [MaxLEtemp,j];
+        end
+        MaxLEtemp = 0; %obliged to run it 2 times due to possible fliped infl
+        for k=1:width(AllTrAxtempo)
+            MaxLEtemp = MaxLEtemp + AllTrAxtempo(:,k)'*flip(ILData(:,k));
         end
         if MaxLEtemp-Max ==0
             BestMaxLE = [MaxLEtemp,j];
