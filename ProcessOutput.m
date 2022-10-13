@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'AB';
-NewFolder = 'ABpr';
+Folder_Name = 'WIMOct5';
+NewFolder = 'WIMOct5prx';
 IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
@@ -61,6 +61,8 @@ for v = 1:length(File_List)
     load(['Output/' Folder_Name '/' File_List(v).name])
     OInfo(v) = OutInfo;
     OInfo(v).BaseData = BaseDataDefaults(OInfo(v).BaseData);
+    % TEMP
+    OInfo(v).MaxEvents(OInfo(v).MaxEvents.SITE == 409,:) = [];
     % Update progress bar
     try
         user = memory;
@@ -230,10 +232,13 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                         for i = 1:length(ClassTypes)
                             CT = ClassTypes{i};
                             Maxi = OInfo(v).Max(r).(CT).(BM).Max(OInfo(v).Max(r).(CT).(BM).SITE == Sitex(z));
-                            OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,IncZ);
-                            Ed = OInfo(v).(Traffic).pd(r).(CT).(BM).(OInfo(v).(Traffic).pd(r).(CT).(BM).Best).Ed;
-                            OInfo(v).(Traffic).AQ.(CT).(BM)(r) = Ed./OInfo(v).E(r).SIA.Total;
-                            OInfo(v).(Traffic).Aq.(CT).(BM)(r) = ((Ed/1.5)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));
+                            if ~isempty(Maxi)
+                                OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,IncZ);
+                                Ed = OInfo(v).(Traffic).pd(r).(CT).(BM).(OInfo(v).(Traffic).pd(r).(CT).(BM).Best).Ed;
+                                OInfo(v).(Traffic).AQ.(CT).(BM)(r) = Ed./OInfo(v).E(r).SIA.Total;
+                                OInfo(v).(Traffic).Aq.(CT).(BM)(r) = ((Ed/1.5)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));
+                        
+                            end
                         end
                     end
                 end

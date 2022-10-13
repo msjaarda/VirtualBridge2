@@ -4,7 +4,7 @@ clear all, clc
 
 %% INPUT
 Folder_Names = 'Det'; % Name of the folder inside Output, containing deterministic results 
-VBResults_Names = 'VBResults'; % Name of the VBResults matlab file where we will add the deterministic results
+VBResults_Names = 'VBResultsWIMOct5'; % Name of the VBResults matlab file where we will add the deterministic results
 DetTraffic_Names = 'Deterministic'; % Name of the deterministic truck(s) inside table in Traffic column
 
 %% CODE

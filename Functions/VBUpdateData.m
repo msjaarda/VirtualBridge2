@@ -5,6 +5,7 @@ function [Num,Lane,ILData,TrData,FolDist] = VBUpdateData(BaseData)
 % LaneTrDistr
 % Flow
 % Traffic
+% RType
 
 if strcmp(BaseData.AnalysisType,"WIM")
     
@@ -190,7 +191,15 @@ end
 
 % Split input by the commas to get individual IL families
 ILs = split(BaseData.ILs{:},',');
-[Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,BaseData.RType);
+try 
+    [Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,BaseData.RType);
+catch
+    if contains(BaseData.ILs,"Uni")
+        [Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,"Uni");
+    else
+        [Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,"Bi");
+    end
+end
 
 % NOTE - sometimes the "track average" (average of two wheel positions) is
 % not equal to the "area average", and so ESIA calculations which involve
