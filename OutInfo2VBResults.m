@@ -6,14 +6,14 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'WIM1160tAll'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'WIM60t11_10_22_pr'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
 % Select parameters for alpha analysis
 AlphaAnalys = 3; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
-AlphaQ1 = 0; %0.6;
-AlphaQ2 = 1; %0.4;
+AlphaQ1 = 0; %0.6; 0;
+AlphaQ2 = 1; %0.4; 1;
 Alphaq = 0.5; %0.5;
 
 %% Running script
@@ -300,6 +300,8 @@ for b = 1:width(NameAnala)
             VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
             % MS Added and commented below it on Sep 2, 2022
             try VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = OutInfo.BaseData.Traffic{:}; catch end
+            % LM on 13 October, 2022. Correction of the above line
+            try VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},num2str(size(eval(append(ILData(j).Name,'.SIA.EQ;')),1)),'L'); catch end
 %             if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
 %                 VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},'2L');
 %             elseif ((contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&contains(InflName{3},'15'))||(contains(InflName{4},'PUN')&&(contains(InflName{3},'12')||contains(InflName{3},'9')))
@@ -327,6 +329,8 @@ for b = 1:width(NameAnala)
     %RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
     LenPrint = VBUpProgBar(st,1,b,LenPrint);
 end
+
+VBResults.FolderName = Folder_Names{1};
 
 save(NameFileSave,'VBResults');
 

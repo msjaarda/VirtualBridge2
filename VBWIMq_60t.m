@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMqInput60t_test.xlsx';
+FName = 'Input/VBWIMqInput60t.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Let's try to delete all the WIM records not around the 60t vehicles...
@@ -36,8 +36,9 @@ for g = 1:height(BaseData)
         % Modify BaseData.SITE(g) based on SiteSet
         BaseData.SITE(g) = Sitesx(w);
         % Update analysis data for current row of BaseData
-        [Num,Lane,ILData,~,~,E] = VBUpdateData(BaseData(g,:));
-        ESIA = E.ESPTR;
+        [Num,Lane,ILData,~,~] = VBUpdateData(BaseData(g,:));
+        %E = VBGetECode(ILData,BaseData.ILRes(g));
+        %ESIA = E.ESPTR;
         
         % Get MaxLength for Spacesave
         MaxLength = (max(arrayfun(@(x) size(x.v,1),ILData))-1)*BaseData.ILRes(g);
@@ -131,7 +132,7 @@ for g = 1:height(BaseData)
             if isempty(PDsy)
                 user = memory;
                 RamUsed = [RamUsed;user.MemUsedMATLAB/(user.MemAvailableAllArrays+user.MemUsedMATLAB)*100];
-                LenPrint = VBUpProgBar(st,g,length(UYears),RamUsed(end),r,LenPrint);
+                LenPrint = VBUpProgBar(st,RamUsed(end),r,LenPrint);    
                 continue
             end
             
@@ -149,6 +150,7 @@ for g = 1:height(BaseData)
                 TrLineUpSub = TrLineUpGr{z};
                 % Must sort due to direction switch and accumarray not having negatives for first few
                 TrLineUpSub = sortrows(TrLineUpSub);
+                TrLineUpSub = table2array(TrLineUpSub);
                 
                 % Get Lanes
                 Lanes = unique(PDsy.LANE);
@@ -396,25 +398,27 @@ for g = 1:height(BaseData)
     
     % m = 1 is ClassT 'All', m = 2 is 'ClassOW', and m = 3 is 'Class'
     % qInvestInitial Inputs
-    BM = {'Monthly', 'Yearly'};             % j
+    %BM = {'Monthly', 'Yearly'};             % j
     %BM = {'Monthly'};
-    ClassType = {'ClassOW'};        % i
-    DistTypes = {'Lognormal'};
+    %ClassType = {'ClassOW'};        % i
+    %DistTypes = {'Lognormal'};
     %[Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEvents,ILData); % TROUBLESHOOT
-    Max = GetBlockMax(MaxEvents,ClassType,BM);
+    %Max = GetBlockMax(MaxEvents,ClassType,BM);
     
     TName = datestr(now,'mmmdd-yy HHMMSS');
     % Need to go back to original BaseData... no SITE switch
     BaseData = VBReadInputFile(FName);
     OutInfo.Name = TName; OutInfo.BaseData = BaseData(g,:);
     % ATTENTION!
-    OutInfo.ESIA = ESIA; %OutInfo.E41 = E41;
+    %OutInfo.ESIA = ESIA; %OutInfo.E41 = E41;
     OutInfo.ILData = ILData;
-    OutInfo.SimStop = false;
-     OutInfo.MaxEvents = MaxEvents;
+    %OutInfo.SimStop = false;
+    OutInfo.BaseData.StopSim = 0;
+    OutInfo.MaxEvents = MaxEvents;
     % OutInfo.Max = Max; Need to be done after
     
     % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
+    %{
     for r = 1:Num.InfCases
         for i = 1:length(ClassType)
             for j = 1:length(BM)
@@ -452,8 +456,9 @@ for g = 1:height(BaseData)
             end
          end
     end
+    %}
     
-    OutInfo.Max = Max;
+    %OutInfo.Max = Max;
     
     % Create folders where there are none
     CreateFolders(BaseData.Folder{g},BaseData.VWIM(g),BaseData.Apercu(g),BaseData.Save(g))
@@ -463,14 +468,14 @@ for g = 1:height(BaseData)
     end
     
     if BaseData.StopSim(g)
-        MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
-        %[Max,~,~,~] = qInvestInitial_60t(BM,ClassType,DistTypes,MaxEventsStop,ILData);
-        Max = GetBlockMax(MaxEvents,ClassType,BM);
+        OutInfo.BaseData.StopSim = 1;
+        % Hmmm should this line be there? I don't think so... comment 4 now
+        %MaxEventsStop(MaxEventsStop.MaxLE <= 0,:) = [];
         
+        % Add some time to not have the same name as non StopSim
         TName = datestr(now+1/86400,'mmmdd-yy HHMMSS');
         OutInfo.Name = TName;
-        OutInfo.SimStop = true;
-        OutInfo.Max = Max;
+        OutInfo.MaxEvents = MaxEventsStop;
         
 %         % Plot BlockMax, find Design Values, Ed, using Beta, rather than 99th percentile
 %         for r = 1:Num.InfCases
