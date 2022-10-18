@@ -44,7 +44,7 @@ clear, clc, close all
 % When MaxEvents doesn't exist, it will work with Max
 
 Folder_Name = 'WIMOct5';
-NewFolder = 'WIMOct5prx';
+NewFolder = 'WIMOct5Redopr';
 IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct

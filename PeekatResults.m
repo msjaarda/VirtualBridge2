@@ -49,7 +49,7 @@ Max = OutInfo.Max(InflPosi).(Class).(BlockM);
 Data = Max.Max;
 Max = sortrows(Max,3,'descend');
 
-pd = GetFit(Data,BlockM,DistTypes,1,1);
+pd = GetFit(Data,BlockM,DistTypes,1,0);
 %pd = GetFit(Data(~isoutlier(Data,'gesd')),BlockM,DistTypes,1,1);
 
 % Find sites that generate Max cases

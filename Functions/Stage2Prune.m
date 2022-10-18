@@ -10,8 +10,8 @@ try
 catch
 end
 
-PDs(PDs.SPEED > 130,:) = [];
-PDs(PDs.SPEED < 10,:) = [];
+PDs(PDs.SPEED > 120,:) = [];
+PDs(PDs.SPEED < 15,:) = [];
 
 end
 
