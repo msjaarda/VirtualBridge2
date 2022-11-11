@@ -11,7 +11,7 @@
 clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/VBWIMInputOFROUOct5_409.xlsx';
+FName = 'Input/VBWIMInputStefan.xlsx';
 BaseData = VBReadInputFile(FName);
 
 % Initialize parpool if necessary and initialize progress bar

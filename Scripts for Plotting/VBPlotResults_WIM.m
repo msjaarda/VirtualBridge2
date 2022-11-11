@@ -9,11 +9,11 @@ AE(1) = "Mn"; AE(2) = "Mp"; AE(3) = "V";
 Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 %#ok<*SAGROW> ... to prevent warning messages
 % Get VBResults using VBOutput2Struct
-[VBResults] = VBOutput2Struct('WIM');
-[VBResultsPP] = VBOutput2Struct('WIMClassPP');
-%load('VBResults.mat')
+[VBResults] = VBOutput2Structx('WIMOct18pr');
+%[VBResultsPP] = VBOutput2Struct('WIMClassPP');
+%load('VBResultsWIMOct5Redo.mat')
 % Class
-Class = 'All'; ClassS = 'StopAll';
+Class = 'ClassOW'; ClassS = 'StopClassOW';
 
 Export = true;
 
@@ -28,8 +28,8 @@ Traffic = fieldnames(VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(T
 % Set overall at the end to be top layer
 Temp = Traffic{1}; Traffic(1) = []; Traffic{end+1} = Temp;
 
-FName = 'Box Girder Bridge Unidirectional 2L (All)';
-FNameS = 'Box Girder Bridge Unidirectional 2L (All) StopSimR';
+FName = 'Box Girder Bridge Unidirectional 2L (Class+)';
+FNameS = 'Box Girder Bridge Unidirectional 2L (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Traffic)
         % Get ydata and xdata
@@ -182,7 +182,7 @@ AE(1) = "Mn"; AE(2) = "Mp"; AE(3) = "V";
 Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 clear Class
 % Class
-Class = 'All'; ClassS = 'StopAll';
+Class = 'ClassOW'; ClassS = 'StopClassOW';
 
 % General Info
 Width = 'Wid9';      Layout = 'Uni';
@@ -191,8 +191,8 @@ Traffic = fieldnames(VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(T
 % Set overall at the end to be top layer
 Temp = Traffic{1}; Traffic(1) = []; Traffic{end+1} = Temp;
 
-FName = 'Twin Girder Bridge Unidirectional 2L (All)';
-FNameS = 'Twin Girder Bridge Unidirectional 2L (All) StopSimR';
+FName = 'Twin Girder Bridge Unidirectional 2L (Class+)';
+FNameS = 'Twin Girder Bridge Unidirectional 2L (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Traffic)
         % Get ydata and xdata
@@ -229,8 +229,8 @@ Traffic = fieldnames(VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(T
 % Set overall at the end to be top layer
 Temp = Traffic{1}; Traffic(1) = []; Traffic{end+1} = Temp;
 
-FName = 'Concrete Twin Girder Bridge Unidirectional 2L (All)';
-FNameS = 'Concrete Twin Girder Bridge Unidirectional 2L (All) StopSimR';
+FName = 'Concrete Twin Girder Bridge Unidirectional 2L (Class+)';
+FNameS = 'Concrete Twin Girder Bridge Unidirectional 2L (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Traffic)
         % Get ydata and xdata
@@ -284,7 +284,7 @@ Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 %Title{1} = 'M-'; Title{2} = 'MxMid'; Title{3} = 'MxEdg';
 clear Class
 % Class
-Class = 'All'; ClassS = 'StopAll';
+Class = 'ClassOW'; ClassS = 'StopClassOW';
 
 Type = 'Slab';         SubType = 'Short';
 % General Info
@@ -295,7 +295,7 @@ Traffic = fieldnames(VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(T
 % Set overall at the end to be top layer
 Temp = Traffic{1}; Traffic(1) = []; Traffic{end+1} = Temp;
 
-FName = 'Slab Bridge Fixed p1 Bidirectional 4L (All)';
+FName = 'Slab Bridge Fixed p1 Bidirectional 4L (Class+)';
 for m = 1:3
     for i = 1:length(Traffic)
         % Get ydata and xdata
@@ -327,8 +327,8 @@ Traffic = fieldnames(VBResults.AQ.(Type).(SubType).(Width).(Layout).(Support).(T
 % Set overall at the end to be top layer
 Temp = Traffic{1}; Traffic(1) = []; Traffic{end+1} = Temp;
 
-FName = 'Slab Bridge Fixed p1 Bidirectional 4L (All)';
-FNameS = 'Slab Bridge Fixed p1 Bidirectional 4L (All) StopSimR';
+FName = 'Slab Bridge Fixed p1 Bidirectional 4L (Class+)';
+FNameS = 'Slab Bridge Fixed p1 Bidirectional 4L (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Traffic)
         % Get ydata and xdata
@@ -389,7 +389,7 @@ Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 % Get VBResults using VBOutput2Struct
 %[VBResults] = VBOutput2Struct('WIM');
 % Class
-Class = 'All'; ClassS = 'StopAll';
+Class = 'ClassOW'; ClassS = 'StopClassOW';
 
 % General Info
 clear Width
@@ -398,7 +398,7 @@ Width{1} = 'Wid12';  Width{2} = 'Wid9';  Width{3} = 'Wid9';   Width{4} = 'Wid9';
 Layout = 'Uni';
 Traffic = 'Uni2L';
 
-FName = 'Unidirectional 2L Comparison (All)';
+FName = 'Unidirectional 2L Comparison (Class+)';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata
@@ -418,7 +418,7 @@ if Export
     exportgraphics(gcf,FName + ".jpg",'Resolution',600);
 end
 
-FName = 'Unidirectional 2L Comparison (All) StopSimR';
+FName = 'Unidirectional 2L Comparison (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata
@@ -463,7 +463,7 @@ Width{1} = 'Wid18';  Width{2} = 'Wid18';  Width{3} = 'Wid18';
 Layout = 'Bi';
 Traffic = 'Bi4L';
 
-FName = 'Bidirectional 4L Comparison (All)';
+FName = 'Bidirectional 4L Comparison (Class+)';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata
@@ -485,7 +485,7 @@ end
 
 
 
-FName = 'Bidirectional 4L Comparison (All) StopSimR';
+FName = 'Bidirectional 4L Comparison (Class+) StopSimR';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata
@@ -542,7 +542,7 @@ Title{1} = 'M-'; Title{2} = 'M+'; Title{3} = 'V';
 % Get VBResults using VBOutput2Struct
 %[VBResults] = VBOutput2Struct('WIM');
 % Class
-Class = 'All'; ClassS = 'StopAll';
+Class = 'ClassOW'; ClassS = 'StopClassOW';
 
 % General Info
 Width{1} = 'Wid12';  Width{2} = 'Wid9';  Width{3} = 'Wid9';   Width{4} = 'Wid9';  Width{5} = 'Wid9';    
@@ -550,7 +550,7 @@ Width{1} = 'Wid12';  Width{2} = 'Wid9';  Width{3} = 'Wid9';   Width{4} = 'Wid9';
 Layout = 'Bi';
 Traffic = 'Bi2L';
 
-FName = 'Bidirectional 2L Comparison (All)x';
+FName = 'Bidirectional 2L Comparison (Class+)x';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata
@@ -570,7 +570,7 @@ if Export
     exportgraphics(gcf,FName + ".jpg",'Resolution',600);
 end
 
-FName = 'Bidirectional 2L Comparison (All) StopSimRx';
+FName = 'Bidirectional 2L Comparison (Class+) StopSimRx';
 for m = 1:3
     for i = 1:length(Type)
         % Get ydata and xdata

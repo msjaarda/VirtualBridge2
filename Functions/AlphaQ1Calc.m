@@ -356,6 +356,52 @@ if AdvPlots
         %xticks(0.4:0.2:2.6)
     end
     end
+
+    % Axle Distance vs Axle Load (Q1+Q2)/2 Requested by Aurelio
+    
+    if strcmp(Type,"Tandem")
+    figure('Position',[Ri Up 1200 350],'Name',[Country ' ' Type ' Axle Spacing vs Load'],'NumberTitle','off'); Ri = Ri+50; Up = Ri+50;
+    
+    % X Stuff
+    Step = 0.025;
+    LimitL = Step/2; LimitR = 3.15;
+    X = LimitL:Step:LimitR;
+    Xp = LimitL-Step/2:Step:LimitR-Step/2;
+    x = X(1:end-1) + diff(X);
+    
+    for i = 1:length(ClassType)
+        Class = ClassType{i};
+        
+        subplot(1,3,i)
+        hold on
+        
+        for j = 1:length(BM)
+            BlockM = BM{j};
+            
+            %y = histcounts(Max.(Class).(BlockM).W1_2,'BinEdges',X,'normalization','pdf');
+%             if i == 2 && strcmp(BlockM,"Weekly")
+%                 ystar = Max.(Class).(BlockM).W1_2;
+%             end
+            scatter(Max.(Class).(BlockM).W1_2,(Max.(Class).(BlockM).AWT1kN+Max.(Class).(BlockM).AWT2kN)/2,7,C(j,:),'DisplayName',BlockM)
+            %bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.5,'DisplayName',BlockM)
+            
+        end
+        
+        % Set Plot Details
+        %set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
+        box on
+        xlim([LimitL+.25 LimitR-.25])
+        ylim([50 250])
+        if i == 1
+            ylabel('Total Tandem Load (kN) /2')
+        end
+        xlabel('m')
+        title([ClassT{i}])
+        legend('location','best')
+        %xticks(0.4:0.2:2.6)
+    end
+    end
+
     
     
 end

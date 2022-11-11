@@ -4,7 +4,7 @@ function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab)
 % Country (or BMAxles Group Name) such as "CH", "DE", "US" or "AT"
 % FitPlots/AdvPlots/DispTab Booleans 
 % Returns AQ (value for Weekly BlockMax, with 1) All 2) Class+ 3) Class
-
+ 
 % VBAxleStats    >> BMAxles       >> AlphaQ1Calc
 % Q1Q2Stats      >> BMQ1Q2        >> AlphaQ2Calc
 % VBWIMq         >> qMaxEvents    >> qInvestigation
@@ -14,12 +14,14 @@ load('BMQ1Q2.mat')
 BM = {'Daily', 'Weekly', 'Yearly'};             % j
 ClassType = {'All', 'ClassOW', 'Class'};        % i
 ClassT = {'All', 'Classified+', 'Classified'};
-DistTypes = {'Lognormal'};                      % k
+DistTypes = {'All'};                      % k
 
 Max = BMQ1Q2.(Country).Max;
 
 % Initialize Fig Positions
 Ri = 0; Up = 0;
+
+Dist = DistTypes{1};
 
 % FIGURE OF ALL DISTS
 if FitPlots
@@ -51,7 +53,8 @@ for i = 1:length(ClassType)
         bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.5,'DisplayName',BlockM)
         
         Dist = DistTypes{1};
-        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],1,1);
+        %pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],1,1);
+        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],1,1);
         plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
         
     end
@@ -89,7 +92,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
     plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])    
     
     Class = 'All';
@@ -97,7 +100,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.2,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
     plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
     
     % Set Plot Details
@@ -159,7 +162,7 @@ Summary = array2table(zeros(4,length(BM)*length(ClassType)));
 Summary.Properties.VariableNames = {[BM{3} ' ' ClassType{1}], [BM{3} ' ' ClassType{2}], [BM{3} ' ' ClassType{3}], [BM{2} ' ' ClassType{1}],...
     [BM{2} ' ' ClassType{2}], [BM{2} ' ' ClassType{3}], [BM{1} ' ' ClassType{1}], [BM{1} ' ' ClassType{2}], [BM{1} ' ' ClassType{3}]};
 Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQLN', 'AlphaQ2LN'};
-AQ1 = 0.50;
+AQ1 = 0.60;
 
 for i = 1:length(ClassType)
     Class = ClassType{i};
@@ -172,8 +175,9 @@ for i = 1:length(ClassType)
             set(gcf,'Name',[get(gcf,'name') ' ' sprintf('%s %s %s \n',Class,BlockM,pd.Best)],'NumberTitle','off')
         end
         Data = Max.(Class).(BlockM).Max;
-        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],0,1);
-        EdLN = pd.([Dist 'TF']).Ed;
+        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
+        %EdLN = pd.([Dist]).Ed;
+        EdLN = pd.(pd.Best).Ed;
         AQLN = EdLN/(1000*1.5);
         AQ2LN = (EdLN/(1.5)-AQ1*600)/400;
         

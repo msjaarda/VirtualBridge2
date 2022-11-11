@@ -11,6 +11,9 @@ function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
 % pd.Best = name of Dist with lowest gof
 % can use pd.(pd.Best) to access best fit
 
+BETATarget = 4.7; %4.7 CHANGE BACK!!
+PFTarget = 1-normcdf(BETATarget);
+
 % Turn off fit warning
 warning('off','stats:gevfit:IterLimit')
 
@@ -61,12 +64,12 @@ n = GetnBlockM(BlockM);
 
 if ~IncZ
     if sum(Data == 0) == 0
-        Beta = norminv(1-n*0.0000013);
+        Beta = norminv(1-n*PFTarget);
     else
     % Delete zeros from Data, but save proportion
     PropZ = sum(Data == 0)/length(Data);
     Data(Data == 0) = [];
-    Beta = norminv(1-n*0.0000013/PropZ);
+    Beta = norminv(1-n*PFTarget/PropZ);
     
     if isempty(Data) % do a normal fit if Data is empty
         Data = 0;

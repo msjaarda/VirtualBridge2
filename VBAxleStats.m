@@ -16,7 +16,7 @@ TAxSingle = true;
 TAxTandem = true;
 TAxTridem = true;
 
-Country = 'CH';
+Country = 'CA';
 %Country = 'DE';
 %Country = 'AT';
 %Country = 'US';
@@ -53,7 +53,7 @@ for i = 1:length(Sites)
     % Get individual SITE
     SITE = Sites(i);
     % Load WIM File
-    load(['C:\Users\mjsja\Desktop\SwissTraffic2\WIM\' num2str(SITE) '.mat'])
+    load(['WIM/' num2str(SITE) '.mat'])
     %PDs.DTS = datenum(PDs.DTS);
     
     % Perform Stage2Prune

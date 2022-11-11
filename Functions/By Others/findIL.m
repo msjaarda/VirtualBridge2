@@ -29,20 +29,20 @@ if isnumeric(eval([TName '(:,1)']))
         ILData(NumInfCases).v = interp1(ILx,ILv,RoundedILx);
         % Add to IL.Name
         ILData(NumInfCases).Name = TName;
-        if size(ILData(NumInfCases).v,2) < NumLanes
-            % Can choose to duplicate, or add zeros. The rule will be that
-            % if size(ILData.v{Num.InfCases},2) == 1, we duplicate, but if
-            % it is greater, we add zeros with a notification
-            if size(ILData(NumInfCases).v,2) == 1
-                ILData(NumInfCases).v = repmat(ILData(NumInfCases).v,1,NumLanes);
-            else
-                for t = size(ILData(NumInfCases).v,2) + 1:NumLanes % No longer necessary Lucas 27/09/22 
-                    ILData(NumInfCases).v(:,t) = 0;
-                    % Turn back on later... was annoying!
-                    %fprintf('\nWARNING Lane mismatch for IL: %s, ILs with zeros added',TName)
-                end
-            end
-        end
+%         if size(ILData(NumInfCases).v,2) < NumLanes
+%             % Can choose to duplicate, or add zeros. The rule will be that
+%             % if size(ILData.v{Num.InfCases},2) == 1, we duplicate, but if
+%             % it is greater, we add zeros with a notification
+%             if size(ILData(NumInfCases).v,2) == 1
+%                 ILData(NumInfCases).v = repmat(ILData(NumInfCases).v,1,NumLanes);
+%             else
+%                 for t = size(ILData(NumInfCases).v,2) + 1:NumLanes % No longer necessary Lucas 27/09/22 
+%                     ILData(NumInfCases).v(:,t) = 0;
+%                     Turn back on later... was annoying!
+%                     fprintf('\nWARNING Lane mismatch for IL: %s, ILs with zeros added',TName)
+%                 end
+%             end
+        %end
     end
 else
     FNames = fieldnames(eval(TName));

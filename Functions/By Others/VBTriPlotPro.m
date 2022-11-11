@@ -90,12 +90,17 @@ if strcmp(Type,'WIMComp')
         % set original axes as active, and link axes in case of zooming
         axes(a); linkaxes([a b]);
         % Set axis limits
-        ylim([0 1]); xlim([xSt xFi])
+        xlim([xSt xFi])
+        if ~strcmp(Type,'WIMCSA')
+            ylim([0 1]);
+        end
         
         % Y-axis only for the leftmost (first) plot
         if m == 1
             if strcmp(Type,'WIM')
                 ylabel('E_{WIM}/E_{SIA}')
+            elseif strcmp(Type,'WIMCSA')
+                ylabel('E_{WIM}/E_{CSA}')
             elseif strcmp(Type,'PLAT')
                 ylabel('[E_{BASE} OR E_{PLATOON}] /E_{SIA}')
             else
@@ -174,7 +179,10 @@ else
         end
         
         % Set tick details, x-axis label, and title
-        ytickformat('%.2f'); yticks(0:0.1:1); set(gca,'TickDir','out'); set(gca,'YGrid','on'); xticks(xdataL{m});
+        if ~strcmp(Type,'WIMCSA')
+            ytickformat('%.2f'); yticks(0:0.1:1);
+        end
+         set(gca,'TickDir','out'); set(gca,'YGrid','on'); xticks(xdataL{m});
         xlabel('Span (m)')
         title(Title{m})
         % get handle of current, set box property to off and remove background color
@@ -184,12 +192,17 @@ else
         % set original axes as active, and link axes in case of zooming
         axes(a); linkaxes([a b]);
         % Set axis limits
-        ylim([0 1]); xlim([xdataL{m}(1) xdataL{m}(end)])
-        
+        xlim([xdataL{m}(1) xdataL{m}(end)])
+        if ~strcmp(Type,'WIMCSA')
+            ylim([0 1]);
+        end
+
         % Y-axis only for the leftmost (first) plot
         if m == 1
             if strcmp(Type,'WIM')
                 ylabel('E_{WIM}/E_{SIA}')
+            elseif strcmp(Type,'WIMCSA')
+                ylabel('E_{WIM}/E_{CSA}')
             elseif strcmp(Type,'PLAT')
                 ylabel('[E_{BASE} OR E_{PLATOON}] /E_{SIA}')
             else
@@ -256,7 +269,7 @@ set(gca,'TickLength',[0,0]);
 set(gca,'XTick',[],'YTick',[]);
 
 %Trafic distr
-if strcmp(Type,'WIM') ||  strcmp(Type,'WIMComp') 
+if strcmp(Type,'WIM') ||  strcmp(Type,'WIMComp') || strcmp(Type,'WIMCSA') 
     LaneTrDistr = {' ',' ',' ',' ',' ',' '};
 elseif strcmp(Type,'PLAT')
     LaneTrDistr = {' ',' ',' ',' ',' ',' '};

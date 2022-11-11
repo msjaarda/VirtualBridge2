@@ -191,6 +191,8 @@ end
 
 % Split input by the commas to get individual IL families
 ILs = split(BaseData.ILs{:},',');
+% Problem here with Box Girder - for 1122 Width 18 Bi, the first one works!
+% So the name is wrong...
 try 
     [Num.InfCases, ILData] = findIL(ILs,BaseData.ILRes,Num.Lanes,BaseData.RType);
 catch

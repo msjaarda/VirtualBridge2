@@ -19,7 +19,7 @@ load('VBResults.mat')
 % Class
 Class = 'Class';
 
-Export = true;
+Export = false;
 
 %Type = 'Twin'; 
 Type = 'Box';
