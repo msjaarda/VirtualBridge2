@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIMOct5';
-NewFolder = 'WIMOct5Redopr';
+Folder_Name = 'SimNov10test2';
+NewFolder = 'SimNov10test2pr';
 IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
@@ -61,8 +61,7 @@ for v = 1:length(File_List)
     load(['Output/' Folder_Name '/' File_List(v).name])
     OInfo(v) = OutInfo;
     OInfo(v).BaseData = BaseDataDefaults(OInfo(v).BaseData);
-    % TEMP
-    OInfo(v).MaxEvents(OInfo(v).MaxEvents.SITE == 409,:) = [];
+
     % Update progress bar
     try
         user = memory;
@@ -125,7 +124,7 @@ fields = fieldnames(OInfo(v));
 % 2. We are doing SIM, and therefore only have OverMax
 
 % GetBlockMax and GetFit
-BlockMax = {'Weekly'};        % j
+BlockMax = {'Yearly'}; %{'Weekly'};        % j
 ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
@@ -166,11 +165,12 @@ end
 if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
     % Start Progress Bar
     u = StartProgBar(length(File_List), 1, 2, 4); tic; st = now;
-    BlockMax = OInfo(v).BaseData.Period; BM = BlockMax{1};
+    BlockMax = OInfo(v).BaseData.Period;
     ClassTypes = {'Class'}; CT = ClassTypes{1};
     for v = 1:length(OInfo)
         for r = 1:length(OInfo(v).ILData)
             for j = 1:length(BlockMax)
+                BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,IncZ);
                 end

@@ -6,14 +6,14 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'WIMOct5Redopr'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'SimOct5RemastprCong'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
 % Select parameters for alpha analysis
 AlphaAnalys = 1; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
-AlphaQ1 = 0; %0.6; 0;
-AlphaQ2 = 1; %0.4; 1;
+AlphaQ1 = 0.6; %0.6; 0;
+AlphaQ2 = 0.4; %0.4; 1;
 Alphaq = 0.5; %0.5;
 
 %% Running script
@@ -24,7 +24,7 @@ File_List = {Dir_List.name}';
 % check if WIM folder exist
 if sum(strcmp(File_List,Folder_Names{1}))>=1
 else
-disp("------------------NO FOLDER IN OUTPUT TRY AGAIN----------------------");
+error("------------------NO FOLDER IN OUTPUT TRY AGAIN----------------------");
 end
 
 % check fast loop
@@ -63,6 +63,7 @@ File_List = erase(File_List,'.mat');
 
 % Start Progress Bar
 u = StartProgBar(height(File_List), 1, 1, 3-FasterLoop); tic; st = now;
+MoyenneTemp = []; % Pour les sims, moyenne des différents traffics
 
 for i=1:height(File_List)
     
@@ -87,7 +88,15 @@ for i=1:height(File_List)
         MatName = append(ILDataNames{l},'.EdLN.',Fields1{j},'.',Fields2{k},' = ','OutInfo.pd(',int2str(l),').',Fields1{j},'.',Fields2{k},'.','(BestFit)','.Ed;');
         MatName = erase(MatName,'ILLib');
         MatName = append('CombInfo',MatName);
+        try % Pour les sims, on fait la moyenne sur les différents traffics
+        eval(append('CombInfo',erase(append(ILDataNames{l},'.EdLN.',Fields1{j},'.',Fields2{k},';'),'ILLib')));
+        MatName = append(ILDataNames{l},'.EdLN.',Fields1{j},'.',Fields2{k},'(end+1) = ','OutInfo.pd(',int2str(l),').',Fields1{j},'.',Fields2{k},'.','(BestFit)','.Ed;');
+        MatName = erase(MatName,'ILLib');
+        MatName = append('CombInfo',MatName);
         eval(MatName);
+        catch
+        eval(MatName);
+        end
         % Save best fit
         MatName = append(ILDataNames{l},'.EdLN.',Fields1{j},'.',Fields2{k},'BestFit',' = BestFit;');
         MatName = erase(MatName,'ILLib');
@@ -253,9 +262,9 @@ for b = 1:width(NameAnala)
                 
                 for k = 1:height(ClassName)
                     
-                    Ed = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b}));
+                    Ed = eval(append('mean(',ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},')'));
                     if AlphaAnalys == 1
-                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = eval(append(ILData(j).Name,'.EdLN',ClassName{k},NameAnala{b},'0',CodesName{i}));
+                        VBResults.(CodesName{i}).(NameAnala{b}).(ClassName{k})(j) = eval(append('mean(',ILData(j).Name,'.EdLN',ClassName{k},NameAnala{b},'0',CodesName{i},')'));
                         VBResults.(CodesName{i}).(NameAnala{b}).(append('BestFit',ClassName{k}))(j) = eval(append(ILData(j).Name,'.EdLN.',ClassName{k},'.',NameAnala{b},'BestFit'));
                         %VBResults.(CodesName{i}).(NameAnala{b}).(fields10{r})(a) = Ed./(LambdaQ.*(AlphaQ1.*Q1+Alphaq.*Qq+AlphaQ2.*Q2));
                     elseif AlphaAnalys == 2
@@ -298,8 +307,6 @@ for b = 1:width(NameAnala)
             VBResults.(CodesName{i}).(NameAnala{b}).Layout(j) = InflName{4}; 
             VBResults.(CodesName{i}).(NameAnala{b}).Support(j) = InflName{5}; 
             VBResults.(CodesName{i}).(NameAnala{b}).Trans(j) = InflName{6};
-            % MS Added and commented below it on Sep 2, 2022
-            try VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = OutInfo.BaseData.Traffic{:}; catch end
             % LM on 13 October, 2022. Correction of the above line
             try VBResults.(CodesName{i}).(NameAnala{b}).Traffic(j) = append(InflName{4},num2str(size(eval(append(ILData(j).Name,'.SIA.EQ;')),1)),'L'); catch end
 %             if (contains(InflName{4},'Uni')||contains(InflName{4},'Bi'))&&(contains(InflName{3},'12')||contains(InflName{3},'9'))
