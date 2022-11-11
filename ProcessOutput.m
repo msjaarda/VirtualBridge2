@@ -124,7 +124,7 @@ fields = fieldnames(OInfo(v));
 % 2. We are doing SIM, and therefore only have OverMax
 
 % GetBlockMax and GetFit
-BlockMax = {'Yearly'}; %{'Weekly'};        % j
+BlockMax = {'Weekly'}; %{'Yearly'};        % j
 ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
@@ -186,6 +186,11 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
         end
     end
 end
+
+% Potential problem here with BlockMax Sim when having 2 durations in one
+% input file. Line 167 it adapts for each OInfo, but then the last loop
+% defines the new BlockMax, which then assigns BM in line 201 irrespective
+% of OInfo.
 
 Gamma = 1.5;
 AQ1 = 0.7; AQ2 = 0.5;
