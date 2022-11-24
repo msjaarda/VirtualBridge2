@@ -19,7 +19,7 @@ function [NumInfCases, ILData] = recurser(NumInfCases,ILData,TName,ILRes,NumLane
 % Detect if we are at the end
 if isnumeric(eval([TName '(:,1)']))
     ILt = eval([TName '(:,2:end)']);
-    if size(ILt,2) == NumLanes || contains(TName,'Box') % Added a check to keep only the right Infl Lane in accordance with the lane configuration Lucas 27/09/22
+    if size(ILt,2) == NumLanes % Added a check to keep only the right Infl Lane in accordance with the lane configuration Lucas 27/09/22
         NumInfCases = NumInfCases + 1;
         ILx = eval([TName '(:,1)']);
         ILv = eval([TName '(:,2:end)']);
