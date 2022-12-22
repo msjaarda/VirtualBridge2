@@ -46,6 +46,7 @@ clear, clc, close all
 Folder_Name = 'WIMOct18pr';
 NewFolder = 'WIMOct18prx4_2';
 IncZ = 0; % Line 123-124 modify
+BETATarget = 4.2;
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -146,7 +147,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                     CT = ClassTypes{i};
-                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[0 4.2]);
+                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[0 BETATarget]);
                 end
             end
         end
