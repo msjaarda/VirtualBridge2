@@ -162,7 +162,7 @@ Summary = array2table(zeros(4,length(BM)*length(ClassType)));
 Summary.Properties.VariableNames = {[BM{3} ' ' ClassType{1}], [BM{3} ' ' ClassType{2}], [BM{3} ' ' ClassType{3}], [BM{2} ' ' ClassType{1}],...
     [BM{2} ' ' ClassType{2}], [BM{2} ' ' ClassType{3}], [BM{1} ' ' ClassType{1}], [BM{1} ' ' ClassType{2}], [BM{1} ' ' ClassType{3}]};
 Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQLN', 'AlphaQ2LN'};
-AQ1 = 0.60;
+AQ1 = 0.55;
 
 for i = 1:length(ClassType)
     Class = ClassType{i};

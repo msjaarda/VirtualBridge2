@@ -11,7 +11,14 @@ function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
 % pd.Best = name of Dist with lowest gof
 % can use pd.(pd.Best) to access best fit
 
-BETATarget = 4.7; %4.7 CHANGE BACK!!
+if length(IncZ) > 1
+    BETATarget = IncZ(2);
+    IncZ(2) = [];
+else
+    BETATarget = 4.2;
+end
+
+%BETATarget = 4.2; %4.7 CHANGE BACK!!
 PFTarget = 1-normcdf(BETATarget);
 
 % Turn off fit warning
@@ -84,12 +91,13 @@ if ~IncZ
     end
     end
 else
-    Beta = norminv(1-n*0.0000013);
+    Beta = norminv(1-n*PFTarget);
     
 end
 
 % As of 8/6/22, Alpha depends on Reference Period...
 Alpha = GetAlpha(BlockM);
+Alpha = 0.7;
 
 % Gather a few stats from Data
 Em = mean(Data);

@@ -2,6 +2,18 @@ function [PDCx, TrLineUp] = VBWIM2TrLineUp(PDCx,SpaceSaver,Lane)
 % VBWIM2TRLINEUP Translates WIM or VWIM data into AllTrAx and TrLineUp
 % Also returns PDC (in the form of PDCx) with some mods
 
+% Use SpaceSaver as a way to sneak in the Vehicle-by-Vehicle requirement
+% for fatigue... simply give SpaceSaver = [SpaceSaver MinDist];
+% MinDist here is the minimum distance that should be added between every
+% vehicle... if you set MinDist = SpaceSaver then all dists will change to
+% be equal to SpaceSaver + 26 m (max length of truck)
+if length(SpaceSaver) == 2
+    MinDist = SpaceSaver(2);
+    SpaceSaver = SpaceSaver(1);
+else
+    MinDist = 0;
+end
+
 % Detect type of PDCx... basically, does it have time (DTS) or spacing (SpCu)
 isWIM =  ismember('DTS', PDCx.Properties.VariableNames);
 % Else, assume it is VWIM, Apercu, or Det
@@ -24,6 +36,11 @@ if isWIM
     if SpaceSaver > 0
         PDCx.Dist(PDCx.Dist > SpaceSaver + 26) = SpaceSaver + 26;
     end
+    % Moved lower
+%     if MinDist > 0 
+%         XX = PDCx.Dist(1);
+%         PDCx.Dist(PDCx.Dist < MinDist + 26) = MinDist + 26; PDCx.Dist(1) = XX; % Restore first
+%     end
     
     % Cummulative distance in axle stream
     PDCx.SpCu = cumsum(PDCx.Dist) + 30; % add 30 to avoid negative values
@@ -74,6 +91,51 @@ if isWIM
     
     % If LnTrBtw is negative we delete entry
     PDCx(PDCx.LnTrBtw < 1.5,:) = [];
+end
+
+% We are coming back to do the MinDist because we want the LnTrBtw < 1.5
+% deletion (functions as a kind of filter)
+if isWIM
+    if MinDist > 0 
+        XX = PDCx.Dist(1);
+        PDCx.Dist(PDCx.Dist < MinDist + 26) = MinDist + 26; PDCx.Dist(1) = XX; % Restore first
+        PDCx.SpCu = cumsum(PDCx.Dist) + 30; 
+        % REDO above
+        
+        % Spacing is front of veh to front of veh
+        PDCx.LnTrSpacing = zeros(height(PDCx),1);
+        % Btw, or between, is rear of veh to front of next
+        PDCx.LnTrBtw = zeros(height(PDCx),1);
+
+        % Some kind of filter for making sure trucks don't encroach on one another
+        for i = 1:length(Lanes)
+
+            % Find indices of the lane we are working in
+            LaneInds = PDCx.LANE == Lanes(i);
+
+            % Find all locations where truck i and i - 1 arrived at the same time
+            % 30 chosen as greater than max tr length (26) to avoid deleting r1
+            AA = [30; diff(PDCx.SpCu(LaneInds))];
+
+            PDCx.LnTrSpacing(LaneInds) = AA;
+            % The following only makes sense in direction 1. We don't circshift
+            % for the 2 direction... why not?
+            try
+                if Lane.Details.Dir(Lanes(i)) == 1
+                    PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
+                else
+                    PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
+                end
+            catch
+                if Lane.Details.Dir(i) == 1
+                    PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(circshift(find(LaneInds == 1),1))/100;
+                else
+                    PDCx.LnTrBtw(LaneInds) = AA - PDCx.LENTH(LaneInds)/100;
+                end
+            end
+
+        end
+    end
 end
 
 % Create wheelbase and axle load vectors

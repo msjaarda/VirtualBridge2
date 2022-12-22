@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'SimNov10test2';
-NewFolder = 'SimNov10test2pr';
+Folder_Name = 'WIMOct18pr';
+NewFolder = 'WIMOct18prx4_2';
 IncZ = 0; % Line 123-124 modify
 
 % Ensure file list is succinct
@@ -146,7 +146,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                     CT = ClassTypes{i};
-                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,0);
+                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[0 4.2]);
                 end
             end
         end

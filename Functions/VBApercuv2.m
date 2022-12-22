@@ -68,7 +68,11 @@ sgtitle(Title);
 % Define Q, an excerpt of TrLineUp with just those vehicles on the bridge
 Q = TrLineUp(TrLineUp(:,1) >= BrStInd & TrLineUp(:,1) <= BrStInd+length(Infx)-1,:); % added equals...
 % Define T, an excerpt of WIM/VWIM PDC with just vehicles on the bridge
-T = PDC(unique(Q(:,3)),:);
+% if isWIM
+    T = PDC(unique(Q(:,3)),:);
+% else
+%     T = PDC(PDC.LaneVehNum == unique(Q(:,2)),:);
+% end
 
 if height(T) == 0
     posi = find(TrLineUp(:,1) <= BrStInd);

@@ -400,20 +400,7 @@ Traffic = 'Uni2L';
 
 FName = 'Unidirectional 2L Comparison (Class+)';
 for m = 1:3
-    for i = 1:length(Type)
-        % Get ydata and xdata
-        ydata{m,i} = VBResults.AQ.(Type{i}).(SubType{i}).(Width{i}).(Layout).(Support{i}).(Trans{i}).(AE(m)).(Traffic).(Class);
-        xdata{m,i} = VBResults.x.(Type{i}).(SubType{i}).(Width{i}).(Layout).(Support{i}).(Trans{i}).(AE(m)).(Traffic).(Class);
-        % DisplayName
-        PDets.DN{m,i} = [Type{i} + " " + SubType{i} + " " +  Support{i} + " " + Trans{i}];
-        % Marker Size, Edge Color, Face Color
-        PDets.MS{m}(i) = 5; PDets.MEC{m}(i,:) = [0 0 0]; 
-        PDets.MFC{m}(i,:) = D(i*4,:);
-    end
-end
-
-% Plot
-FigNum = VBTriPlotPro(xdata,ydata,PDets,Title,'WIMComp',FigNum,FName); clear ydata xdata PDets
+    t
 if Export
     exportgraphics(gcf,FName + ".jpg",'Resolution',600);
 end

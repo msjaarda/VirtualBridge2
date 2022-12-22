@@ -4,10 +4,10 @@
 % Simulate traffic over a bridge to find maximum load effects
 
 % Initializing commands
-clear, clc, close all, format long g, rng('shuffle');
+clear, clc%, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputWIMSim.xlsx');
+BaseData = VBReadInputFile('VBSimInputPUNApercu.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -31,8 +31,8 @@ for g = 1:height(BaseData)
     if BaseData.Parallel(g) > 0, gcp; clc; end 
     m = StartProgBar(BaseData.NumSims(g), Num.Batches, g, height(BaseData)); tic; st = now;
     
-    parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
-    %for v = 1:BaseData.NumSims(g)
+    %parfor (v = 1:BaseData.NumSims(g), BaseData.Parallel(g)*100)
+    for v = 1:BaseData.NumSims(g)
         
         % Initialize variables outside of batch simulation loop
         LaneAxLineUp = cell(Num.Lanes,1); LaneVehLineUp = cell(Num.Lanes,1); ApercuMax = [];
@@ -165,6 +165,8 @@ end
 
 % Run Apercu to see critical case... does all IL given for the last row of BaseData
 if BaseData.Apercu(g) == 1
-    [T, OverMx, AllTrAxx] = VBApercuv2(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
+    %T = VBApercuv2(PD,'Title',ILData,ApercuOverMax(1,1),ApercuOverMax,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
+             %VBApercuv2(PDC,Title,ILData,BrStInd,TrLineUp,DLF,Lane,ILRes)
+    [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
 end
 

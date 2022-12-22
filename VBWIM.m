@@ -44,7 +44,7 @@ for g = 1:height(BaseData)
         if BaseData.Stage2P(g); PDs = Stage2Prune(PDs); end
         
         % Find and remove duplicates
-        if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11 | Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 1122
+        if Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 11 || Sites.Layout(Sites.SITE == BaseData.SITE(g)) == 1122
             % Get Duplicates
             PDs = FindDup2(PDs,0,0);
             % Delete Duplicates - from L1
