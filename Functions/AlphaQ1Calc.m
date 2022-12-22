@@ -1,4 +1,4 @@
-function [AQ1,Summary] = AlphaQ1Calc(Country,Type,FitPlots,AdvPlots,DispTab)
+function [AQ1,Summary] = AlphaQ1Calc(Country,Type,FitPlots,AdvPlots,DispTab,BETATarget)
 % ALPHAQCALC
 % Calculates AlphaQ1 using:
 % Country (or BMAxles Group Name) such as "CH", "DE", or "AT"
@@ -67,7 +67,7 @@ for i = 1:length(ClassType)
         
         for k = 2
             Dist = DistTypes{k};
-            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,[1 BETATarget]);
             plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
         end
     end
@@ -103,7 +103,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,[1 BETATarget]);
     plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])    
     
     Class = 'All';
@@ -111,7 +111,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.2,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,[1 BETATarget]);
     plot(x_values,pdf(pd.(Dist).pd,x_values)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
 
     % Set Plot Details
@@ -182,10 +182,10 @@ for i = 1:length(ClassType)
         BlockM = BM{j};
         
         if j == 2
-            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',1,1);
+            pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',1,[1 BETATarget]);
             set(gcf,'Name',[get(gcf,'name') ' ' sprintf('%s %s %s \n',Class,BlockM,pd.Best)],'NumberTitle','off')
         end
-        pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',0,1);
+        pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',0,[1 BETATarget]);
         EdBest = pd.(pd.Best).Ed;
         %fprintf('%s %s %s \n',Class,BlockM,pd.Best)
         EdLN = pd.Lognormal.Ed;
@@ -209,7 +209,7 @@ if FitPlots
     BlockM = BM{2};
     Class = ClassType{1};
     Dist = DistTypes{k}; Data = Max.(Class).(BlockM).Max/Div;
-    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,Dist,0,[1 BETATarget]);
     
     y = histcounts(Max.(Class).(BlockM).Max/Div,'BinEdges',X,'normalization','pdf');
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)

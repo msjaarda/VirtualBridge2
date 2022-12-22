@@ -1,4 +1,4 @@
-function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab)
+function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab,BETATarget)
 % ALPHAQ2CALC
 % Calculates AlphaQ using:
 % Country (or BMAxles Group Name) such as "CH", "DE", "US" or "AT"
@@ -53,8 +53,8 @@ for i = 1:length(ClassType)
         bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.5,'DisplayName',BlockM)
         
         Dist = DistTypes{1};
-        %pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],1,1);
-        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],1,1);
+        %pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist 'TF'],1,[1 BETATarget]);
+        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],1,[1 BETATarget]);
         plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
         
     end
@@ -92,7 +92,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor','k','FaceColor',[.8 .8 .8],'FaceAlpha',0.8,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,[1 BETATarget]);
     plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])    
     
     Class = 'All';
@@ -100,7 +100,7 @@ for j = 1:length(BM)
     bar(x,y/ScaleDown(j),1,'EdgeColor',C(j,:),'FaceColor',[.8 .8 .8],'FaceAlpha',0.2,'DisplayName',Class)
     
     Dist = DistTypes{k};
-    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
+    pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,[1 BETATarget]);
     plot(x,pdf(pd.(pd.Best).pd,x)/ScaleDown(j),'k-','DisplayName',[Dist 'Fit'])
     
     % Set Plot Details
@@ -171,11 +171,11 @@ for i = 1:length(ClassType)
         BlockM = BM{j};
         
         if j == 2
-            pd = GetFit(Max.(Class).(BlockM).Max,BlockM,'All',1,1);
+            pd = GetFit(Max.(Class).(BlockM).Max,BlockM,'All',1,[1 BETATarget]);
             set(gcf,'Name',[get(gcf,'name') ' ' sprintf('%s %s %s \n',Class,BlockM,pd.Best)],'NumberTitle','off')
         end
         Data = Max.(Class).(BlockM).Max;
-        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,1);
+        pd = GetFit(Max.(Class).(BlockM).Max,BlockM,[Dist],0,[1 BETATarget]);
         %EdLN = pd.([Dist]).Ed;
         EdLN = pd.(pd.Best).Ed;
         AQLN = EdLN/(1000*1.5);
