@@ -30,6 +30,8 @@ File_List = {Dir_List(:).name}';
 %cleaning file list
 File_List = File_List(~strcmp(File_List,'.')&~strcmp(File_List,'..')&contains(File_List,'.mat'));
 File_List = erase(File_List,'.mat');
+File_Listsim = {};
+InflPosi = [];
 
 for i=1:height(File_List)
     
@@ -37,17 +39,35 @@ for i=1:height(File_List)
     
     if OutInfo.BaseData.StopSim == 0
     ILDataNames = {OutInfo.ILData.Name}';
-    if sum(contains(ILDataNames,InfLine))>=1
-        File_List = File_List{i};
-        InflPosi = find(contains(ILDataNames,InfLine));
-        break
+    if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
+        if sum(contains(ILDataNames,InfLine))>=1
+            File_List = File_List{i};
+            InflPosi = find(contains(ILDataNames,InfLine));
+            break
+        end
+    elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
+        if sum(contains(ILDataNames,InfLine))>=1
+            File_Listsim{end+1} = File_List{i};
+            InflPosi(end+1) = find(contains(ILDataNames,InfLine));
+        end
     end
     end
 end
 
+if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
 Max = OutInfo.Max(InflPosi).(Class).(BlockM);
 Data = Max.Max;
 Max = sortrows(Max,3,'descend');
+elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
+    % !!!!!!!!!! ATTENTION CHOISIR LE TRAFIC A LOAD POUR LES SIMS !!!!!!!!!
+NumTrafLoad = 4;
+load(append('Output/',OutputFolder,'/',File_Listsim{NumTrafLoad},'.mat'));
+Max = OutInfo.OverMaxT(OutInfo.OverMaxT.InfCase == InflPosi(NumTrafLoad),:);
+Data = Max.MaxLE;
+Max = sortrows(Max,4,'descend');
+else
+    error('Ni SIM ni WIM reconnu');
+end
 
 pd = GetFit(Data,BlockM,DistTypes,1,0);
 %pd = GetFit(Data(~isoutlier(Data,'gesd')),BlockM,DistTypes,1,1);
@@ -57,6 +77,9 @@ pd = GetFit(Data,BlockM,DistTypes,1,0);
 %for i=1:max(c)
 %    NumSitesAct(i) = sum(c==i);
 %end
+
+if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
+
 %NumSitesAct = NumSitesAct';
 SitesAct = Max.SITE(1:NumAnalyses);
 
@@ -173,6 +196,8 @@ for g = 1:height(BaseData)
     % Update progress bar
     UpProgBar(u, st, g, 1, height(BaseData), 1)
     
+end
+
 end
 
 end
