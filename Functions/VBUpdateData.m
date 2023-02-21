@@ -89,6 +89,10 @@ end
 try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch end
 % Get Num.Lanes from the length of Lane.Dir
 Num.Lanes = length(Lane.Details.Dir);
+% Override Num.Lanes for Fatigue
+if BaseData.SlowOnly
+    Num.Lanes = 1;
+end
 
 % FolDist can use qualitative measures:
 % "Jammed" or "Stopped" : 0 kph   -- Koshini Stopped

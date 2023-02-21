@@ -43,10 +43,10 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'WIMOct18pr';
-NewFolder = 'WIMOct18prx4_2';
+Folder_Name = 'Alberta';
+NewFolder = 'Albertapr';
 IncZ = 0; % Line 123-124 modify
-BETATarget = 4.2;
+BETATarget = 4.7;
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
