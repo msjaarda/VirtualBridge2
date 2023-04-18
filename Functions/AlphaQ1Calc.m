@@ -8,8 +8,10 @@ function [AQ1,Summary] = AlphaQ1Calc(Country,Type,FitPlots,AdvPlots,DispTab,BETA
 % Make work for Single, Tridem...
 
 % Load
-load('Misc/BMAxles.mat')
-Max = BMAxles.(Country).MaxAx.(Type);
+%load('Misc/BMAxles.mat')
+load('Misc/BMQ1Q2SingleLucS14.mat')
+%Max = BMAxles.(Country).MaxAx.(Type);
+Max = BMQ1Q2.(Country).Max;
 % Set Divisor
 if strcmp(Type,"Single")
     Div = 1;
@@ -188,7 +190,8 @@ for i = 1:length(ClassType)
         pd = GetFit(Max.(Class).(BlockM).Max/Div,BlockM,'All',0,[1 BETATarget]);
         EdBest = pd.(pd.Best).Ed;
         %fprintf('%s %s %s \n',Class,BlockM,pd.Best)
-        EdLN = pd.Lognormal.Ed;
+        %EdLN = pd.Lognormal.Ed;
+        EdLN = EdBest;
         AQBest = EdBest/(300*1.5);
         AQLN = EdLN/(300*1.5);
         
