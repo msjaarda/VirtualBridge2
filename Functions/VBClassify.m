@@ -49,6 +49,38 @@ countGroup(:,j+1)=count;
 % corrected for the presence of nan
 PD.TYPE = nansum(countGroup .* 10.^(cumsum(~isnan(countGroup),2,'reverse')-1),2);
 
+% % Create the table of axeles. 0: >2m ; 1: <2m, NaN: no axle
+% axleTable = double(PD{:,IndW:IndW+NumW-1} < 244);
+% axleTable(PD{:,IndW:IndW+NumW-1} == 0) = NaN;
+% 
+% % Initilize the empty count of axles and count of axles per group. 
+% count = ones(size(axleTable,1),1);
+% countGroup = nan(size(axleTable)+[0 1]);
+% 
+% for j = 1:size(axleTable,2)
+%     
+%     % Find vehicule with current axle being seperated from the previous
+%     % group
+%     idAlone = axleTable(:,j) == 0;
+%     
+%     % Find vehicule with current axle being part of the previous group.
+%     idTogether = axleTable(:,j) == 1; 
+%     
+%     % If it is part of the previous group, then add 1 to the count of axle
+%     count(idTogether) = count(idTogether) + 1;
+%     
+%     % If new group, first write down the count of the previous group
+%     countGroup(idAlone,j) = count(idAlone);
+%     % And reinitilize the count of axel in the new group to 1
+%     count(idAlone) = 1;
+%     
+% end
+% 
+% % Add the count of the last group
+% countGroup(:,j+1)=count;
+% 
+% PD.TYPE2 = nansum(countGroup .* 10.^(cumsum(~isnan(countGroup),2)-1),2);
+
 % ---------------- TYPE DONE -------------------
 
 % Classificaiton according to AGB 2002/005 with the addition of Class 23.
@@ -210,7 +242,7 @@ PD.CLASS(Type,:) = 1128;
 % Type 113a)
 Axles = PD.AX == 5;
 Dist12 = PD.W1_2 >= 320 & PD.W1_2 < 450;
-Dist23 = PD.W2_3 >= 360 & PD.W2_3 < 860;
+Dist23 = PD.W2_3 >= 240 & PD.W2_3 < 860; % Modify the 360 to be 240 at the request of Germans... they have Type 98 switch back though.
 Dist34 = PD.W3_4 >= 60 & PD.W3_4 < 240;
 Dist45 = PD.W4_5 >= 60 & PD.W4_5 < 240;
 Weight = PD.GW_TOT >= 9000 & PD.GW_TOT < 75000;

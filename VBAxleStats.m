@@ -12,9 +12,9 @@
 clear, clc, tic, close all
 
 % Inputs
-TAxSingle = true;
+TAxSingle = false;
 TAxTandem = true;
-TAxTridem = true;
+TAxTridem = false;
 
 Country = 'CA';
 %Country = 'DE';
@@ -55,6 +55,10 @@ for i = 1:length(Sites)
     % Load WIM File
     load(['WIM/' num2str(SITE) '.mat'])
     %PDs.DTS = datenum(PDs.DTS);
+    % Uncomment the below for Alberta!
+    %PDs.CLASS = PDs.VarName12;
+    %PDs.CLASS(PDs.CLASS == 99) = 0;
+    %PDs.CLASS(PDs.CLASS == 14) = 0;
     
     % Perform Stage2Prune
     PDs = Stage2Prune(PDs);

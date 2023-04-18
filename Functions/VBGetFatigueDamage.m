@@ -2,6 +2,12 @@ function [MaxDamage] = VBGetFatigueDamage(R,ScalingFactor,CAT,MaxDamage)
 %GETFATIGUEDAMAGE
 % Calculates fatigue damage using rainflow method from a given stress history, R
 
+% I'll have to modify! To be used with CSA S6 (Gamma) but also to take in
+% m = 3 or 5 or mixed... and include cutoff or not
+
+% R may be given with two columns - the second being the vehicle on the
+% bridge...
+
 R = R/(ScalingFactor);
 
 n2 = 2E6; s2 = CAT;                                 % 2 is C (Class Value)
