@@ -43,10 +43,12 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'Alberta';
-NewFolder = 'Albertapr';
-IncZ = 0; % Line 123-124 modify
-BETATarget = 4.7;
+Folder_Name = 'WIMOct18';
+NewFolder = 'WIMOct18prA42v2';
+BETATarget = 4.2;
+IncZ = 0; %Do we want to include zeros... Special case when we want to study
+% only 2sd lane with sometimes no trafic. Normal case IncZ = 0; we dont
+% include zeros. Tip : GetFit -> if zeros not possible to use Lognormal
 
 % Ensure file list is succinct
 File_List = GetFileList(Folder_Name);
@@ -147,7 +149,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                     CT = ClassTypes{i};
-                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[0 BETATarget]);
+                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[IncZ BETATarget]);
                 end
             end
         end
@@ -173,7 +175,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
             for j = 1:length(BlockMax)
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
-                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,IncZ);
+                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,[IncZ BETATarget]);
                 end
             end
         end
@@ -239,11 +241,10 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                             CT = ClassTypes{i};
                             Maxi = OInfo(v).Max(r).(CT).(BM).Max(OInfo(v).Max(r).(CT).(BM).SITE == Sitex(z));
                             if ~isempty(Maxi)
-                                OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,IncZ);
+                                OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,[IncZ BETATarget]);
                                 Ed = OInfo(v).(Traffic).pd(r).(CT).(BM).(OInfo(v).(Traffic).pd(r).(CT).(BM).Best).Ed;
                                 OInfo(v).(Traffic).AQ.(CT).(BM)(r) = Ed./OInfo(v).E(r).SIA.Total;
                                 OInfo(v).(Traffic).Aq.(CT).(BM)(r) = ((Ed/1.5)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));
-                        
                             end
                         end
                     end
