@@ -1,8 +1,10 @@
 function [pd,x_values,y_PDF_Fit,y_CDF_Fit,pdm,x_valuesm,y_PDF_Fitm,y_CDF_Fitm] = GetBlockMaxFit(Data,Dist,Plot,PropTruck,x_values)
 %GETBLOCKMAXFIT Fits, and optionally plots, BlockMaximumData
-%   Data    - simply the block maximum data (max moment, shear, etc. during period)
-%   Dist    - string, 'Normal, 'Lognormal'
-%   Plot    - boolean
+%   Data      - simply the block maximum data (max moment, shear, etc. during period)
+%   Dist      - string, 'Normal, 'Lognormal'
+%   Plot      - boolean
+%   PropTruck - put 0 if you don't know!
+%   x_values  - put 0 if you don't know!
 
 % Data = Max.Max for Matt [old code] Data = Max for Lucas
 

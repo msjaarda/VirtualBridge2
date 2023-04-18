@@ -11,7 +11,7 @@ if NumSims < 10
         m = D(ind);  
     end
 elseif NumSims < 100
-    m = NumSims;
+    m = NumSims*NumBatches;
 elseif mod(NumSims/100,1) == 0
     m = 100;
 else
