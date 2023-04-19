@@ -6,7 +6,7 @@ load("ILLib.mat");
 
 disp("-----------------------------------------------------");
 disp("Bonjour bienvenue dans le script COMPARATOR");
-disp("Vous utilisez la version 2.4 du 24/06/2022, Lucas");
+disp("Vous utilisez la version 2.5 du 06/03/2023, Lucas");
 disp("-----------------------------------------------------");
 a = 1;
 
@@ -18,14 +18,14 @@ while a ~= 0
 b = 0;
 while b == 0
 disp("-----------------------------------------------------");
-Prompt = 'Type de pont : 1)Box 2)Twin 3)Multi 4)Slab \n';
+Prompt = 'Type de pont : 1)Box 2)Twin 3)Multi 4)Slab 5)Dalle de roulement\n';
 Entry = input(Prompt);
 fprintf(repmat('\b',1,length(Prompt)+55));
-if Entry > 0 && Entry < 5
+if Entry > 0 && Entry < 6
 b = 1;
 end
 end
-Donnee.BridgeType = {'Box';'Twin';'Multi';'Slab'};
+Donnee.BridgeType = {'Box';'Twin';'Multi';'Slab';'DalleRoulem'};
 Donnee.BridgeType = char(Donnee.BridgeType(Entry));
 Fields = fieldnames(ILLib);
 Fields = Fields(contains(Fields,Donnee.BridgeType));
@@ -229,13 +229,17 @@ MarcGraph = {'none';'none';'none';'none';'o';'+';'.'};
 CoulGraph = [0 0.4470 0.7410;0.8500 0.3250 0.0980;0.9290 0.6940 0.1250;0.4940 0.1840 0.5560;0.4660 0.6740 0.1880;0.3010 0.7450 0.9330;0.6350 0.0780 0.1840];
 
 for i=1:width(Y)
-plot(X,Y(:,i),'Color',CoulGraph(i,:),'LineStyle',char(TracGraph(a)),'Marker',char(MarcGraph(a)));
+plot(X,Y(:,i),'Color',CoulGraph(i,:),'LineStyle',char(TracGraph(a)),'Marker',char(MarcGraph(a)),'LineWidth',1.5);
 hold on;
 Legende{i} = append('Voie',int2str(i));
 end
 
 xlim([0 X(end)]);
 grid on;
+
+if strcmp(Donnee.BridgeType,'DalleRoulem')
+    xlim([18 32]);
+end
 
 position = 'northeast';
 if strcmp(Donnee.AEstress,'Mn')

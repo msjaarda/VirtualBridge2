@@ -1,4 +1,4 @@
-function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab,BETATarget)
+function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab,BETATarget,NameFile)
 % ALPHAQ2CALC
 % Calculates AlphaQ using:
 % Country (or BMAxles Group Name) such as "CH", "DE", "US" or "AT"
@@ -9,7 +9,7 @@ function [AQ,AQ2,Summary] = AlphaQ2Calc(Country,FitPlots,AdvPlots,DispTab,BETATa
 % Q1Q2Stats      >> BMQ1Q2        >> AlphaQ2Calc
 % VBWIMq         >> qMaxEvents    >> qInvestigation
 
-load('BMQ1Q2.mat')
+load(NameFile) %load('BMQ1Q2.mat');
 
 BM = {'Daily', 'Weekly', 'Yearly'};             % j
 ClassType = {'All', 'ClassOW', 'Class'};        % i
@@ -158,10 +158,11 @@ end
 
 % TABLE GENERATION
 
-Summary = array2table(zeros(4,length(BM)*length(ClassType)));
+Summary = array2table(zeros(15,length(BM)*length(ClassType))); %Summary = array2table(zeros(15,length(BM)*length(ClassType)));
 Summary.Properties.VariableNames = {[BM{3} ' ' ClassType{1}], [BM{3} ' ' ClassType{2}], [BM{3} ' ' ClassType{3}], [BM{2} ' ' ClassType{1}],...
     [BM{2} ' ' ClassType{2}], [BM{2} ' ' ClassType{3}], [BM{1} ' ' ClassType{1}], [BM{1} ' ' ClassType{2}], [BM{1} ' ' ClassType{3}]};
-Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQLN', 'AlphaQ2LN'};
+%Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQLN', 'AlphaQ2LN'};
+Summary.Properties.RowNames = {'Ed', 'LNFit (%)', 'AlphaQLN', 'AlphaQ2LN', 'BestFit','Normal','Lognormal','LognormalTF','gev','gevGumbel','Normalgof','Lognormalgof','LognormalTFgof','gevgof','gevGumbelgof'};
 AQ1 = 0.55;
 
 for i = 1:length(ClassType)
@@ -180,8 +181,10 @@ for i = 1:length(ClassType)
         EdLN = pd.(pd.Best).Ed;
         AQLN = EdLN/(1000*1.5);
         AQ2LN = (EdLN/(1.5)-AQ1*600)/400;
+        BestFitNames = {'Normal','Lognormal','LognormalTF','gev','gevGumbel'};
         
-        Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQLN; AQ2LN];
+        %Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQLN; AQ2LN];
+        Summary.([BlockM ' ' Class]) = [EdLN; Fit(i,j); AQLN; AQ2LN; find(strcmp(BestFitNames,pd.Best)); pd.Normal.Ed; pd.Lognormal.Ed; pd.LognormalTF.Ed; pd.gev.Ed; pd.gevGumbel.Ed; pd.Normal.gof; pd.Lognormal.gof; pd.LognormalTF.gof; pd.gev.gof; pd.gevGumbel.gof];
         
         if strcmp(BlockM,'Weekly')
             AQ(i) = AQLN; Ed(i) = EdLN; AQ2(i) = AQ2LN; 
