@@ -6,7 +6,7 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'Test121225UniVSBIprBeta4_2'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'Test181225BiMultiprBeta4_2'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 

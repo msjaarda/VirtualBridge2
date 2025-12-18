@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'Test121225UniVSBI'; %'WIMOct18';
-NewFolder = 'Test121225UniVSBIprBeta4_2'; %'WIMOct18prA42v2';
+Folder_Name = 'Test181225BiMulti'; %'WIMOct18';
+NewFolder = 'Test181225BiMultiprBeta4_2'; %'WIMOct18prA42v2';
 BETATarget = 4.2;
 IncZ = 0; %Do we want to include zeros... Special case when we want to study
 % only 2sd lane with sometimes no trafic. Normal case IncZ = 0; we dont
