@@ -67,11 +67,12 @@ end % RType stands for RoadwayType and can be "Uni"(directional) "Bi"(directiona
 if ~ismember('RType', BaseData.Properties.VariableNames)
     BaseData.RType(:) = "Uni";
 end
+% We can normally detect if we are "Uni" "Bi" or "PUN"
 
 if ~ismember('SlowOnly', BaseData.Properties.VariableNames)
     BaseData.SlowOnly(:) = false;
 end
-% We can normally detect if we are "Uni" "Bi" or "PUN"
+
 
 
 % % Uni == 0, Bi == 1
@@ -91,4 +92,3 @@ end
 % end
 
 end
-

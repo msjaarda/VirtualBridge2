@@ -84,8 +84,8 @@ if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
 SitesAct = Max.SITE(1:NumAnalyses);
 
 % Create table
-BaseData = table('Size',[height(SitesAct),10],'VariableTypes',["double","string","double","double","double","double","double","string","string","datetime"]);
-BaseData.Properties.VariableNames = {'SITE','ILs','ILRes','RunDyn','Parallel','Apercu','NumAnalyses','AnalysisType','ClassType','Date'};
+BaseData = table('Size',[height(SitesAct),11],'VariableTypes',["double","string","double","double","double","double","double","string","string","datetime","logical"]);
+BaseData.Properties.VariableNames = {'SITE','ILs','ILRes','RunDyn','Parallel','Apercu','NumAnalyses','AnalysisType','ClassType','Date','SlowOnly'};
 BaseData.SITE = SitesAct;
 BaseData.ILs(:) = InfLine;
 BaseData.ILRes(:) = OutInfo.BaseData.ILRes;
@@ -95,6 +95,7 @@ BaseData.AnalysisType(:) = 'WIM';
 BaseData.ClassType(:) = Class;
 BaseData.Date = Max.DTS(1:NumAnalyses);
 BaseData.RunDyn(:) = Dyna;
+BaseData.SlowOnly(:) = false;
 RType = {'Uni';'Bi';'PUN'};
 BaseData.RType(:) = convertCharsToStrings(RType{[contains(InfLine,'Uni');contains(InfLine,'Bi');contains(InfLine,'PUN')]});
 
