@@ -20,8 +20,11 @@ if strcmp(BaseData.AnalysisType,"WIM")
     % Assign Lane.Details.ALANE here
     % Start by doing all with NSEW == 2 or 4
     IDs = Lane.Details.NSEW == 2 | Lane.Details.NSEW == 4;
-    if sum(IDs) > 0
+    % Check also for other IDs
+    IDs2 = Lane.Details.NSEW == 1 | Lane.Details.NSEW == 3;
+    if (sum(IDs) > 0) && (sum(IDs2) == 0)
         Check = sortrows(Lane.Details(IDs,:),{'LANE'});
+        Check2 = [];
         % If the first one is a Lane 1 we good
         if Check.LANETYPE(1) == 1
             Check.ALANE = [1:height(Check)]';
@@ -29,21 +32,8 @@ if strcmp(BaseData.AnalysisType,"WIM")
             Check = sortrows(Lane.Details(IDs,:),{'LANE'},'descend');
             Check.ALANE = [1:height(Check)]';
         end
-        % Now check for other IDs
-        IDs2 = Lane.Details.NSEW == 1 | Lane.Details.NSEW == 3;
-        if sum(IDs2) > 0
-            Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'});
-            % If the first one is a Lane 1 we good
-            if Check2.LANETYPE(1) == 1
-                Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
-            else
-                Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'},'descend');
-                Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
-            end
-        else
-            Check2 = [];
-        end
-    else
+        Lane.Details = [Check; Check2];
+    elseif (sum(IDs) == 0) && (sum(IDs2) > 0)
         Check = [];
         Check2 = sortrows(Lane.Details,{'LANE'});
         % If the first one is a Lane 1 we good
@@ -53,8 +43,32 @@ if strcmp(BaseData.AnalysisType,"WIM")
             Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'},'descend');
             Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
         end
+        Lane.Details = [Check; Check2];
+    elseif (sum(IDs) > 0) && (sum(IDs2) > 0) %Bidirectionnel
+        Check = sortrows(Lane.Details(IDs,:),{'LANE'});
+        % If the first one is a Lane 1 we good
+        if Check.LANETYPE(1) == 1
+            Check.ALANE = [1:height(Check)]';
+        else
+            Check = sortrows(Lane.Details(IDs,:),{'LANE'},'descend');
+            Check.ALANE = [1:height(Check)]';
+        end
+        Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'});
+        % If the first one is a Lane 1 we good
+        if Check2.LANETYPE(1) == 1
+            Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+        else
+            Check2 = sortrows(Lane.Details(IDs2,:),{'LANE'},'descend');
+            Check2.ALANE = [height(Check2)+height(Check):-1:height(Check)+1]';
+        end
+        if Lane.Details.NSEW(1) == 2 || Lane.Details.NSEW(1) == 4
+            Lane.Details = [Check; Check2];
+        else
+            Lane.Details = [Check2; Check];
+        end
+    else
+        error("error VBUpdateData");
     end
-    Lane.Details = [Check; Check2];
     
     %[~, ~, Lane.Dir] = unique(Lane.Details.NSEW);
     for i = 1:height(Lane.Details)
@@ -90,8 +104,11 @@ try Lane.TrDistr =  cellfun(@str2num,split(BaseData.LaneTrDistr{:},',')); catch 
 % Get Num.Lanes from the length of Lane.Dir
 Num.Lanes = length(Lane.Details.Dir);
 % Override Num.Lanes for Fatigue
+try
 if BaseData.SlowOnly
     Num.Lanes = 1;
+end
+catch
 end
 
 % FolDist can use qualitative measures:

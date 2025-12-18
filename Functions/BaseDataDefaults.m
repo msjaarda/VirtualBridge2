@@ -65,11 +65,11 @@ if ~ismember('LightVehs', BaseData.Properties.VariableNames) % 0 is not included
 end % RType stands for RoadwayType and can be "Uni"(directional) "Bi"(directional) or "PUN"
 
 if ~ismember('RType', BaseData.Properties.VariableNames)
-    BaseData.RType(:) = false;
+    BaseData.RType(:) = "Uni";
 end
 
 if ~ismember('SlowOnly', BaseData.Properties.VariableNames)
-    BaseData.SlowOnly(:) = "Uni";
+    BaseData.SlowOnly(:) = false;
 end
 % We can normally detect if we are "Uni" "Bi" or "PUN"
 

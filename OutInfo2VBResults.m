@@ -6,15 +6,15 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'Test121225UniVSBIprBeta4_2'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
 % Select parameters for alpha analysis
 AlphaAnalys = 1; % 1)Blended Alpha 2)AlphaQ1 3)AlphaQ2 4)Alphaq
-AlphaQ1 = 0.55; %0.6; 0;
-AlphaQ2 = 0.35; %0.4; 1;
-Alphaq = 0.5; %0.5;
+AlphaQ1 = 0.55; %0.6; 0; 0.5;
+AlphaQ2 = 0.35; %0.4; 1; 0.35;
+Alphaq = 0; %0.5;
 
 %% Running script
 %open folders
@@ -68,7 +68,8 @@ MoyenneTemp = []; % Pour les sims, moyenne des différents traffics
 for i=1:height(File_List)
     
     load(append('Output/',Folder_Names{1},'/',File_List{i},'.mat'));
-    
+    %OutInfo.BaseData.StopSim(1) = 1;
+
     if OutInfo.BaseData.StopSim == 0
     Fields1 = fieldnames(OutInfo.pd);
     
