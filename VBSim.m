@@ -7,7 +7,7 @@
 clear, clc%, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputPUNApercu.xlsx');
+BaseData = VBReadInputFile('VBSimInputJan20.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)

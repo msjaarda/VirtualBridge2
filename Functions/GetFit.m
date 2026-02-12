@@ -1,4 +1,4 @@
-function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
+function pd = GetFit_alphaConsistent(Data,BlockM,DistTypes,Plot,IncZ)
 % This function will give back pd and gof (goodness of fit)
 % pd will be a structure pd.(Dist)
 % pd.(Dist).pd
@@ -11,6 +11,14 @@ function pd = GetFit(Data,BlockM,DistTypes,Plot,IncZ)
 % pd.Best = name of Dist with lowest gof
 % can use pd.(pd.Best) to access best fit
 
+% 2024.04.15 Qianhui Yu
+% The treatment for alphaE is changed for VIM simulation. AlphaE is
+% considered to be corresponding to yearly target relibility index. (in older versions, AlphaE is multiplied to yearly target index for JAM simulation and it is multiplied to weekly target for VIM. This is not consistent)
+% ! Note: not Beta in this function refers to the target reliability for
+% design action effect for a given reference period already including the
+% influence of alphaE. No additional alphaE is needed to be multiplied to
+% Beta. This is a siginificant big change comparing with prvious versions.
+
 if length(IncZ) > 1
     BETATarget = IncZ(2);
     IncZ(2) = [];
@@ -18,8 +26,11 @@ else
     BETATarget = 4.2;
 end
 
+% 2024.04.15 Qianhui Yu alpha is applied to the yearly target reliability
+Alpha = 0.7;
+
 %BETATarget = 4.2; %4.7 CHANGE BACK!!
-PFTarget = 1-normcdf(BETATarget);
+PFTarget = 1-normcdf(BETATarget*Alpha);
 
 % Turn off fit warning
 warning('off','stats:gevfit:IterLimit')
@@ -95,9 +106,7 @@ else
     
 end
 
-% As of 8/6/22, Alpha depends on Reference Period...
-Alpha = GetAlpha(BlockM);
-Alpha = 0.7;
+
 
 % Gather a few stats from Data
 Em = mean(Data);
@@ -106,13 +115,13 @@ COV = Stdev/Em;
 Delta2 = log(COV^2+1);
 
 % Get EdSIA values... only works for Normal!
-EdSIA(1) = Em*(1+Alpha*Beta*COV);
-EdSIA(2) = Em*exp(Alpha*Beta*sqrt(Delta2)-0.5*Delta2);
-EdSIA(3) = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(Alpha*Beta)))));
+EdSIA(1) = Em*(1+1*Beta*COV);
+EdSIA(2) = Em*exp(1*Beta*sqrt(Delta2)-0.5*Delta2);
+EdSIA(3) = Em*(1 + COV*(0.45 + 0.78*log(-log(normpdf(1*Beta)))));
 % See Table C3 Eurocode 1990
-EdEC(1) = Em*(1+Alpha*Beta*COV);
-EdEC(2) = Em*exp(Alpha*Beta*COV);
-EdEC(3) = (Em+0.577/(pi/(Stdev*sqrt(6))))+(1/(pi/(Stdev*sqrt(6))))*log(-log(normpdf(Alpha*Beta)));
+EdEC(1) = Em*(1+1*Beta*COV);
+EdEC(2) = Em*exp(1*Beta*COV);
+EdEC(3) = (Em+0.577/(pi/(Stdev*sqrt(6))))+(1/(pi/(Stdev*sqrt(6))))*log(-log(normpdf(1*Beta)));
 
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
@@ -174,7 +183,7 @@ end
 
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
-    pd.(Dist).Ed = icdf(pd.(Dist).pd,1-normcdf(-Beta*Alpha));
+    pd.(Dist).Ed = icdf(pd.(Dist).pd,1-normcdf(-Beta*1));
     
     % Probability of failure
     PF = n/1000;   
@@ -187,7 +196,7 @@ end
 % Note that the top value won't show on the scatter - it is infinity!
 % Neither will zero... but this is added by matlab into the ecdfx for the
 % purpose of plotting stairs.
-pd.ecdfEd = interp1(pd.ecdf,pd.ecdfx,1-normcdf(-Beta*Alpha),'linear','extrap');
+pd.ecdfEd = interp1(pd.ecdf,pd.ecdfx,1-normcdf(-Beta*1),'linear','extrap');
 % % XXOld = sort(Data);
 % % YYOld = ((1:length(Data))/(length(Data) + 1))';
 % % [XXXOld, ia, ~] = unique(XXOld);

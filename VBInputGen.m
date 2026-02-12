@@ -4,7 +4,7 @@
 % Summarize traffic characteristics from WIM or VirtualWIM
 %       - Output is a MATSimInput spreadsheet to be used with MATSim
 %       - Class+ Option Added 19/8/2022
-
+%       - Crane  distance unit is changed from mm to m 13/12/2023 ADEM
 tic, clear, clc, hold off, close all, format long g, rng('shuffle'), load('TrLib.mat')
 
 % ----- INPUT -----
@@ -49,15 +49,16 @@ else
     TrAllo.f(15) = .2; TrAllo.g(15) = .2; TrAllo.h(15) = .2; TrAllo.i(15) = .2; TrAllo.j(15) = .2;
     TrAllo.a(16) = 0.5; TrAllo.b(16) = 0.5; TrAllo.d(16) = 0.5; TrAllo.e(16) = 0.5; 
     TrAllo.g(16) = 0.33; TrAllo.h(16) = 0.34; TrAllo.i(16) = 0.33;
-    TrAllo.a(17) = 0.3; TrAllo.b(17) = 0.34; TrAllo.c(17) = 0.33;
-    TrAllo.d(17) = 0.3; TrAllo.e(17) = 0.34; TrAllo.f(17) = 0.33;
+    TrAllo.a(17) = 0.33; TrAllo.b(17) = 0.34; TrAllo.c(17) = 0.33; %0.30 to 0.33 update
+    TrAllo.d(17) = 0.33; TrAllo.e(17) = 0.34; TrAllo.f(17) = 0.33;
     TrAllo.g(17) = 0.5; TrAllo.h(17) = 0.5;
     TrWitAx = renamevars(TrWitAx,'EndD','d67');
+    %       - Crane distance unit is changed from mm to m 13/12/2023
     TrWitAx.d78 = repmat(nan,height(TrWitAx),1); TrWitAx.EndD = repmat(nan,height(TrWitAx),1);
-    TrWitAx.d23(14) = mean(Crane.t60.W2); TrWitAx.d34(14) = mean(Crane.t60.W3); TrWitAx.d45(14) = mean(Crane.t60.W4);
-    TrWitAx.d23(15) = mean(Crane.t72.W2); TrWitAx.d34(15) = mean(Crane.t72.W3); TrWitAx.d45(15) = mean(Crane.t72.W4); TrWitAx.d56(15) = mean(Crane.t72.W5);
-    TrWitAx.d23(16) = mean(Crane.t84.W2); TrWitAx.d34(16) = mean(Crane.t84.W3); TrWitAx.d45(16) = mean(Crane.t84.W4); TrWitAx.d56(16) = mean(Crane.t84.W5); TrWitAx.d67(16) = mean(Crane.t84.W6);
-    TrWitAx.d23(17) = mean(Crane.t96.W2); TrWitAx.d34(17) = mean(Crane.t96.W3); TrWitAx.d45(17) = mean(Crane.t96.W4); TrWitAx.d56(17) = mean(Crane.t96.W5); TrWitAx.d67(17) = mean(Crane.t96.W6); TrWitAx.EndD(17) = mean(Crane.t96.W7);
+    TrWitAx.d23(14) = mean(Crane.t60.W2)/1000; TrWitAx.d34(14) = mean(Crane.t60.W3)/1000; TrWitAx.d45(14) = mean(Crane.t60.W4)/1000; TrWitAx.d56(14)=1.5;
+    TrWitAx.d23(15) = mean(Crane.t72.W2)/1000; TrWitAx.d34(15) = mean(Crane.t72.W3)/1000; TrWitAx.d45(15) = mean(Crane.t72.W4)/1000; TrWitAx.d56(15) = mean(Crane.t72.W5)/1000; TrWitAx.d67(15)=1.5;
+    TrWitAx.d12(16) = mean(Crane.t84.W1)/1000; TrWitAx.d34(16) = mean(Crane.t84.W3)/1000; TrWitAx.d56(16) = mean(Crane.t84.W5)/1000; TrWitAx.d67(16) = mean(Crane.t84.W6)/1000; TrWitAx.d78(16)=1.5;
+    TrWitAx.d12(17) = mean(Crane.t96.W1)/1000; TrWitAx.d23(17) = mean(Crane.t96.W2)/1000; TrWitAx.d45(17) = mean(Crane.t96.W4)/1000; TrWitAx.d56(17) = mean(Crane.t96.W5)/1000; TrWitAx.d78(17) = mean(Crane.t96.W7)/1000; TrWitAx.EndD(17)=1.5;
     del = [];
     for j = 1:4
         if sum(PDs.CLASS == TrTyps(13+j)) < 10
@@ -91,7 +92,7 @@ TrLib = orderfields(TrLib);
 
 % If importing new TrLib to TrLib
 if Save == 1
-    save('Misc/TrLib.mat','TrLib')
+   save('Misc/TrLib.mat','TrLib')
 end
 
 % Optional

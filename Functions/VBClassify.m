@@ -242,7 +242,7 @@ PD.CLASS(Type,:) = 1128;
 % Type 113a)
 Axles = PD.AX == 5;
 Dist12 = PD.W1_2 >= 320 & PD.W1_2 < 450;
-Dist23 = PD.W2_3 >= 240 & PD.W2_3 < 860; % Modify the 360 to be 240 at the request of Germans... they have Type 98 switch back though.
+Dist23 = PD.W2_3 >= 360 & PD.W2_3 < 860; % Modify the 360 to be 240 at the request of Germans... they have Type 98 switch back though.
 Dist34 = PD.W3_4 >= 60 & PD.W3_4 < 240;
 Dist45 = PD.W4_5 >= 60 & PD.W4_5 < 240;
 Weight = PD.GW_TOT >= 9000 & PD.GW_TOT < 75000;
