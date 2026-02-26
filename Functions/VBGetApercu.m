@@ -24,7 +24,11 @@ for t = 1:NumInfCases
     % Record Maximums
     OverMax = [OverMax; [t, MaxLEx, BrStIndx, MaxSimNum]];
     
+    if any(ismember(OverMaxT.Properties.VariableNames,'SITE'))
+    T = VBApercuv2(PDC,OverMaxT.SITE,ILData(t),BrStIndx,TrLineUp,DLFx,Lane,ILRes);
+    else
     T = VBApercuv2(PDC,'',ILData(t),BrStIndx,TrLineUp,DLFx,Lane,ILRes);
+    end
             
 end
 

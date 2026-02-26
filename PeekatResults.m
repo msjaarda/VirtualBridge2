@@ -18,7 +18,7 @@ load('Sites.mat')
 Dir_List = dir('Output');
 File_List = {Dir_List.name}';
 
-% check if WIM folder exist
+% check if WIM/SIM folder exist
 if sum(strcmp(File_List,OutputFolder))>=1
 else
    error(append('No ',OutputFolder,' Folder!!'));
@@ -59,12 +59,20 @@ Max = OutInfo.Max(InflPosi).(Class).(BlockM);
 Data = Max.Max;
 Max = sortrows(Max,3,'descend');
 elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
-    % !!!!!!!!!! ATTENTION CHOISIR LE TRAFIC A LOAD POUR LES SIMS !!!!!!!!!
-NumTrafLoad = 4;
-load(append('Output/',OutputFolder,'/',File_Listsim{NumTrafLoad},'.mat'));
-Max = OutInfo.OverMaxT(OutInfo.OverMaxT.InfCase == InflPosi(NumTrafLoad),:);
-Data = Max.MaxLE;
-Max = sortrows(Max,4,'descend');
+    Max = [];
+    Data = [];
+    for i = 1:length(File_Listsim)
+    load(append('Output/',OutputFolder,'/',File_Listsim{i},'.mat'));
+    Maxtmp = OutInfo.OverMaxT(OutInfo.OverMaxT.InfCase == InflPosi(i),:);
+    Maxtmp.FileName = repmat(string(File_Listsim{i}), height(Maxtmp), 1);
+    Maxtmp.SITE = repmat(string(OutInfo.BaseData.Traffic), height(Maxtmp), 1);
+    Data = [Data;Maxtmp.MaxLE];
+    Maxtmp = sortrows(Maxtmp,4,'descend');
+    Max = [Max;Maxtmp(1:NumAnalyses,:)];
+    end
+    Max = sortrows(Max,4,'descend');
+    Max = Max(1:NumAnalyses,:);
+    Max.DTS = datetime(str2double(regexp(Max.SITE, '\d{4}', 'match', 'once')), 1, 1);
 else
     error('Ni SIM ni WIM reconnu');
 end
@@ -91,7 +99,7 @@ BaseData.ILs(:) = InfLine;
 BaseData.ILRes(:) = OutInfo.BaseData.ILRes;
 BaseData.Apercu(:) = 1;
 BaseData.NumAnalyses(:) = 1;
-BaseData.AnalysisType(:) = 'WIM';
+BaseData.AnalysisType(:) = "WIM";
 BaseData.ClassType(:) = Class;
 BaseData.Date = Max.DTS(1:NumAnalyses);
 BaseData.RunDyn(:) = Dyna;
@@ -198,6 +206,45 @@ for g = 1:height(BaseData)
     UpProgBar(u, st, g, 1, height(BaseData), 1)
     
 end
+
+elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
+
+    load('ILLib.mat');
+    [~,Lane,ILData,~,~] = VBUpdateData(OutInfo.BaseData);
+    ILData = ILData([matches({ILData.Name},append('ILLib.',InfLine))]');
+
+    Dir_List2 = dir('Apercu/');
+    File_List2 = {Dir_List2(:).name}';
+
+    %cleaning file list
+    File_List2 = File_List2(~strcmp(File_List2,'.')&~strcmp(File_List2,'..')&~contains(File_List2,'.mat'));
+
+    if sum(strcmp(File_List2,OutputFolder))>=1
+        OutputFolder2 = OutputFolder;
+    else
+        % check if the file name can be similar to the OutputFolder name
+        TF = cellfun(@(x) contains(OutputFolder, x), File_List2);
+        if sum(TF)==1
+            OutputFolder2 = string(File_List2(TF));
+        elseif sum(TF)==0
+            error(append('Apercu file not found! Name of the file : ',OutputFolder));
+        else
+            error('Too many files with similar names inside Apercu...');
+        end
+    end
+
+    for i = 1:NumAnalyses
+    load(append('Apercu/',OutputFolder2,'/','AWIM_',Max.FileName(i),'.mat'));
+    Max.SITE(i) = Max.SITE(i) + " : Max " + num2str(i) + " / Simulation n°" + Max.SimNum(i);
+    % Because we want to use the VBGetApercu code, we have to adapt the
+    % given datas, PD is "pruned" to contain only the ploted data
+    PD = PD(PD.SimNum==Max.SimNum(i),:);
+    PD = PD(PD.InfCase==Max.InfCase(i),:);
+    Max.InfCase(i) = 1; %set infl lane to 1 because we will only study InfLine
+    PD.InfCase(:) = 1;
+    PD.SimNum(:) = 1;
+    [~,~,~] = VBGetApercu(PD,Max(i,:),1,ILData,Dyna,Lane,OutInfo.BaseData.ILRes);
+    end
 
 end
 

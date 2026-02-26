@@ -7,7 +7,7 @@
 clear, clc%, close all, format long g, rng('shuffle');
 
 % Read Input File
-BaseData = VBReadInputFile('VBSimInputJan20.xlsx');
+BaseData = VBReadInputFile('VBSimStandardTest.xlsx');
 
 % Each row of BaseData represents one analysis
 for g = 1:height(BaseData)
@@ -167,6 +167,7 @@ end
 if BaseData.Apercu(g) == 1
     %T = VBApercuv2(PD,'Title',ILData,ApercuOverMax(1,1),ApercuOverMax,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
              %VBApercuv2(PDC,Title,ILData,BrStInd,TrLineUp,DLF,Lane,ILRes)
-    [T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),Lane,BaseData.ILRes(g));
+    %Activate the one bellow to see the results
+    %[T, OverMx, AllTrAx] = VBGetApercu(PD,OverMaxT,Num.InfCases,ILData,BaseData.RunDyn(g),Lane,BaseData.ILRes(g)); 
 end
 
