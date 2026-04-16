@@ -68,8 +68,8 @@ if strcmp(DistTypes,'All')
     if length(Data) < 30
         DistTypes = {'Normal', 'Lognormal', 'LognormalTF'};
     else
-        %DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
-        DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel','GeneralizedPareto'};
+        DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
+        %DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel','GeneralizedPareto'};
     end
 elseif ~iscell(DistTypes) % Turn Dist into cell if it is individual
     DistTypes = cellstr(DistTypes);
