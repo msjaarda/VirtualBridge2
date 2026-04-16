@@ -68,7 +68,8 @@ if strcmp(DistTypes,'All')
     if length(Data) < 30
         DistTypes = {'Normal', 'Lognormal', 'LognormalTF'};
     else
-        DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
+        %DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel'};
+        DistTypes = {'Normal', 'Lognormal', 'LognormalTF', 'gev', 'gevGumbel','GeneralizedPareto'};
     end
 elseif ~iscell(DistTypes) % Turn Dist into cell if it is individual
     DistTypes = cellstr(DistTypes);
@@ -123,6 +124,7 @@ EdEC(1) = Em*(1+1*Beta*COV);
 EdEC(2) = Em*exp(1*Beta*COV);
 EdEC(3) = (Em+0.577/(pi/(Stdev*sqrt(6))))+(1/(pi/(Stdev*sqrt(6))))*log(-log(normpdf(1*Beta)));
 
+[pd.ecdf, pd.ecdfx] = ecdf(Data);
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
     if strcmp(Dist,'gevGumbel')
@@ -143,13 +145,41 @@ for k = 1:length(DistTypes)
         pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
     elseif  strcmp(Dist,'LognormalLM') % Min Sum ^2 Error
         mdl = fitlm(norminv((1:length(Data))/(length(Data) + 1)),log(sort(Data)),'linear');
-        pd.(Dist).pd = makedist('normal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
+        pd.(Dist).pd = makedist('lognormal',mdl.Coefficients.Estimate(1),mdl.Coefficients.Estimate(2));
         pd.(Dist).R2 = mdl.Rsquared.Ordinary*100;
+    elseif  strcmp(Dist,'GeneralizedPareto')
+        % --- 1. Threshold ---
+        Prop = 0.95;
+        u = quantile(Data, Prop);
+        % --- 2. Excesses ---
+        Excess = Data(Data > u) - u;
+        Nu = length(Excess);
+        nTot = length(Data);
+        if Nu < 10
+            warning('Few exceedances for GPD fit')
+        end
+        % --- 3. Fit GPD ---
+        pd.(Dist).pd = fitdist(Excess,'GeneralizedPareto');
+        % --- 4. Store POT info ---
+        pd.(Dist).u = u;
+        pd.(Dist).p_u = Nu / nTot;
+        % --- 5. Custom quantile function ---
+        xi = pd.(Dist).pd.k;
+        betaGP = pd.(Dist).pd.sigma;
+        p_u = pd.(Dist).p_u;
+        if abs(xi) < 1e-6
+        pd.(Dist).icdf = @(p) u - betaGP * log((1-p)./p_u);
+        else
+        pd.(Dist).icdf = @(p) u + (betaGP/xi)*((( (1-p)./p_u ).^(-xi)) - 1);
+        end
+        pd.(Dist).pdf = @(x) (x > u) .* (p_u .* pdf(pd.(Dist).pd, x - u));
+        [Xuniq, ia] = unique(pd.ecdfx);
+        ECDFuniq = pd.ecdf(ia);
+        pd.(Dist).cdf = @(x) (x <= u) .* interp1(Xuniq, ECDFuniq, x, 'linear', 'extrap') + (x > u)  .* (1 - p_u .* (1 - cdf(pd.(Dist).pd, x - u)));
     else
         pd.(Dist).pd = fitdist(Data,Dist); % Maximum Likelihood
     end
 end
-[pd.ecdf, pd.ecdfx] = ecdf(Data);
 
 % CheckSIA(1,:) = [-norminv(1-cdf(pd.Normal.pd,EdSIA(1))), Beta*Alpha];
 % CheckSIA(2,:) = [-norminv(1-cdf(pd.Lognormal.pd,EdSIA(2))), Beta*Alpha];
@@ -171,10 +201,16 @@ if Plot
     
     for k = 1:length(DistTypes)
         Dist = DistTypes{k};
-        plot(X,pdf(pd.(Dist).pd,x_values),'-','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+        if strcmp(Dist,'GeneralizedPareto')
+            plot(X,pd.(Dist).pdf(x_values),'-','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+            %xline(pd.(Dist).u,'k--','Threshold u')
+        else
+            plot(X,pdf(pd.(Dist).pd,x_values),'-','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+        end
     end
     
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
+    text(0.09*max(X),max(y)*0.95,append(int2str(size(Data,1)),' ',BlockM,' Maxima Values'));
     ylabel('Normalized Histogram and Fit')
     xlabel('Bridge Action Effect')
     title('Fits'); legend('location','best'); box on
@@ -183,11 +219,19 @@ end
 
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
+    if strcmp(Dist,'GeneralizedPareto')
+    pd.(Dist).Ed = pd.(Dist).icdf(1-normcdf(-Beta));
+    else
     pd.(Dist).Ed = icdf(pd.(Dist).pd,1-normcdf(-Beta*1));
+    end
     
     % Probability of failure
-    PF = n/1000;   
+    PF = n/1000;
+    if strcmp(Dist,'GeneralizedPareto')
+    pd.(Dist).E1000 = pd.(Dist).icdf(1-PF);
+    else
     pd.(Dist).E1000 = icdf(pd.(Dist).pd,1-PF);
+    end
     
 end
 % The reason we can't take ecdfEd is because it can never be larger than
@@ -218,7 +262,13 @@ if Plot
     %TempX = 220:480;
     for k = 1:length(DistTypes)
         Dist = DistTypes{k};
+        if strcmp(Dist,'GeneralizedPareto')
+            Xs = sort(Data);
+            FX = pd.(Dist).cdf(Xs);
+            plot(Xs,-log(-log(FX)),'--','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+        else
         plot(sort(Data),-log(-log(cdf(pd.(Dist).pd,sort(Data)))),'--','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
+        end
         %plot(TempX,-log(-log(cdf(pd.(Dist).pd,TempX))),'--','Color',C(k,:),'LineWidth',1,'DisplayName',Dist)
     end
     
@@ -246,7 +296,11 @@ pd.Best = DistTypes{1};
 % we have...
 for k = 1:length(DistTypes)
     Dist = DistTypes{k};
-    pd.(Dist).gof = sqrt(sum((EDataTail-icdf(pd.(Dist).pd,Vals)).^2));
+        if strcmp(Dist,'GeneralizedPareto')
+        pd.(Dist).gof = sqrt(sum((EDataTail-pd.(Dist).icdf(Vals)).^2));
+        else
+        pd.(Dist).gof = sqrt(sum((EDataTail-icdf(pd.(Dist).pd,Vals)).^2));
+        end
     if pd.(Dist).gof < pd.(pd.Best).gof
         pd.Best = Dist;
     end
@@ -258,8 +312,17 @@ if Plot
     %text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.85,append('Best Fit: ',pd.Best));
     %text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*1.3,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
     %correction Lucas pour text out of the fit 20.01.2023
+    if strcmp(pd.Best,'GeneralizedPareto')
+    yBest = -log(-log(pd.(pd.Best).cdf(sort(Data))));
+    yBest = yBest(~isinf(yBest));
+    text(0.75*max(Data),min(yBest)*1.05,append('Best Fit: ',pd.Best));
+    text(0.75*max(Data),min(yBest)*1.90,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
+    text(0.75*max(Data),min(yBest)*0.2,append('Gof: ',num2str(pd.(pd.Best).gof,5)));
+    else
     text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.85,append('Best Fit: ',pd.Best));
     text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*1.3,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
+    text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.4,append('Gof: ',num2str(pd.(pd.Best).gof,5)));
+    end
     %xplot= [min(Data); sort(Data)]; xplot = xplot(end-1);
     %yplot= -log(-log((0:length(Data))/(length(Data)))); yplot = yplot(end-1);
     %scatter(xplot,yplot,10,'r','filled','DisplayName','Data of interest');

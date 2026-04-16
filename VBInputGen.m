@@ -19,7 +19,9 @@ load('Sites.mat')
 Sitesx = Sites.SITE(strcmp(Sites.SName,SName) & datetime(Year,1,1) >= Sites.StartDate & datetime(Year,1,1) <= Sites.EndDate & Sites.Core);
 
 if length(Sitesx) == 1
-    load(['WIM/' num2str(Sitesx) '.mat']) 
+    load(['WIM/' num2str(Sitesx) '.mat'])
+    %PDs = PDs(year(PDs.DTS) == Year,:); Attention sinon il prend toutes
+    %les données de toutes les années...
 elseif length(Sitesx) == 2
     load(['WIM/' num2str(Sitesx(1)) '.mat'])
     PDs = PDs(year(PDs.DTS) == Year,:);  PD1 = PDs;
