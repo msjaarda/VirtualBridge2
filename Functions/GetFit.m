@@ -210,7 +210,7 @@ if Plot
     end
     
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
-    text(0.09*max(X),max(y)*0.95,append(int2str(size(Data,1)),' ',BlockM,' Maxima Values'));
+    text(0.05*max(X),max(y)*0.95,append(int2str(size(Data,1)),' ',BlockM,' Maxima Values'));
     ylabel('Normalized Histogram and Fit')
     xlabel('Bridge Action Effect')
     title('Fits'); legend('location','best'); box on

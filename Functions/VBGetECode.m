@@ -5,6 +5,10 @@ function E = VBGetECode(ILData,ILRes)
 % Warning!!!! ILData must have the same resolution as ILRes otherwise
 % results will be wrong!!
 
+% Lucas 23.04.2026 : When we add complexe inflines, positive one is no more
+% the determining one, we have to check also the negative one. The actual
+% solution is to negative duplicate the infline in the ILLib
+
 for i = 1:length(ILData)
 
     CSA.Axle(i) = 0; % initialise the number of axle on the bridge for CSA code
