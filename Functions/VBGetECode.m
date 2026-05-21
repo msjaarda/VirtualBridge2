@@ -5,9 +5,8 @@ function E = VBGetECode(ILData,ILRes)
 % Warning!!!! ILData must have the same resolution as ILRes otherwise
 % results will be wrong!!
 
-% Lucas 23.04.2026 : When we add complexe inflines, positive one is no more
-% the determining one, we have to check also the negative one. The actual
-% solution is to negative duplicate the infline in the ILLib
+% Lucas 23.04.2026 : When we add complexe inflines, first infline / first
+% lane --> must be the determining one!!!
 
 for i = 1:length(ILData)
 
@@ -19,23 +18,18 @@ for i = 1:length(ILData)
         
         if j == 1
             PL = 300; % SIA
-            PLBR(1) = 210; %210; %140; % Bruhwiler values from 15 october 2019 document, updated with the one found with blockmax axles types
-            PLBR(2) = 175; %175; %110;
-            PLBR(3) = 135; %135; %95;
+            PLOFROU6 = 205; % New load model from OFROU 6
             PL12 = 120; % 12 tonnes per axle (load model for 41, 48 and 72 truck)
             PLEU = 300; % EUROCODE
             PLCSA(1) = 50; PLCSA(2) = 125; PLCSA(3) = 125; PLCSA(4) = 175; PLCSA(5) = 150; % CSA (Canadian code)
             PLAAS(1) = 35.6; PLAAS(2) = 142.5; PLAAS(3) = 111.5; % AAASHTO (American code)
         elseif j == 2
             PL = 200; % SIA
-            PLBR(1) = 0;
-            PLBR(2) = 150; %150; %85;
-            PLBR(3) = 110; %110; %70;
+            PLOFROU6 = 77; % New load model from OFROU 6
             PLEU = 200; % EUROCODE
         elseif j == 3
             PL = 0; % SIA
-            PLBR(2) = 0; %0;
-            PLBR(3) = 0; %0;
+            PLOFROU6 = 0; % New load model from OFROU 6
             PLEU = 100; % EUROCODE
         else
             PLEU = 0; % EUROCODE
@@ -43,9 +37,8 @@ for i = 1:length(ILData)
         
         % Concentrated loads
         Conc.SIA = zeros(round(1.2/ILRes)+1,1); % SIA Load Model
-        Conc.BR1 = PLBR(1); % Brühwiler Load Model, 1 axle
-        Conc.BR2 = zeros(round(1.2/ILRes)+1,1); % Brühwiler Load Model, 2 axles
-        Conc.BR3 = zeros(round(2.4/ILRes)+1,1); % Brühwiler Load Model, 3 axles
+        Conc.OFROU6 = PLOFROU6; % New load model from OFROU 6
+        Conc.OFROU6ts = ones(round(10/ILRes)+1,1); % New load model from OFROU 6, truck shadow
         Conc.K41 = zeros(round(7.2/ILRes)+1,1); % KUBA-ST Load Model, 41 truck type
         Conc.K48 = zeros(round(9.1/ILRes)+1,1); % KUBA-ST Load Model, 48 truck type
         Conc.K72 = zeros(round(14/ILRes)+1,1); % KUBA-ST Load Model, 72 truck type
@@ -58,28 +51,11 @@ for i = 1:length(ILData)
            % SIA Load model (Swiss Code)  
            Conc.SIA(1) = PL;
            Conc.SIA(end) = Conc.SIA(end) + PL;
-           
-           % Brühwiler Load Model, 2 axles
-           Conc.BR2(1) = PLBR(2);
-           Conc.BR2(end) = Conc.BR2(end) + PLBR(2);
-           
+                   
            % EUROCODE Load Model 1
            Conc.EURO(1) = PLEU;
-           Conc.EURO(end) = Conc.EURO(end) + PLEU;
-                        
-        if max(size(Conc.BR3)) == 1
-            Conc.BR3(1) = PLBR(3)*3;
-        elseif max(size(Conc.BR3)) == 2
-            Conc.BR3(1) = PLBR(3)*1.5; Conc.BR3(end) = PLBR(3)*1.5;
-        else
-            Conc.BR3(1) = PLBR(3); Conc.BR3(end) = PLBR(3);
-            try
-                Conc.BR3((end+1)/2) = PLBR(3);
-            catch
-                Conc.BR3((end)/2) = PLBR(3)*.5; Conc.BR3((end)/2+1) = PLBR(3)*.5;
-            end
-        end
-        
+           Conc.EURO(end) = Conc.EURO(end) + PLEU;                 
+          
         if j == 1 % Load model for the 41 crane, due to resolution must add previous load if applied in the same spot (correction for low resolution)
            Conc.K41(1) = PL12;
            Conc.K41(round(2.4/ILRes)+1) = Conc.K41(round(2.4/ILRes)+1) + PL12;
@@ -135,9 +111,25 @@ for i = 1:length(ILData)
                    
         % Save the biggest contribution, save also the position for load models with q gaps
         MaxInf.vCONV(j,i) = max(conv(Conc.SIA,yILv));
-        [MaxInf.vCONVBR1(j,i),MaxInf.vCONVBR1Posi(j,i)] = max(conv(Conc.BR1,yILv));
-        [MaxInf.vCONVBR2(j,i),MaxInf.vCONVBR2Posi(j,i)] = max(conv(Conc.BR2,yILv));
-        [MaxInf.vCONVBR3(j,i),MaxInf.vCONVBR3Posi(j,i)] = max(conv(Conc.BR3,yILv));
+        [MaxInf.vCONVOFROU6(j,i),MaxInf.vCONVOFROU6Posi(j,i)] = max(conv(Conc.OFROU6,yILv));
+        if j == 1
+            StartTruckS = max(MaxInf.vCONVOFROU6Posi(j,i)-round(10/ILRes),1); %10m before and after the load Qk
+            EndTruckS = min(MaxInf.vCONVOFROU6Posi(j,i)+round(10/ILRes),length(yILv));
+            x = (0:ILRes:(length(yILv)-1)*ILRes)';
+            yILvTS = yILv;
+            yILvTS(1:StartTruckS-1) = 0;
+            yILvTS(EndTruckS+1:end) = 0;
+            [~,MaxInf.vCONVOFROU6tsPosi(j,i)] = max(conv(Conc.OFROU6ts,yILvTS)); %find best position for the distributed load
+            StartTruckS = max(MaxInf.vCONVOFROU6tsPosi(j,i)-round(10/ILRes),1);
+            EndTruckS = MaxInf.vCONVOFROU6tsPosi(j,i);
+            yILvTS = yILvTS(StartTruckS:EndTruckS);
+            x = x(StartTruckS:EndTruckS);
+            yILvTS(yILvTS<0) = 0;
+            yILvTSInteger = trapz(x,yILvTS);
+            LaneWidth = 3;
+            qkOFROU6 = 18-3; % We have to remove the 3 kN/m2 that are on all bridge, easier
+            MaxInf.vCONVOFROU6ts(j,i) = yILvTSInteger*qkOFROU6*LaneWidth;
+        end
         [MaxInf.vCONV41(j,i),MaxInf.vCONV41Posi(j,i)] = max(conv(Conc.K41,yILv));
         [MaxInf.vCONV48(j,i),MaxInf.vCONV48Posi(j,i)] = max(conv(Conc.K48,yILv));
         [MaxInf.vCONV72(j,i),MaxInf.vCONV72Posi(j,i)] = max(conv(Conc.K72,yILv));
@@ -174,11 +166,10 @@ for i = 1:length(ILData)
     A = ILData(i).v;
     A(A<0) = 0;
     IntInf.v(:,i) = trapz(x,A);
+    IntInf.vOFROU6(:,i) = trapz(x,A);
     % Create gap for load models who need it
     for j = 1:size(A,2)
-        IntInf.vBR1(j,i) = IntInf.v(j,i)-(j==1)*trapz(x(max(MaxInf.vCONVBR1Posi(j,i)-round(2/ILRes),1):min(MaxInf.vCONVBR1Posi(j,i)+round(2/ILRes),end)),A(max(MaxInf.vCONVBR1Posi(j,i)-round(2/ILRes),1):min(MaxInf.vCONVBR1Posi(j,i)+round(2/ILRes),end),j));
-        IntInf.vBR2(j,i) = IntInf.v(j,i)-(j==1||j==2)*trapz(x(max(MaxInf.vCONVBR2Posi(j,i)-round(3.2/ILRes),1):min(MaxInf.vCONVBR2Posi(j,i)+round(2/ILRes),end)),A(max(MaxInf.vCONVBR2Posi(j,i)-round(3.2/ILRes),1):min(MaxInf.vCONVBR2Posi(j,i)+round(2/ILRes),end),j));
-        IntInf.vBR3(j,i) = IntInf.v(j,i)-(j==1||j==2)*trapz(x(max(MaxInf.vCONVBR3Posi(j,i)-round(4.4/ILRes),1):min(MaxInf.vCONVBR3Posi(j,i)+round(2/ILRes),end)),A(max(MaxInf.vCONVBR3Posi(j,i)-round(4.4/ILRes),1):min(MaxInf.vCONVBR3Posi(j,i)+round(2/ILRes),end),j));
+        %IntInf.vBR1(j,i) = IntInf.v(j,i)-(j==1)*trapz(x(max(MaxInf.vCONVBR1Posi(j,i)-round(2/ILRes),1):min(MaxInf.vCONVBR1Posi(j,i)+round(2/ILRes),end)),A(max(MaxInf.vCONVBR1Posi(j,i)-round(2/ILRes),1):min(MaxInf.vCONVBR1Posi(j,i)+round(2/ILRes),end),j));
         IntInf.v41(j,i) = IntInf.v(j,i)-(j==1)*trapz(x(max(MaxInf.vCONV41Posi(j,i)-round(8.9/ILRes),1):min(MaxInf.vCONV41Posi(j,i)+round(4.3/ILRes),end)),A(max(MaxInf.vCONV41Posi(j,i)-round(8.9/ILRes),1):min(MaxInf.vCONV41Posi(j,i)+round(4.3/ILRes),end),j));
         IntInf.v48(j,i) = IntInf.v(j,i)-(j==1)*trapz(x(max(MaxInf.vCONV48Posi(j,i)-round(11/ILRes),1):min(MaxInf.vCONV48Posi(j,i)+round(4.9/ILRes),end)),A(max(MaxInf.vCONV48Posi(j,i)-round(11/ILRes),1):min(MaxInf.vCONV48Posi(j,i)+round(4.9/ILRes),end),j));
         IntInf.v72(j,i) = IntInf.v(j,i)-(j==1)*trapz(x(max(MaxInf.vCONV72Posi(j,i)-round(15/ILRes),1):min(MaxInf.vCONV72Posi(j,i)+round(1.5/ILRes),end)),A(max(MaxInf.vCONV72Posi(j,i)-round(15/ILRes),1):min(MaxInf.vCONV72Posi(j,i)+round(1.5/ILRes),end),j));
@@ -190,10 +181,9 @@ end
 LaneWidth = 3; % meters, hard coded
 % Distributed loads CHANGE TO 2.5 NORMALLY (3 FOR EXPERIMENT)
 qk = 2.5*ones(width(ILData(1).v),1);
-qkBR = qk;
+qkOFROU6 = 3*ones(width(ILData(1).v),1);
 qk05 = qk; % kN/m2 with alpha = 1 (needed alpha = 0.5)
 qk(1) = 9; % kN/m2
-qkBR(1) = 3.6; % kN/m2
 qk05(1) = 9; % kN/m2 with alpha = 1 (needed alpha = 0.5)
 qkCSA = 3*ones(width(ILData(1).v),1); % kN/m2 Canadian code
 qkAAS = 3.11*ones(width(ILData(1).v),1); % kN/m2 American code
@@ -208,9 +198,8 @@ Alpha = 1;
 % Calculate ESIA for each InfCase
 for i = 1:length(ILData)
     Maxv.CONV = MaxInf.vCONV(:,i); % SIA CODE
-    Maxv.CONVBR1 = MaxInf.vCONVBR1(:,i); % Brühwiler load model 1
-    Maxv.CONVBR2 = MaxInf.vCONVBR2(:,i); % Brühwiler load model 2
-    Maxv.CONVBR3 = MaxInf.vCONVBR3(:,i); % Brühwiler load model 3
+    Maxv.CONVOFROU6 = MaxInf.vCONVOFROU6(:,i); % New load model from OFROU 6 Single axle 205 kN + 77kN
+    Maxv.CONVOFROU6ts = MaxInf.vCONVOFROU6ts(:,i); % New load model from OFROU 6 Shadow of the truck 18kN/m2 - 3kN/m2
     Maxv.CONV41 = MaxInf.vCONV41(:,i); % KUBA-ST model for 41 truck
     Maxv.CONV48 = MaxInf.vCONV48(:,i); % KUBA-ST model for 48 truck
     Maxv.CONV72 = MaxInf.vCONV72(:,i); % KUBA-ST model for 72 truck
@@ -224,9 +213,7 @@ for i = 1:length(ILData)
     Maxv.CONVAAS3 = MaxInf.vCONVAAS3(:,i); % AASHTO CODE, 0.9*2truck HS20-44 for Mn
     
     Int.v = IntInf.v(:,i); % SIA CODE
-    Int.vBR1 = IntInf.vBR1(:,i); % Brühwiler load model 1
-    Int.vBR2 = IntInf.vBR2(:,i); % Brühwiler load model 2
-    Int.vBR3 = IntInf.vBR3(:,i); % Brühwiler load model 3
+    Int.vOFROU6 = IntInf.vOFROU6(:,i); % New load model from OFROU 6
     Int.v41 = IntInf.v41(:,i); % KUBA-ST model for 41 truck
     Int.v48 = IntInf.v48(:,i); % KUBA-ST model for 48 truck
     Int.v72 = IntInf.v72(:,i); % KUBA-ST model for 72 truck
@@ -239,6 +226,12 @@ for i = 1:length(ILData)
     E(i).SIA.Total = 1.5*Alpha*(sum(Maxv.CONV)+Int.v'*qk*LaneWidth);
     E(i).SIA.EQ = Maxv.CONV;
     E(i).SIA.Eq = Int.v.*qk*LaneWidth;
+
+    % OFROU 6 (New load model 2026)
+    E(i).OFROU6.Total = 1.5*Alpha*(sum(Maxv.CONVOFROU6)+Maxv.CONVOFROU6ts+Int.vOFROU6'*qkOFROU6*LaneWidth);
+    E(i).OFROU6.EQ = Maxv.CONVOFROU6;
+    E(i).OFROU6.Eq1S = Maxv.CONVOFROU6ts; % Only the 18-3 kN/m2
+    E(i).OFROU6.Eq = Int.vOFROU6.*qkOFROU6*LaneWidth;
     
     % EUROCODE (European code) - load model n°1
     E(i).EURO.Total = 1.35*Alpha*(sum(Maxv.CONVEURO)+Int.vEURO'*qk*LaneWidth);
@@ -280,22 +273,6 @@ for i = 1:length(ILData)
     E(i).KUBA_SPTR_RmvL1.Total= 1.5*Alpha*(sum(Maxv.CONVSPTR_RmvL1)+Int.vSPTR'*qk05*LaneWidth);
     E(i).KUBA_SPTR_RmvL1.EQ = Maxv.CONVSPTR_RmvL1;
     E(i).KUBA_SPTR_RmvL1.Eq = Int.vSPTR.*qk05*LaneWidth;
-    
-    % EBRU (Professor Eugen Brühwiler load model (EPFL))
-    [E(i).BRU.Total,posi] = max([1.5*(sum(Maxv.CONVBR1)+Int.vBR1'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR2)+Int.vBR2'*qkBR*LaneWidth);1.5*(sum(Maxv.CONVBR3)+Int.vBR3'*qkBR*LaneWidth)]);
-    E(i).BRU.LoadMod = append('Model n°',int2str(posi));
-    if posi == 1
-        E(i).BRU.EQ = Maxv.CONVBR1;
-        E(i).BRU.Eq = Int.vBR1.*qkBR*LaneWidth;
-    elseif posi == 2
-        E(i).BRU.EQ = Maxv.CONVBR2;
-        E(i).BRU.Eq = Int.vBR2.*qkBR*LaneWidth;
-    elseif posi == 3
-        E(i).BRU.EQ = Maxv.CONVBR3;
-        E(i).BRU.Eq = Int.vBR3.*qkBR*LaneWidth;
-    else
-        error('error with EBRU');
-    end
         
 end
 
