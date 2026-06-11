@@ -11,8 +11,10 @@
 clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 
 % Read Input File
-FName = 'Input/test.xlsx';
+FName = 'Input/VBWIMFlamatt.xlsx';
 BaseData = VBReadInputFile(FName);
+% Do we want bad datas? Core = 1 no bad data.
+Core = 0;
 
 % Initialize parpool if necessary and initialize progress bar
 if BaseData.Parallel(1) > 0, gcp; clc; end
@@ -24,7 +26,7 @@ for g = 1:height(BaseData)
     MaxEvents = []; RamUsed = []; LenPrint = []; MaxEventsStop = [];
     
     % Recognize if BaseData.SITE(g) is actually a set
-    SitesList = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),0,BaseData.Country(g));
+    SitesList = VBGetSiteSet(BaseData.SITE(g),BaseData.LightVehs(g),Core,BaseData.Country(g));
     
     % For each Site    
     for w = 1:length(SitesList)

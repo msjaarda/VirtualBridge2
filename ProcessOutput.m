@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'SimFev19JamTest'; %'WIMOct18';
-NewFolder = 'SimFev19JamTestprBeta4_2'; %'WIMOct18prA42v2';
+Folder_Name = 'SimFlamattJuin26'; %'WIMOct18';
+NewFolder = 'SimFlamattJuin26prBeta4_2avecPourc'; %'WIMOct18prA42v2';
 BETATarget = 4.2;
 IncZ = 0; %Do we want to include zeros... Special case when we want to study
 % only 2sd lane with sometimes no trafic. Normal case IncZ = 0; we dont
@@ -127,7 +127,11 @@ fields = fieldnames(OInfo(v));
 % 2. We are doing SIM, and therefore only have OverMax
 
 % GetBlockMax and GetFit
-BlockMax = {'Weekly'}; %{'Yearly'};        % j
+if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
+    BlockMax = {'Weekly'}; %{'Weekly'}; %{'Yearly'};        % j
+elseif strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
+    BlockMax = {'Weekly';'Yearly'}; %{'Weekly'}; %{'Yearly'}; %not used       % j
+end
 ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
 %DistTypes = {'NormalLM', 'LognormalLM', 'LognormalTF', 'gev', 'gevGumbel'}; % For the 60t analyses
@@ -168,13 +172,22 @@ end
 if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
     % Start Progress Bar
     u = StartProgBar(length(File_List), 1, 2, 4); tic; st = now;
-    BlockMax = OInfo(v).BaseData.Period;
-    ClassTypes = {'Class'}; CT = ClassTypes{1};
+    %ClassTypes = {'ClassOW','Class'}; %CT = ClassTypes{1}; %{'Class'};
+    %SimClassCheck = [0,0];
     for v = 1:length(OInfo)
+        BlockMax = OInfo(v).BaseData.Period;
+        if contains(OInfo(v).BaseData.Traffic{1},'CP')
+            ClassTypes = {'ClassOW'};
+            %SimClassCheck(1) = 1;
+        else
+            ClassTypes = {'Class'};
+            %SimClassCheck(2) = 2;
+        end
         for r = 1:length(OInfo(v).ILData)
             for j = 1:length(BlockMax)
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
+                   CT = ClassTypes{i};
                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,[IncZ BETATarget]);
                 end
             end
@@ -202,6 +215,14 @@ AQ1 = 0.7; AQ2 = 0.5;
 u = StartProgBar(length(File_List), 1, 3, 4); tic; st = now;
 for v = 1:length(OInfo)
     OInfo(v).E = VBGetECode(OInfo(v).ILData,OInfo(v).BaseData.ILRes);
+    if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
+        BlockMax = OInfo(v).BaseData.Period;
+        if contains(OInfo(v).BaseData.Traffic{1},'CP')
+            ClassTypes = {'ClassOW'};
+        else
+            ClassTypes = {'Class'};
+        end
+    end
     for r = 1:length(OInfo(v).ILData)
         for j = 1:length(BlockMax)
             BM = BlockMax{j};

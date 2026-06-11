@@ -238,8 +238,24 @@ for i = 1:Num.InfCases
     % Keep in mind... may not always be true
     
     % Switch signs of all ILs associated with InfCase together if warranted
-    if abs(max(ILData(i).v(:,1))) < abs(min(ILData(i).v(:,1)))
+    x = 0:BaseData.ILRes:(length(ILData(i).v(:,1))-1)*BaseData.ILRes;
+    InflTemp.Neutr = ILData(i).v(:,1);
+    InflTemp.Posi = InflTemp.Neutr;
+    InflTemp.Nega = InflTemp.Neutr;
+    InflTemp.Posi(InflTemp.Posi<0) = 0;
+    InflTemp.Nega(InflTemp.Nega>0) = 0;
+    InflTemp.Nega = -InflTemp.Nega;
+    IntegTemp.Neutra = trapz(x,InflTemp.Neutr);
+    IntegTemp.Posi = trapz(x,InflTemp.Posi);
+    IntegTemp.Nega = trapz(x,InflTemp.Nega);
+    IntegTemp.PosiPercent = IntegTemp.Posi/(IntegTemp.Posi+IntegTemp.Nega)*100;
+    IntegTemp.NegaPercent = IntegTemp.Nega/(IntegTemp.Posi+IntegTemp.Nega)*100;
+    if IntegTemp.Neutra < 0
         ILData(i).v = -ILData(i).v;
+    end
+
+    if (45<=IntegTemp.PosiPercent) && (IntegTemp.PosiPercent<=55)
+        warning(append('Check influence lines, positif and negatif integers are close [45%-55%] : ',ILData(i).Name));
     end
     
     % Find max Influence line value index, k

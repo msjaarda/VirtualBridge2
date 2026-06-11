@@ -11,12 +11,13 @@ tic, clear, clc, hold off, close all, format long g, rng('shuffle'), load('TrLib
 
 % Year, #, Station Name, string, save and plot toggles
 %Year = 2017; SName = 'Ger9625'; Save = 0; PlotFits = 1; Stage2P = 1;
-Year = 2019; SName = 'Gotthard'; PlotFits = 1; Save = 0; Stage2P = 1; ClassPlus = 1;
+Year = 2019; SName = 'Ceneri'; PlotFits = 1; Save = 0; Stage2P = 1; ClassPlus = 1;
 
 % ----- ENDIN -----
 
 load('Sites.mat')
 Sitesx = Sites.SITE(strcmp(Sites.SName,SName) & datetime(Year,1,1) >= Sites.StartDate & datetime(Year,1,1) <= Sites.EndDate & Sites.Core);
+%Sitesx = [408;409];
 
 if length(Sitesx) == 1
     load(['WIM/' num2str(Sitesx) '.mat'])
