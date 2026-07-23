@@ -11,7 +11,7 @@ tic, clear, clc, hold off, close all, format long g, rng('shuffle'), load('TrLib
 
 % Year, #, Station Name, string, save and plot toggles
 %Year = 2017; SName = 'Ger9625'; Save = 0; PlotFits = 1; Stage2P = 1;
-Year = 2019; SName = 'Ceneri'; PlotFits = 1; Save = 0; Stage2P = 1; ClassPlus = 1;
+Year = 2015; SName = 'Gotthard'; PlotFits = 1; Save = 0; Stage2P = 1; ClassPlus = 1;
 
 % ----- ENDIN -----
 
@@ -21,7 +21,7 @@ Sitesx = Sites.SITE(strcmp(Sites.SName,SName) & datetime(Year,1,1) >= Sites.Star
 
 if length(Sitesx) == 1
     load(['WIM/' num2str(Sitesx) '.mat'])
-    %PDs = PDs(year(PDs.DTS) == Year,:); Attention sinon il prend toutes
+    PDs = PDs(year(PDs.DTS) == Year,:); %Attention sinon il prend toutes
     %les données de toutes les années...
 elseif length(Sitesx) == 2
     load(['WIM/' num2str(Sitesx(1)) '.mat'])

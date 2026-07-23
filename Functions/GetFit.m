@@ -19,9 +19,19 @@ function pd = GetFit_alphaConsistent(Data,BlockM,DistTypes,Plot,IncZ)
 % influence of alphaE. No additional alphaE is needed to be multiplied to
 % Beta. This is a siginificant big change comparing with prvious versions.
 
+%2026.07.23 Lucas time of the event 1 --> 100%, for exemple jammed can take
+%place only 2% of the time so EventDuration = 0.02; The value below is a
+%default value, meaning that if it has been well defined in the Input File
+%it should do it automatically
+EventDuration = 1;
+
 if length(IncZ) > 1
     BETATarget = IncZ(2);
     IncZ(2) = [];
+    if length(IncZ) > 1
+        EventDuration = IncZ(2);
+        IncZ(2) = [];
+    end
 else
     BETATarget = 4.2;
 end
@@ -80,6 +90,7 @@ else % if manually selected, remove gev for less than 30 data
 end
 
 n = GetnBlockM(BlockM);
+n = n/EventDuration;
 
 if ~IncZ
     if sum(Data == 0) == 0

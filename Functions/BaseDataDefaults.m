@@ -73,7 +73,9 @@ if ~ismember('SlowOnly', BaseData.Properties.VariableNames)
     BaseData.SlowOnly(:) = false;
 end
 
-
+if ~ismember('EventDuration', BaseData.Properties.VariableNames)
+    BaseData.EventDuration(:) = 1;
+end
 
 % % Uni == 0, Bi == 1
 % if strcmp(BaseData.AnalysisType,'Sim') % Sim

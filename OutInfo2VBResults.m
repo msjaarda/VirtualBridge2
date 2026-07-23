@@ -6,7 +6,7 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'SimFlamattJuin26prBeta4_2avecPourc'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'WIMFlamattprBeta4_7'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
@@ -35,7 +35,7 @@ else
 end
 
 if AlphaAnalys == 1
-   NameFileSave = append('VBResults.mat');
+   NameFileSave = append('VBResults',Folder_Names{1},'.mat');
 elseif AlphaAnalys == 2
    NameFileSave = append('VBResultsAlphaQ1(Q2=',num2str(AlphaQ2),'etq=',num2str(Alphaq),').mat');
 elseif AlphaAnalys == 3

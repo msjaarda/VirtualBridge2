@@ -43,8 +43,8 @@ clear, clc, close all
 % OverMaxT... will hunt for unneeded things and delete them or archive them
 % When MaxEvents doesn't exist, it will work with Max
 
-Folder_Name = 'SimFlamattJuin26'; %'WIMOct18';
-NewFolder = 'SimFlamattJuin26prBeta4_2avecPourc'; %'WIMOct18prA42v2';
+Folder_Name = 'WIMFlamatt'; %'WIMOct18';
+NewFolder = 'WIMFlamattprBeta4_2'; %'WIMOct18prA42v2';
 BETATarget = 4.2;
 IncZ = 0; %Do we want to include zeros... Special case when we want to study
 % only 2sd lane with sometimes no trafic. Normal case IncZ = 0; we dont
@@ -153,7 +153,8 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                     CT = ClassTypes{i};
-                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[IncZ BETATarget]);
+                    try EventDuration = OInfo(v).BaseData.EventDuration; catch EventDuration = 1; end
+                    OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).Max(r).(CT).(BM).Max,BM,DistTypes,0,[IncZ BETATarget EventDuration]);
                 end
             end
         end
@@ -165,6 +166,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
         catch
             LenPrint = VBUpProgBar(st,1,v,LenPrint);
         end
+        OInfo(v).BaseData.Beta = BETATarget;
     end
 end
 
@@ -188,7 +190,8 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
                 BM = BlockMax{j};
                 for i = 1:length(ClassTypes)
                    CT = ClassTypes{i};
-                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,[IncZ BETATarget]);
+                   try EventDuration = OInfo(v).BaseData.EventDuration; catch EventDuration = 1; end
+                   OInfo(v).pd(r).(CT).(BM) = GetFit(OInfo(v).OverMax(:,r),BM,DistTypes,0,[IncZ BETATarget EventDuration]);
                 end
             end
         end
@@ -200,6 +203,7 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
         catch
             LenPrint = VBUpProgBar(st,1,v,LenPrint);
         end
+        OInfo(v).BaseData.Beta = BETATarget;
     end
 end
 
@@ -262,7 +266,8 @@ if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
                             CT = ClassTypes{i};
                             Maxi = OInfo(v).Max(r).(CT).(BM).Max(OInfo(v).Max(r).(CT).(BM).SITE == Sitex(z));
                             if ~isempty(Maxi)
-                                OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,[IncZ BETATarget]);
+                                try EventDuration = OInfo(v).BaseData.EventDuration; catch EventDuration = 1; end
+                                OInfo(v).(Traffic).pd(r).(CT).(BM) = GetFit(Maxi,BM,DistTypes,0,[IncZ BETATarget EventDuration]);
                                 Ed = OInfo(v).(Traffic).pd(r).(CT).(BM).(OInfo(v).(Traffic).pd(r).(CT).(BM).Best).Ed;
                                 OInfo(v).(Traffic).AQ.(CT).(BM)(r) = Ed./OInfo(v).E(r).SIA.Total;
                                 OInfo(v).(Traffic).Aq.(CT).(BM)(r) = ((Ed/1.5)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));

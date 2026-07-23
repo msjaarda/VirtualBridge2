@@ -77,7 +77,10 @@ else
     error('Ni SIM ni WIM reconnu');
 end
 
-pd = GetFit(Data,BlockM,DistTypes,1,0);
+try EventDuration = OInfo.BaseData.EventDuration; catch EventDuration = 1; end
+try BETATarget = OInfo.BaseData.Beta; catch BETATarget = 4.2; end
+pd = GetFit(Data,BlockM,DistTypes,1,[IncZ BETATarget EventDuration]);
+%pd = GetFit(Data,BlockM,DistTypes,1,0);
 %pd = GetFit(Data(~isoutlier(Data,'gesd')),BlockM,DistTypes,1,1);
 
 % Find sites that generate Max cases
