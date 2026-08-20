@@ -13,7 +13,7 @@ clear, clc, tic, format long g, load('Sites.mat'), rng('shuffle'), close all;
 % Read Input File
 FName = 'Input/VBWIMFlamatt.xlsx';
 BaseData = VBReadInputFile(FName);
-% Do we want bad datas? Core = 1 no bad data.
+% Do we want bad data? Core = 1 no bad data.
 Core = 0;
 
 % Initialize parpool if necessary and initialize progress bar

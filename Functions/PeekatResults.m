@@ -3,6 +3,7 @@ function PeekatResults(InfLine,OutputFolder,BlockM,Class,DistTypes,NumAnalyses,D
 
 %clear, clc, close all,
 load('Sites.mat')
+IncZ = 0;
 
 %% INPUT
 % Select the Infl Line to inspect
@@ -46,7 +47,8 @@ for i=1:height(File_List)
             break
         end
     elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
-        if sum(contains(ILDataNames,InfLine))>=1
+        ClassSimCheck = strcmp(char(fieldnames(OutInfo.pd)),Class);
+        if sum(contains(ILDataNames,InfLine))>=1 && ClassSimCheck
             File_Listsim{end+1} = File_List{i};
             InflPosi(end+1) = find(contains(ILDataNames,InfLine));
         end
@@ -54,10 +56,12 @@ for i=1:height(File_List)
     end
 end
 
-if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
+if strcmp(OutInfo.BaseData.AnalysisType,'WIM') %Possible un jour checker si on peut avoir plusieurs résultats WIM... Normalement pas un probleme
 Max = OutInfo.Max(InflPosi).(Class).(BlockM);
 Data = Max.Max;
 Max = sortrows(Max,3,'descend');
+try EventDuration = OutInfo.BaseData.EventDuration; catch EventDuration = 1; end
+try BETATarget = OutInfo.BaseData.Beta; catch BETATarget = 4.2; end
 elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
     Max = [];
     Data = [];
@@ -66,7 +70,10 @@ elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
     Maxtmp = OutInfo.OverMaxT(OutInfo.OverMaxT.InfCase == InflPosi(i),:);
     Maxtmp.FileName = repmat(string(File_Listsim{i}), height(Maxtmp), 1);
     Maxtmp.SITE = repmat(string(OutInfo.BaseData.Traffic), height(Maxtmp), 1);
-    Data = [Data;Maxtmp.MaxLE];
+    Data(:,i) = Maxtmp.MaxLE;
+    DataSite{i} = unique(Maxtmp.SITE);
+    try EventDuration(i) = OutInfo.BaseData.EventDuration; catch EventDuration = 1; end
+    try BETATarget(i) = OutInfo.BaseData.Beta; catch BETATarget = 4.2; end
     Maxtmp = sortrows(Maxtmp,4,'descend');
     Max = [Max;Maxtmp(1:NumAnalyses,:)];
     end
@@ -77,9 +84,14 @@ else
     error('Ni SIM ni WIM reconnu');
 end
 
-try EventDuration = OInfo.BaseData.EventDuration; catch EventDuration = 1; end
-try BETATarget = OInfo.BaseData.Beta; catch BETATarget = 4.2; end
-pd = GetFit(Data,BlockM,DistTypes,1,[IncZ BETATarget EventDuration]);
+if strcmp(OutInfo.BaseData.AnalysisType,'WIM')
+    pd = GetFit(Data,BlockM,DistTypes,1,[IncZ BETATarget EventDuration]);
+elseif strcmp(OutInfo.BaseData.AnalysisType,'Sim')
+    for i = 1:width(Data)
+    disp(DataSite{i});
+    pd = GetFit(Data(:,i),BlockM,DistTypes,1,[IncZ BETATarget(i) EventDuration(i)]);
+    end
+end
 %pd = GetFit(Data,BlockM,DistTypes,1,0);
 %pd = GetFit(Data(~isoutlier(Data,'gesd')),BlockM,DistTypes,1,1);
 

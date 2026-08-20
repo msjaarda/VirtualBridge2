@@ -130,7 +130,7 @@ fields = fieldnames(OInfo(v));
 if strcmp(OInfo(1).BaseData.AnalysisType,'WIM')
     BlockMax = {'Weekly'}; %{'Weekly'}; %{'Yearly'};        % j
 elseif strcmp(OInfo(1).BaseData.AnalysisType,'Sim')
-    BlockMax = {'Weekly';'Yearly'}; %{'Weekly'}; %{'Yearly'}; %not used       % j
+    BlockMax = {''}; %{'Weekly';'Yearly'}; %{'Weekly'}; %{'Yearly'}; %not used       % j
 end
 ClassTypes = {'All', 'ClassOW', 'Class'}; %{'ClassOW'}; %{'All', 'ClassOW', 'Class'};     % i
 DistTypes = {'All'};                                        % k
@@ -234,7 +234,7 @@ for v = 1:length(OInfo)
                 CT = ClassTypes{i};
                 Ed = OInfo(v).pd(r).(CT).(BM).(OInfo(v).pd(r).(CT).(BM).Best).Ed;
                 OInfo(v).AQ.(CT).(BM)(r) = Ed./OInfo(v).E(r).SIA.Total;
-                OInfo(v).Aq.(CT).(BM)(r) = ((Ed/1.5)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));
+                OInfo(v).Aq.(CT).(BM)(r) = ((Ed/Gamma)-AQ1*OInfo(v).E(r).SIA.EQ(1)-AQ2*OInfo(v).E(r).SIA.EQ(2))./(sum(OInfo(v).E(r).SIA.Eq));
             end
         end
     end

@@ -6,7 +6,7 @@ clear all, clc
 % First place is for the WIM or SIM folder,
 % Second is for the models folder (if needed)
 
-Folder_Names{1} = 'WIMFlamattprBeta4_7'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
+Folder_Names{1} = 'WIMFlamattprBeta3_21'; %'Albertapr'; %'AGB2002_real_pr'; %'WIM1160tAll';
 Folder_Names{2} = Folder_Names{1};
 %Folder_Names{2} = 'BoxSim3'; %second folder will import the ECodes of the 2sd file
 
@@ -35,13 +35,13 @@ else
 end
 
 if AlphaAnalys == 1
-   NameFileSave = append('VBResults',Folder_Names{1},'.mat');
+   NameFileSave = append('VBResults/VBResults',Folder_Names{1},'.mat');
 elseif AlphaAnalys == 2
-   NameFileSave = append('VBResultsAlphaQ1(Q2=',num2str(AlphaQ2),'etq=',num2str(Alphaq),').mat');
+   NameFileSave = append('VBResults/VBResultsAlphaQ1(Q2=',num2str(AlphaQ2),'etq=',num2str(Alphaq),')',Folder_Names{1},'.mat');
 elseif AlphaAnalys == 3
-   NameFileSave = append('VBResultsAlphaQ2(Q1=',num2str(AlphaQ1),'etq=',num2str(Alphaq),').mat');
+   NameFileSave = append('VBResults/VBResultsAlphaQ2(Q1=',num2str(AlphaQ1),'etq=',num2str(Alphaq),')',Folder_Names{1},'.mat');
 elseif AlphaAnalys == 4
-   NameFileSave = append('VBResultsAlphaq(Q1=',num2str(AlphaQ1),'etQ2=',num2str(AlphaQ2),').mat');
+   NameFileSave = append('VBResults/VBResultsAlphaq(Q1=',num2str(AlphaQ1),'etQ2=',num2str(AlphaQ2),')',Folder_Names{1},'.mat');
 end
 
 %set factors
@@ -243,7 +243,11 @@ u = StartProgBar(width(NameAnala), 1, 3-FasterLoop, 3-FasterLoop); tic; st = now
 
 [NumInfCases, ILData] = findILNamesStr(CombInfo);
 CodesName = fieldnames(eval(append(ILData(1).Name,';'))); CodesName = CodesName(contains(CodesName,'0'));CodesName = cellfun(@(x) strsplit(x, '0'), CodesName, 'UniformOutput', false);CodesName = vertcat(CodesName{:});CodesName = CodesName(:,2);CodesName = unique(CodesName);
-ClassName = fieldnames(eval(append(ILData(1).Name,'.EdLN',';')));
+for j = 1:NumInfCases
+ClassName{j} = fieldnames(eval(append(ILData(j).Name,'.EdLN',';')));
+end
+ClassName = vertcat(ClassName{:});
+ClassName = unique(ClassName);
 
 for b = 1:width(NameAnala)
     

@@ -221,7 +221,8 @@ if Plot
     end
     
     set(gca,'ytick',[],'yticklabel',[],'ycolor','k')
-    text(0.05*max(X),max(y)*0.95,append(int2str(size(Data,1)),' ',BlockM,' Maxima Values'));
+    ax = gca;
+    text(ax.XLim(1)+0.62*(ax.XLim(2)-ax.XLim(1)),ax.YLim(1)+0.30*(ax.YLim(2)-ax.YLim(1)),append(int2str(size(Data,1)),' ',BlockM,' Maxima Values'));
     ylabel('Normalized Histogram and Fit')
     xlabel('Bridge Action Effect')
     title('Fits'); legend('location','best'); box on
@@ -318,22 +319,12 @@ for k = 1:length(DistTypes)
 end
 
 if Plot
-    %scatter(pd.(pd.Best).Ed,-log(-log(1-normcdf(-Beta*Alpha))),'r','filled','DisplayName','Ed');
-    %scatter(pd.ecdfEd,-log(-log(1-normcdf(-Beta*Alpha))),'g','filled','DisplayName','ecdfEd');
-    %text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.85,append('Best Fit: ',pd.Best));
-    %text(0.7*max(X),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*1.3,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
-    %correction Lucas pour text out of the fit 20.01.2023
-    if strcmp(pd.Best,'GeneralizedPareto')
-    yBest = -log(-log(pd.(pd.Best).cdf(sort(Data))));
-    yBest = yBest(~isinf(yBest));
-    text(0.75*max(Data),min(yBest)*1.05,append('Best Fit: ',pd.Best));
-    text(0.75*max(Data),min(yBest)*1.90,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
-    text(0.75*max(Data),min(yBest)*0.2,append('Gof: ',num2str(pd.(pd.Best).gof,5)));
-    else
-    text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.85,append('Best Fit: ',pd.Best));
-    text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*1.3,append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
-    text(0.75*max(Data),min(-log(-log(cdf(pd.(pd.Best).pd,sort(Data)))))*0.4,append('Gof: ',num2str(pd.(pd.Best).gof,5)));
-    end
+    %correction Lucas pour text out of the fit 30.07.2026
+    ax = gca;
+    text(ax.XLim(1)+0.65*(ax.XLim(2)-ax.XLim(1)),ax.YLim(1)+0.25*(ax.YLim(2)-ax.YLim(1)),append('Best Fit: ',pd.Best));
+    text(ax.XLim(1)+0.65*(ax.XLim(2)-ax.XLim(1)),ax.YLim(1)+0.20*(ax.YLim(2)-ax.YLim(1)),append('Ed: ',num2str(pd.(pd.Best).Ed,5)));
+    text(ax.XLim(1)+0.65*(ax.XLim(2)-ax.XLim(1)),ax.YLim(1)+0.15*(ax.YLim(2)-ax.YLim(1)),append('Gof: ',num2str(pd.(pd.Best).gof,5)));
+    text(ax.XLim(1)+0.65*(ax.XLim(2)-ax.XLim(1)),ax.YLim(1)+0.10*(ax.YLim(2)-ax.YLim(1)),append('\beta_{corrected}=',num2str(Beta,3)));
     %xplot= [min(Data); sort(Data)]; xplot = xplot(end-1);
     %yplot= -log(-log((0:length(Data))/(length(Data)))); yplot = yplot(end-1);
     %scatter(xplot,yplot,10,'r','filled','DisplayName','Data of interest');
