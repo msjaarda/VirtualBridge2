@@ -15,7 +15,7 @@ function [TrTyps,TrNames] = VBTypes2Names
 % VType.ClassOW = zeros(height(VType),1); VType.ClassOW(14:end-2) = 1;
 
 TrTyps = [11; 12; 22; 23; 111; 11117; 1127; 12117; 122; 11127; 1128; 1138; 1238; 41; 48; 49; 46; 0; 99];
-TrNames = ["11" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "11112r" "112a" "113a" "123a"...
+TrNames = ["11" "12" "22" "23" "111" "1111r" "112r" "1211r" "122" "1112r" "112a" "113a" "123a"...
     "60t Crane" "72t Crane" "84t Crane" "96t Crane" "No Class" "Empty/Light"]';
 
 VType = table();

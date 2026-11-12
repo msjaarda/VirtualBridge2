@@ -22,7 +22,8 @@ fprintf('\n Time: %s \n\n',datetime('now')), tic
 % -------- INPUT --------
 
 % Tell Matlab where the directory is that holds the daily files
-Directory = 'C:\Users\mjsja\switchdrive\WIMDrop';
+%Directory = 'C:\Users\mjsja\switchdrive\WIMDrop';
+Directory = 'C:\Users\lmatheve\Desktop\NouvellesDonnéesWIM';
 %E:\Rohdaten
 Folder_List = dir(Directory);
 
@@ -33,7 +34,7 @@ count = 1;
 for i = 1:length(Folder_List)
     try
         % Folder must be of M660 variety
-        if strcmp(Folder_List(i).name(end-4:end-1),'M660')
+        %if strcmp(Folder_List(i).name(end-4:end-1),'M660')
             KeepFolder(i) = true;
             % Name is 7th to first space or comma
             FC = strfind(Folder_List(i).name,',');
@@ -42,9 +43,9 @@ for i = 1:length(Folder_List)
             Stations(count) = str2num(Folder_List(i).name(1:3));
             % Increase count
             count = count + 1;
-        else
-            KeepFolder(i) = false;
-        end
+        %else
+            %KeepFolder(i) = false;
+        %end
     catch
         KeepFolder(i) = false;
     end
@@ -53,7 +54,7 @@ end
 Folder_List = Folder_List(KeepFolder); SName = SNames'; Stations = Stations';
 
 % Loop through each folder
-for i = 6%:length(Folder_List)
+for i = 1:length(Folder_List)
     
     % Identify subfolders
     SFolder_List = dir([Folder_List(i).folder '\' Folder_List(i).name]);
